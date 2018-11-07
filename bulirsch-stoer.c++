@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <boost/program_options.hpp>
 #include <chrono>
@@ -13,28 +14,36 @@ void group(BulirschStoer* bs, int start, int niterations) {
 	double* y1 = new double;
 	double* h_new = new double;
 	for (int ii = start; ii < niterations; ii ++) {
-		bs->gbs(function, 0, y1, ii, 0.001, h_new, 0.001, 0.01, 1);
+		bs->simulate(function, 0, y1, ii, 0.001, h_new, 0.001, 0.01, 1);
 	}
 }
 
-const long n = 1000000000;
+long int n;
+int nthreads;
 
 int main(int argn, char** argv) {
 	BulirschStoer* bs = new BulirschStoer();
 	double* y1 = new double;
 	double* h_new = new double;
+	std::ofstream outfile;
+
+	outfile.open("data.txt", std::ios::app);
+
 	if (argn > 1) {
 		if (strcmp(argv[1], "omp") == 0) {
 			std::cout << "Using " << cyan << "Open MP" << res << std::endl;
+			outfile << argv[1] << " ";
 			bs -> setThreading(threadmode::omp);
 		}
 		else if (strcmp(argv[1], "single") == 0) {
 			std::cout << "Using " << cyan << "Single" << res << std::endl;
 			bs -> setThreading(threadmode::single);
+			outfile << argv[1] << " ";
 		}
 		else if (strcmp(argv[1], "explicit") == 0) {
 			std::cout << "Using " << cyan << "Explicit" << res << std::endl;
 			bs -> setThreading(threadmode::manual);
+			outfile << argv[1] << " ";
 		}
 		else {
 			std::cout << red << "No threadmode " << argv[1] << " exists, options are "+cyan+"omp"+res+", ";
@@ -42,40 +51,55 @@ int main(int argn, char** argv) {
 			return 1;
 		}
 	}
+	else {
+		outfile << "single ";
+	}
+
+	if (argn > 3) {
+		nthreads = atoi(argv[3]);
+	}
+	else {
+		nthreads = 6;
+	}
+
+	if (argn > 2) {
+		n = atoi(argv[2]);
+	}
+	else {
+		n = 100000;
+	}
+	outfile << n << " ";
 	auto start = std::chrono::high_resolution_clock::now();	
 	switch(bs -> getThreading()) {
 		case omp:
-			#pragma omp parallel for schedule(dynamic)
+			omp_set_num_threads(nthreads);
+			#pragma omp parallel for
 			for (int ii = 0; ii < n; ii ++) {
-				bs->gbs(function, 0, y1, ii, 0.001, h_new, 0.001, 0.01, 1);
+				bs->simulate(function, 0, y1, ii, 0.001, h_new, 0.001, 0.01, 1);
 			}
 			break;
 	
 		case single:
 			for (int ii = 0; ii < n; ii ++) {
-				bs->gbs(function, 0, y1, ii, 0.001, h_new, 0.001, 0.01, 1);
+				bs->simulate(function, 0, y1, ii, 0.001, h_new, 0.001, 0.01, 1);
 			}
 			break;
 		
 		case manual:				
-			std::thread first (group, bs, 0, n/6);
-			std::thread second (group, bs, n/6, 2*n/6);
-			std::thread third (group, bs, 2*n/6, 3*n/6);
-			std::thread fourth (group, bs, 3*n/6, 4*n/6);
-			std::thread fifth (group, bs, 4*n/6, 5*n/6);
-			std::thread sixth (group, bs, 5*n/6, n+1);
-			first.join();
-			second.join();
-			third.join();
-			fourth.join();
-			fifth.join();
-			sixth.join();
+			std::thread threads[nthreads];
+			for (int ii = 0; ii < nthreads; ii ++) {
+				threads[ii] = std::thread(group, bs, ii*n/nthreads, (ii+1)*n/nthreads);
+			}
+			for (int ii = 0; ii < nthreads; ii ++) {
+				threads[ii].join();
+			}
 			break;
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();	
 	long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	std::cout << "Computation time: " << bright+magenta << microseconds << res << std::endl;
+	outfile << microseconds << " " << nthreads << "\n";
 }
 
 int BulirschStoer::attempts = 12;
@@ -99,7 +123,7 @@ double BulirschStoer::step(double (*f)(double, double), double x0, double y0, do
 	}
 	return 0.5 * (y0 + y1 + h * (*f)(x, y1));
 }
-int BulirschStoer::gbs(double (*f)(double, double), double y0, double* y1, double x, double h, double* h_new, double epsilon, double yscale, int rational_extrapolate) {
+int BulirschStoer::simulate(double (*f)(double, double), double y0, double* y1, double x, double h, double* h_new, double epsilon, double yscale, int rational_extrapolate) {
 	double step_size[attempts];
 	double tableau[attempts+1];
 	double estimate;			// Current estimate

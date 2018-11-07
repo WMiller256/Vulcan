@@ -23,6 +23,7 @@
 #include <string.h>
 #include <vector>
 #include <limits>
+#include <omp.h>
 
 #define G 6.67408e-11
 
@@ -40,6 +41,9 @@ enum threadmode {
 	single,
 	omp,
 	manual
+};
+enum format {
+	text
 };
 
 class CSim
@@ -63,7 +67,7 @@ class BulirschStoer : public CSim
 public:
 	BulirschStoer();
 	double step(double (*f)(double, double), double y0, double x0, double x, int nsteps);
-	int gbs(double (*f)(double, double), double y0, double* y1, double x, double h, double* h_new, 
+	int simulate(double (*f)(double, double), double y0, double* y1, double x, double h, double* h_new, 
 		double epsilon, double yscale, int rational_extrapolate);
 	static int rationalExtrapolation(double* fzero, double* tableau, double* x, double f, int n);
 	static int polynomialExtrapolation(double* fzero, double* tableau, double* x, double f, int n);
@@ -92,6 +96,8 @@ public:
 	Pos pos();
 	int originDist();
 
+	std::string writeFormat(format f); 		// Defined in simio.c++
+
 private:
 	CBody* parent;				// Parent, i.e. the body that is being orbited
 	double radius;				// Radius of the body
@@ -99,7 +105,7 @@ private:
 	double y;					// y pos
 	double z;					// z pos
 	double mass;				// Mass of the body
-	double velocity;			// Linear velocity
+	double speed;				// Magnitude of linear velocity
 
 	void init();
 };
@@ -137,17 +143,21 @@ private:
 	typedef struct node {
 		int depth;					// Number of bodies in this block
 		int key;					// The hash key
-		node* next;					// Pointer to the next node, faster iterating
+		node* next;					// Pointer to the next node, for faster iterating
 		std::vector<CBody*> bodies;	// Other bodies in the given hash block
 	}* nodeptr; 
 	nodeptr node_search(Pos pos);
 
 public:
 	Hash(int n = 0);				// Constructor
+
 	nodeptr* table;					// Table of pointers to all the nodes
 	int hash_f(Pos pos);			// Hash function
 	void addNode(CBody* body);		// Adds a node to the 	
 	CBody* find(Pos pos);
+
+	void write(std::string filename);	// Defined in simio.c++
+	
 	int size;
 };
 

@@ -3,21 +3,21 @@
 CBody::CBody() {
 	init();
 }
-CBody::CBody(double Mass, double Radius, double Velocity, bool initialize) {
+CBody::CBody(double Mass, double Radius, double Speed, bool initialize) {
 	if (initialize) init();
 	mass = Mass;
 	radius = Radius;
-	velocity = Velocity;
+	speed = Speed;
 }
-CBody::CBody(double Mass, double Radius, double Velocity, double X, double Y, double Z) {
-	CBody(Mass, Radius, Velocity, Pos(X, Y, Z));
+CBody::CBody(double Mass, double Radius, double Speed, double X, double Y, double Z) {
+	CBody(Mass, Radius, Speed, Pos(X, Y, Z));
 }
-CBody::CBody(double Mass, double Radius, double Velocity, Pos pos) {
+CBody::CBody(double Mass, double Radius, double Speed, Pos pos) {
 	init();
 	x = pos.X();
 	y = pos.Y();
 	z = pos.Z();
-	CBody(Mass, Radius, Velocity, false);
+	CBody(Mass, Radius, Speed, false);
 }
 CBody::~CBody() {
 	// Destructor
@@ -44,5 +44,5 @@ void CBody::init() {
 	y = 0;
 	z = 0;
 	mass = 0;
-	velocity = 0;
+	speed = 0;
 }

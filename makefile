@@ -1,7 +1,7 @@
 #Name of program
 MAIN    = bulirsch-stoer
 
-ABS		= ~/source/$(MAIN)
+ABS		= ~/source/Sim
 BIN		= ~/bin
 BUILD	= $(ABS)/build
 RM      = /bin/rm -f
