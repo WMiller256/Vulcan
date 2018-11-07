@@ -1,0 +1,10 @@
+
+#Ignore figures folder
+Figures/
+
+#Ignore test code
+SIMscaling.c++
+SIMscaling.exe
+
+#Ignore python files
+*.py
