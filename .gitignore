@@ -8,9 +8,14 @@ SIMscaling.exe
 test.c++
 test.exe
 test.make
+test.txt
 
 #ignore binaries
 bin/*
+
+#Ignore stackdumps
+bin/*.stackdump
+*.stackdump
 
 #Ignore python files
 *.py
