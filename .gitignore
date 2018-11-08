@@ -7,6 +7,7 @@ test.exe
 test.make
 test.txt
 build/test.o
+execute.sh
 
 #ignore binaries
 bin/*
