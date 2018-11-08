@@ -1,7 +1,4 @@
 
-#Ignore figures folder
-Figures/
-
 #Ignore test code
 SIMscaling.c++
 SIMscaling.exe
@@ -9,6 +6,7 @@ test.c++
 test.exe
 test.make
 test.txt
+build/test.o
 
 #ignore binaries
 bin/*
@@ -19,3 +17,4 @@ bin/*.stackdump
 
 #Ignore python files
 *.py
+
