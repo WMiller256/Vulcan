@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <experimental/filesystem>
 #include <colors.h>
 #include <math.h>
 #include <string.h>
@@ -29,9 +30,10 @@
 
 extern int nbodies;
 extern bool warnings;
+extern int debug;
 extern double minradius;
 extern double maxradius;
-extern int blockwidth;		// The width of each hash block
+extern double blockwidth;		// The width of each hash block
 
 class Pos;				// Forward declared for use in CBody constructor
 class CBody;			// Forward declared for use in CSim
@@ -53,6 +55,10 @@ public:
 	CSim(int n);
 	CSim(int n, double max);
 	~CSim();
+
+	void addBody(CBody* body);
+	void writeConfiguration(const std::string& filename);
+	void readConfiguration(const std::string& filename);
 
 private:
 	double tMax;		// The integration time
@@ -85,7 +91,7 @@ class CBody
 {
 public:
 	CBody();
-	CBody(double Mass, double Radius, double Velocity, bool initialize = true);
+	CBody(double Mass, double Radius, double Velocity);
 	CBody(double Mass, double Radius, double Velocity, double X, double Y, double Z);
 	CBody(double Mass, double Radius, double Velocity, Pos pos);
 	~CBody();
@@ -94,9 +100,10 @@ public:
 	CBody* getParent();
 
 	Pos pos();
-	int originDist();
+	double originDist();
 
-	std::string writeFormat(format f); 		// Defined in simio.c++
+	std::string writeFormat(format f = text); 		// Defined in simio.c++
+	std::string info();
 
 private:
 	CBody* parent;				// Parent, i.e. the body that is being orbited
@@ -104,6 +111,9 @@ private:
 	double x;					// x pos
 	double y;					// y pos
 	double z;					// z pos
+	double xv;					// velocity in x direction
+	double yv;					// velocity in y direction
+	double zv;					// velocity in z direction
 	double mass;				// Mass of the body
 	double speed;				// Magnitude of linear velocity
 
@@ -123,9 +133,10 @@ public:
 	void setY(double Y);
 	void setZ(double Z);
 
-	int originDist();
+	double originDist();
 
-	void print();
+	std::string info();
+	std::string infoln();
 
 	bool operator==(Pos r) const;
 
@@ -152,11 +163,11 @@ public:
 	Hash(int n = 0);				// Constructor
 
 	nodeptr* table;					// Table of pointers to all the nodes
-	int hash_f(Pos pos);			// Hash function
+	long hash_f(Pos pos);			// Hash function
 	void addNode(CBody* body);		// Adds a node to the 	
 	CBody* find(Pos pos);
 
-	void write(std::string filename);	// Defined in simio.c++
+	void write(const std::string& filename);	// Defined in simio.c++
 	
 	int size;
 };

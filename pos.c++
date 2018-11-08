@@ -1,5 +1,5 @@
 #include "csim.h"
-
+#include "simio.h"
 Pos::Pos() {
 	init();
 }
@@ -28,13 +28,43 @@ void Pos::setZ(double Z) {
 	z = Z;
 }
 
-int Pos::originDist() {
-	return sqrt(pow(x,2) + pow(y,2) + pow(z,2));
+double Pos::originDist() {
+	double dist = sqrt(pow(x,2) + pow(y,2) + pow(z,2));
+	print("In ["+bright+blue+"Pos::originDist()"+res+"]   ", 4);
+	print(info(), 4);
+	print(" ", 4);
+	println(std::to_string(dist), 4);
+	if (dist < minradius) {
+		minradius = dist;
+		blockwidth = (maxradius - minradius) / (nbodies - 1);
+		println("                         {maxradius}:  "+bright+magenta+std::to_string(maxradius)+res+
+			    "\n                         {minradius}:  "+bright+magenta+std::to_string(minradius)+res+
+			    "\n                         {nbodies}:    "+bright+magenta+std::to_string(nbodies)+res+
+			    "\n                         {blockwidth}: "+bright+magenta+std::to_string(blockwidth)+res, 5);
+		if (blockwidth <= 0) {
+			blockwidth = 1.0;
+		}
+	}
+	if (dist > maxradius) {
+		maxradius = dist;
+		blockwidth = (maxradius - minradius) / (nbodies - 1);
+		blockwidth = (maxradius - minradius) / (nbodies - 1);
+		println("                         {maxradius}:  "+bright+magenta+std::to_string(maxradius)+res+
+			    "\n                         {minradius}:  "+bright+magenta+std::to_string(minradius)+res+
+			    "\n                         {nbodies}:    "+bright+magenta+std::to_string(nbodies)+res+
+			    "\n                         {blockwidth}: "+bright+magenta+std::to_string(blockwidth)+res, 5);
+		if (blockwidth <= 0) {
+			blockwidth = 1.0;
+		}
+	}
+
+	return dist;
 }
 
-void Pos::print() {
-	std::cout << "(" << bright+magenta << x << res+", "+bright+magenta << y << res+", "+bright+magenta;
-	std::cout << z << res+")";
+std::string Pos::info() {
+	std::string s = "("+bright+magenta+std::to_string(x)+res+", "+bright+magenta;
+	s += std::to_string(y)+res+", "+bright+magenta+std::to_string(z)+res+")";
+	return s;
 }
 
 bool Pos::operator==(Pos r) const {

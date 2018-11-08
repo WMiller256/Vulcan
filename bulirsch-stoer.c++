@@ -21,6 +21,7 @@ void group(BulirschStoer* bs, int start, int niterations) {
 long int n;
 int nthreads;
 
+#ifndef TEST
 int main(int argn, char** argv) {
 	BulirschStoer* bs = new BulirschStoer();
 	double* y1 = new double;
@@ -101,6 +102,7 @@ int main(int argn, char** argv) {
 	std::cout << "Computation time: " << bright+magenta << microseconds << res << std::endl;
 	outfile << microseconds << " " << nthreads << "\n";
 }
+#endif // TEST
 
 int BulirschStoer::attempts = 12;
 int BulirschStoer::steps[] = { 2,4,6,8,12,16,24,32,48,64,96,128 };

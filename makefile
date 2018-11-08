@@ -1,18 +1,18 @@
 #Name of program
 MAIN    = bulirsch-stoer
 
-ABS		= ~/source/Sim
-BIN		= ~/bin
+ABS		= .
+BIN		= ./bin
 BUILD	= $(ABS)/build
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
 LFLAGS	= -Wl,-rpath,/bin/g++.exe
-LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/
+LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -lstdc++fs
 LIBS	= -lboost_program_options
 
 INC		= -I /usr/lib/boost/
-CFLAGS	= -Wno-deprecated-declarations -fopenmp
+CFLAGS	= -Wno-deprecated-declarations -fopenmp -std=c++17
 CC      = /bin/g++.exe $(CFLAGS) $(INC) $(LIBS) 
 
 #Output coloring
@@ -29,11 +29,13 @@ SRCS	= $(ABS)/$(MAIN).c++	\
 		  $(ABS)/csim.c++		\
 		  $(ABS)/cbody.c++		\
 		  $(ABS)/hash.c++		\
+		  $(ABS)/simio.c++		\
 		  $(ABS)/pos.c++
 OBJS	= $(BUILD)/$(MAIN).o	\
 		  $(BUILD)/csim.o		\
 		  $(BUILD)/cbody.o		\
 		  $(BUILD)/pos.o		\
+		  $(BUILD)/simio.o		\
 		  $(BUILD)/hash.o
 		  
 

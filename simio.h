@@ -8,9 +8,16 @@
 
 #include "csim.h"
 
-Hash::Hash read(const std::string& filename);
+Hash* read(const std::string& filename);
 bool exists(const std::string& filename);
 bool prompt(const std::string& p);
-
+void print(const std::string& s, int depth = 1);
+void print(const int& i, int depth = 1);
+void print(const double& d, int depth = 1);
+void print(const float& f, int depth = 1);
+void println(const std::string& s, int depth = 1);
+void println(const int& i, int depth = 1);
+void println(const double& d, int depth = 1);
+void println(const float& f, int depth = 1);
 
 #endif
