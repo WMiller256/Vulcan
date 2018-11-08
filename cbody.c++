@@ -38,6 +38,12 @@ CBody::~CBody() {
 	// Destructor
 }
 
+std::string CBody::Name() {
+	return name;
+}
+void CBody::Name(std::string newName) {
+	name = newName;
+}
 void CBody::setParent(CBody* Parent) {
 	parent = Parent;
 }
@@ -45,19 +51,43 @@ CBody* CBody::getParent() {
 	return parent;
 }
 
+Pos CBody::pos() {
+	return Pos(x, y, z);
+}
+double CBody::Mass() {
+	return mass;
+}
+double CBody::Radius() {
+	return radius;
+}
+double CBody::Speed() {
+	return magnitude(Vel(xv, yv, zv));
+}
+
 double CBody::originDist() {
 	double dist = pos().originDist();
-	print("In ["+bright+blue+"CBody::originDist()"+res+"] ", 4);
+	print(in("CBody", "originDist"), 4);
 	println(pos().info()+" "+std::to_string(dist), 4);
 	return dist;
 }
-Pos CBody::pos() {
-	return Pos(x, y, z);
+double CBody::distance(CBody* target) {
+	Pos pos = target -> pos();
+	double dist = sqrt(pow(pos.X(),2) + pow(pos.Y(), 2) + pow(pos.Z(), 2));
+	println(in("CBody", "distance")+"Distance to "+pos.info()+" is "+bright+magenta+std::to_string(dist)+res, 4);
+	return dist;
+}
+double CBody::distance(Pos pos) {
+	double dist = sqrt(pow(pos.X(),2) + pow(pos.Y(), 2) + pow(pos.Z(), 2));
+	println(in("CBody", "distance")+"Distance to "+pos.info()+" is "+bright+magenta+std::to_string(dist)+res, 4);
+	return dist;
 }
 
 void CBody::init() {
 	print("Initializing new "+cyan+bright+"CBody"+res+"...");
+
 	parent = NULL;
+	name = "";
+	
 	radius = 0;
 	x = 0;
 	y = 0;
@@ -67,6 +97,7 @@ void CBody::init() {
 	zv = 0;
 	mass = 0;
 	speed = 0;
+
 	print(green+"done\n"+res);
 }
 

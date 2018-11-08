@@ -19,12 +19,18 @@
 #include <iostream>
 #include <iomanip>
 #include <experimental/filesystem>
-#include <colors.h>
+#include "colors.h"
 #include <math.h>
 #include <string.h>
 #include <vector>
 #include <limits>
 #include <omp.h>
+
+#include "force.h"
+#include "global.h"
+#include "vel.h"
+#include "pos.h"
+#include "hash.h"
 
 #define G 6.67408e-11
 
@@ -35,9 +41,7 @@ extern double minradius;
 extern double maxradius;
 extern double blockwidth;		// The width of each hash block
 
-class Pos;				// Forward declared for use in CBody constructor
 class CBody;			// Forward declared for use in CSim
-class Hash;				// Forward declared for use in CSim
 
 enum threadmode {
 	single,
@@ -96,17 +100,26 @@ public:
 	CBody(double Mass, double Radius, double Velocity, Pos pos);
 	~CBody();
 
+	std::string Name();
+	void Name(std::string newName);
 	void setParent(CBody* Parent);
 	CBody* getParent();
 
 	Pos pos();
+	double Mass();
+	double Radius();
+	double Speed();
 	double originDist();
+	double distance(CBody* target);			// Calculate the distance to the target (CBody)
+	double distance(Pos pos);				// Calculate the distance to the target (Pos)
 
 	std::string writeFormat(format f = text); 		// Defined in simio.c++
 	std::string info();
 
 private:
 	CBody* parent;				// Parent, i.e. the body that is being orbited
+	std::string name;			// The (optional) name of the body
+
 	double radius;				// Radius of the body
 	double x;					// x pos
 	double y;					// y pos
@@ -118,58 +131,6 @@ private:
 	double speed;				// Magnitude of linear velocity
 
 	void init();
-};
-
-class Pos
-{
-public:
-	Pos();
-	Pos(double X, double Y, double Z);
-
-	double X();
-	double Y();
-	double Z();
-	void setX(double X);
-	void setY(double Y);
-	void setZ(double Z);
-
-	double originDist();
-
-	std::string info();
-	std::string infoln();
-
-	bool operator==(Pos r) const;
-
-private:
-	double x;
-	double y;
-	double z;
-
-	void init();
-};
-
-class Hash
-{
-private:
-	typedef struct node {
-		int depth;					// Number of bodies in this block
-		int key;					// The hash key
-		node* next;					// Pointer to the next node, for faster iterating
-		std::vector<CBody*> bodies;	// Other bodies in the given hash block
-	}* nodeptr; 
-	nodeptr node_search(Pos pos);
-
-public:
-	Hash(int n = 0);				// Constructor
-
-	nodeptr* table;					// Table of pointers to all the nodes
-	long hash_f(Pos pos);			// Hash function
-	void addNode(CBody* body);		// Adds a node to the 	
-	CBody* find(Pos pos);
-
-	void write(const std::string& filename);	// Defined in simio.c++
-	
-	int size;
 };
 
 #endif // HASH_H

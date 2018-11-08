@@ -15,4 +15,6 @@
 
 <i>bulirsch-stoer.c++</i> - implementation file for CSim subclass BulirschStoer and at current a rudimentary [main()] for testing the speed of parallelization methods. </p>
 
-<i>simio.c++</i> - implementation file for file input and output and debug printing
+<i>simio.h</i> - function prototypes for file I/O and debug printing
+
+<i>simio.c++</i> - implementation file for file I/O and debug printing

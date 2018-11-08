@@ -1,5 +1,5 @@
 #Name of program
-MAIN    = bulirsch-stoer
+MAIN    = solarSystemConfig
 
 ABS		= .
 BIN		= ./bin
@@ -31,14 +31,14 @@ SRCS	= $(ABS)/$(MAIN).c++	\
 		  $(ABS)/hash.c++		\
 		  $(ABS)/simio.c++		\
 		  $(ABS)/global.c++		\
-		  $(ABS)/force.c++		\
 		  $(ABS)/vel.c++		\
+		  $(ABS)/force.c++		\
 		  $(ABS)/pos.c++
 OBJS	= $(BUILD)/$(MAIN).o	\
 		  $(BUILD)/csim.o		\
 		  $(BUILD)/cbody.o		\
-		  $(BUILD)/vel.o		\
 		  $(BUILD)/pos.o		\
+		  $(BUILD)/vel.o		\
 		  $(BUILD)/force.o		\
 		  $(BUILD)/simio.o		\
 		  $(BUILD)/global.o		\
@@ -49,7 +49,7 @@ OBJS	= $(BUILD)/$(MAIN).o	\
 all:
 	@printf "[      $(YELLOW)Building $(MAIN)$(WHITE)       ]\n"
 	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make build
+	make -f solarSystemConfig.make build
 	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 

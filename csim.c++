@@ -2,7 +2,7 @@
 #include "simio.h"
 
 bool warnings = true;
-int debug = 1;
+int debug = 4;
 int nbodies = 9;
 double minradius = std::numeric_limits<double>::infinity();
 double maxradius = 0;

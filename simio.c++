@@ -66,13 +66,22 @@ Hash* read(const std::string& filename) {
 	println("Number of bodies: "+bright+red+std::to_string(nbodies)+res, 3);
 	while (std::getline(file, line)) {
 		n++;
-		if (line == "Body") {
+		if (line.substr(0, 4) == "Body") {
 			double x;
 			double y;
 			double z;
 			double radius;
 			double mass;
 			double speed;
+
+			std::string name;
+			if (line.length() > 4) {
+				name = line.substr(line.find(" ")+1);
+			}
+			else {
+				name = "";
+			}
+			
 			std::getline(file, line); 
 			println(line, 3);
 			n++;
@@ -99,6 +108,7 @@ Hash* read(const std::string& filename) {
 			n++;
 			speed = stof(line.substr(line.find_last_of(" ")+1));
 			CBody* body = new CBody(mass, radius, speed, x, y, z);
+			body -> Name(name);
 			hash -> addNode(body);
 			print(body -> info(), 2);
 		}
@@ -185,3 +195,6 @@ void println(const int& i, int depth) {
 	}
 }
 
+void error(const std::string& s, const int line, const char* file) {
+	printf(std::string(red+white_back+" Error "+s).c_str(), line, file);
+}

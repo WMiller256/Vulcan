@@ -1,4 +1,4 @@
-#include "csim.h"
+#include "hash.h"
 #include "simio.h"
 
 Hash::Hash(int n) {
@@ -65,6 +65,23 @@ void Hash::addNode(CBody* body) {
 		target -> bodies.push_back(body);
 		target -> depth = target -> bodies.size();
 	}
+	for (int ii = 0; ii < size; ii ++) {
+		if (table[ii] != NULL) {
+			int kk = ii;
+			while (table[kk] == NULL) {
+				kk++;
+				if (kk == size) {
+					break;
+				}
+			}
+			if (kk < size) {
+				table[ii] -> next = table[kk];
+			}
+			else {
+				error("Hash indexing failure - line "+cyan+"%d"+res+" in file "+cyan+"%s"+res, __LINE__, __FILE__);
+			}
+		}
+	}
 	table[hash_v] = target;
 	println(green+"done"+res);
 }
@@ -88,4 +105,25 @@ CBody* Hash::find(Pos pos) {
 	print(pos.info(), 4);
 	std::cout << " found ";
 	return NULL;
+}
+
+Force* Hash::force(CBody* target) {
+	nodeptr current;
+	Force* net = new Force();
+	CBody* body;
+	double fmagnitude;
+	for (int ii = 0; ii < nbodies; ii ++) {
+		current = table[ii];
+		if (current != NULL) {
+			for (int kk = 0; kk < current -> depth; kk ++) {
+				body = current -> bodies.at(kk);
+				if (body != target) {
+					fmagnitude = (G * body -> Mass() * target -> Mass()) / pow(target -> distance(body), 2);
+
+					println(in("CBody", "force")+"Magnitude of force between "+body -> Name()+" and "+
+						target -> Name()+" is "+std::to_string(fmagnitude), 4);
+				}
+			}			
+		}
+	}
 }
