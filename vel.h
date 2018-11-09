@@ -15,28 +15,16 @@
 #include <string>
 
 #include "colors.h"
+#include "vec.h"
 
-class Vel
+class Vel : public vec
 {
 public:
 	Vel();
 	Vel(double X, double Y, double Z);
 
-	double X();
-	double Y();
-	double Z();
-	void setX(double X);
-	void setY(double Y);
-	void setZ(double Z);
-
-	std::string info();
-
 private:
-	double x;
-	double y;
-	double z;
 
-	void init();
 };
 
 #endif // VEL_H

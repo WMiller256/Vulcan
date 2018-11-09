@@ -1,39 +1,15 @@
 #include "csim.h"
 #include "simio.h"
-Pos::Pos() {
-	init();
-}
-Pos::Pos(double X, double Y, double Z) {
-	x = X;
-	y = Y;
-	z = Z;
-}
+#include "global.h"
 
-double Pos::X() {
-	return x;
+Pos::Pos() : vec() {
 }
-double Pos::Y() {
-	return y;
-}
-double Pos::Z() {
-	return z;
-}
-void Pos::setX(double X) {
-	x = X;
-}
-void Pos::setY(double Y) {
-	y = Y;
-}
-void Pos::setZ(double Z) {
-	z = Z;
+Pos::Pos(double X, double Y, double Z) : vec(X, Y, Z) {
 }
 
 double Pos::originDist() {
-	double dist = sqrt(pow(x,2) + pow(y,2) + pow(z,2));
-	print("In ["+bright+blue+"Pos::originDist()"+res+"]   ", 4);
-	print(info(), 4);
-	print(" ", 4);
-	println(std::to_string(dist), 4);
+	double dist = sqrt(pow(X(),2) + pow(Y(),2) + pow(Z(),2));
+	printrln(in("Pos", "originDist")+"  "+info(), scientific(dist), 4);
 	if (dist < minradius) {
 		minradius = dist;
 		blockwidth = (maxradius - minradius) / (nbodies - 1);
@@ -60,24 +36,10 @@ double Pos::originDist() {
 
 	return dist;
 }
-
-std::string Pos::info() {
-	std::string s = "("+bright+magenta+std::to_string(x)+res+", "+bright+magenta;
-	s += std::to_string(y)+res+", "+bright+magenta+std::to_string(z)+res+")";
-	return s;
-}
-
-bool Pos::operator==(Pos r) const {
-	if (x == r.X() && y == r.Y() && z == r.Z()) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-void Pos::init() {
-	x = 0;
-	y = 0;
-	z = 0;
+vec Pos::direction(Pos target) {
+	vec v(target.X() - X(), target.Y() - Y(), target.Z() - Z());
+	double m = magnitude(v);
+	v = v / m;
+	printrln(in("Pos","direction")+" {"+green+"target"+res+"} - "+target.info(2)+" to {"+green+"this"+res+"} - "+info(2), v.info(2), 4);
+	return v;
 }

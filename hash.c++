@@ -16,9 +16,10 @@ Hash::Hash(int n) {
 long Hash::hash_f(Pos pos) {
 	double odist = pos.originDist();
 	long ret = (odist - minradius) / blockwidth;
-	println("In ["+bright+blue+"Hash::hash_f()"+res+"] - \n  {ret}: "+std::to_string(ret)+"\n  {minradius}: "+
-		std::to_string(minradius)+"\n  {pos.originDist()}: "+std::to_string(odist)+
-		"\n  {blockwidth}: "+std::to_string(blockwidth), 5);
+	
+	println(in("Hash", "hash_f")+" - \n  {ret}: "+scientific(ret)+"\n  {minradius}: "+
+		scientific(minradius)+"\n  {pos.originDist()}: "+scientific(odist)+
+		"\n  {blockwidth}: "+scientific(blockwidth), 5);
 	if (ret < 0) {
 		println(red+white_back+" Error "+res+" hash function returned "+std::to_string(ret));
 		return 0;
@@ -29,8 +30,8 @@ long Hash::hash_f(Pos pos) {
 void Hash::addNode(CBody* body) {
 	print("Adding new "+cyan+bright+"Hash"+res+" node...  ");
 	print("\n", 2);
-	println("In ["+bright+blue+"Hash::addNode()"+res+"]     "+body -> pos().info(), 3);
-	println("In ["+bright+blue+"Hash::addNode()"+res+"]     Origin distance: "+std::to_string(body -> originDist()), 4);
+	println(in("Hash", "addNode")+"    "+body -> pos().info(), 3);
+	printrln(in("Hash", "addNode")+"    Origin distance: ", scientific(body -> originDist()), 4);
 	double odist = body -> originDist();
 	if (!(odist < 0)) {
 		if (odist < minradius) {
@@ -53,7 +54,7 @@ void Hash::addNode(CBody* body) {
 		println(blue+white_back+" Warning "+res+" [originDist()] returned "+std::to_string(odist), warn);
 	}
 	int hash_v = hash_f(body -> pos());
-	println("Hash value: "+red+bright+std::to_string(hash_v)+res, 3);
+	println("  Hash value: "+red+bright+std::to_string(hash_v)+res, 3);
 	nodeptr target = table[hash_v];
 	if (target == NULL) {				// Empty block case
 		target = new node;
@@ -107,23 +108,84 @@ CBody* Hash::find(Pos pos) {
 	return NULL;
 }
 
+void Hash::printForces() {
+	int gdebug = debug;
+	nodeptr current;
+	nodeptr target;
+	CBody* body;
+	CBody* tbody;
+	double fmagnitude;
+	for (int jj = 0; jj < nbodies; jj ++) {
+		target = table[jj];
+		if (target != NULL) {
+			for (int mm = 0; mm < target -> depth; mm ++) {
+				tbody = target -> bodies.at(mm);	
+				for (int ii = 0; ii < nbodies; ii ++) {
+					current = table[ii];
+					if (current != NULL) {
+						int depth = current -> depth;
+						for (int kk = 0; kk < depth; kk ++) {
+							body = current -> bodies.at(kk);
+							if (body != tbody) {
+								debug = -1;
+								fmagnitude = (G * body -> Mass() * tbody -> Mass()) / pow(tbody -> distance(body), 2);
+
+								debug = gdebug;
+								printrln(in("CBody", "force")+"   Magnitude of force between "+body -> Name()+" and "+
+									tbody -> Name()+" is ", scientific(fmagnitude));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	debug = gdebug;
+}
+
 Force* Hash::force(CBody* target) {
 	nodeptr current;
 	Force* net = new Force();
 	CBody* body;
 	double fmagnitude;
+	vec dir;
+	vec v;
 	for (int ii = 0; ii < nbodies; ii ++) {
 		current = table[ii];
 		if (current != NULL) {
-			for (int kk = 0; kk < current -> depth; kk ++) {
+			int depth = current -> depth;
+			for (int kk = 0; kk < depth; kk ++) {
 				body = current -> bodies.at(kk);
 				if (body != target) {
 					fmagnitude = (G * body -> Mass() * target -> Mass()) / pow(target -> distance(body), 2);
+					dir = body -> pos().direction(body -> COM(target));
+					v = dir * fmagnitude;
+					*net += v;
 
-					println(in("CBody", "force")+"Magnitude of force between "+body -> Name()+" and "+
-						target -> Name()+" is "+std::to_string(fmagnitude), 4);
+					printrln(in("Hash", "force")+"    Magnitude of force between "+body -> Name()+" and "+
+						target -> Name()+" is ", scientific(fmagnitude), 4);
+					printrln(in("Hash", "force")+"    Direction of force between "+body -> Name()+" and "+
+						target -> Name()+" is ", dir.info(), 4);
+					printrln(in("Hash", "force")+"    Force vector between "+body -> Name()+" and "+
+						target -> Name()+" is ", v.info(), 4);
+					printrln(in("Hash", "force")+"    Net force vector on "+body -> Name()+" is ", net -> info(), 4);
 				}
 			}			
+		}
+	}
+}
+
+void Hash::step() {
+	nodeptr current;
+	CBody* body;
+	for (int ii = 0; ii < nbodies; ii ++) {
+		current = table[ii];
+		if (current != NULL) {
+			int depth = current -> depth;
+			for (int kk = 0; kk < depth; kk ++) {
+				body = current -> bodies.at(kk);
+				force(body);
+			}
 		}
 	}
 }

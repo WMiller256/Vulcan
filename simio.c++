@@ -4,7 +4,11 @@ void Hash::write(const std::string&	filename) {
 	std::ofstream out;
 	if (exists(filename)) {
 		if (!prompt("File exists, overwrite? (y|n) ")) {
+			println("File will not be overwritten, exiting "+cyan+"Hash"+yellow+"::"+bright+white+"write"+res);
 			return;
+		}
+		else {
+			println("Overwriting "+yellow+filename+res);
 		}
 	}
 	print("Writing file "+yellow+filename+res+"... ");
@@ -195,6 +199,122 @@ void println(const int& i, int depth) {
 	}
 }
 
-void error(const std::string& s, const int line, const char* file) {
-	printf(std::string(red+white_back+" Error "+s).c_str(), line, file);
+void printr(const std::string& l, const std::string r, int depth) {
+	if (debug >= depth && depth != -1) {
+		int left = nchar(l);
+		int right = nchar(r);
+		int termwidth = winwidth();
+		if (termwidth < left + right) {
+			print(l+r, depth);
+		}
+		else {
+			int middle = termwidth - (left + right)-1;
+			std::cout << l;
+			for (int ii = 0; ii < middle; ii ++) {
+				std::cout << " ";
+			}
+			std::cout << r;
+		}		
+	}	
+}
+void printrln(const std::string& l, const std::string r, int depth) {
+	if (debug >= depth && depth != -1) {
+		printr(l, r, depth);
+		if (nchar(l) + nchar(r) < winwidth()) {
+			std::cout << std::endl;
+		}
+	}
+}
+
+int nchar(const std::string& s) { // Finds the number of alphanumeric characters in the given string
+	int ret = 0;
+	std::string str = stripcolors(s);
+	int length = str.length();
+	for (int ii = 0; ii < length; ii ++) {
+		if (str[ii] >= ' ' && str[ii] <= '~') {
+			ret++;
+		}
+	}
+	return ret;
+}
+
+int winheight() {
+    int width;
+    int height;
+    initscr();
+    getmaxyx(stdscr, height, width);
+    endwin();
+    return height;
+}
+int winwidth() {
+    int width;
+    int height;
+    initscr();
+    getmaxyx(stdscr, height, width);
+    endwin();
+    return width;
+}
+void print_special(const std::string& str, const char& fore, const char& back) {
+    int termwidth = winwidth();
+    std::cout << bright;
+    if (back == 'g') {
+        std::cout << green_back;
+    }
+    else if (back == 'c') {
+        std::cout << cyan_back;
+    }
+    else if (back == 'w') {
+        std::cout << white_back;
+    }
+    else if (back == 'b') {
+        std::cout << blue_back;
+    }
+    else if (back == 'y') {
+        std::cout << yellow_back;
+    }
+    else if (back == 'm') {
+        std::cout << magenta_back;
+    }
+    else if (back == 'r') {
+        std::cout << red_back;
+    }
+    else if (back == 'k') {
+        std::cout << black_back;
+    }
+    if (fore == 'g') {
+        std::cout << green;
+    }
+    else if (fore == 'c') {
+        std::cout << cyan;
+    }
+    else if (fore == 'w') {
+        std::cout << white;
+    }
+    else if (fore == 'b') {
+        std::cout << blue;
+    }
+    else if (fore == 'y') {
+        std::cout << yellow;
+    }
+    else if (fore == 'm') {
+        std::cout << magenta;
+    }
+    else if (fore == 'r' || fore == 'e') {
+        std::cout << red;
+    }
+    else if (fore == 'k') {
+        std::cout << black;
+    }
+    if (str.length() < termwidth) {
+        for (int ii = 0; ii < (termwidth-str.length())/2; ii++) {
+            std::cout << " ";
+        }
+    }
+    std::cout << str;
+    if (str.length() < termwidth) {
+        for (int ii = 0; ii < (termwidth-str.length())/2; ii++) {
+            std::cout << " ";
+        }
+    }
+    std::cout << res << std::endl;
 }

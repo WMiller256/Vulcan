@@ -2,7 +2,7 @@
 #include "simio.h"
 
 bool warnings = true;
-int debug = 4;
+int debug = 0;
 int nbodies = 9;
 double minradius = std::numeric_limits<double>::infinity();
 double maxradius = 0;
@@ -26,10 +26,20 @@ CSim::CSim(int n, double max) {
 CSim::~CSim() {
 }
 
+void CSim::setDebug(int Debug) {
+	debug = Debug;
+}
+
 void CSim::addBody(CBody* body) {
 	bodies -> addNode(body);
 }
+void CSim::step() {
+	bodies -> step();
+}
 
+void CSim::printForces() {
+	bodies -> printForces();
+}
 void CSim::writeConfiguration(const std::string& filename) {
 	bodies -> write(filename);
 }

@@ -18,10 +18,10 @@
 #include "colors.h"
 #include "vel.h"
 #include "pos.h"
+#include "baseio.h"
 #include "simio.h"
 
 std::string in(std::string prefix, std::string function);
-double magnitude(Vel vel);
-double magnitude(Pos pos);
+double magnitude(vec vec);
 
 #endif // GLOBAL_H

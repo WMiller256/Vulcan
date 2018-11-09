@@ -60,7 +60,12 @@ public:
 	CSim(int n, double max);
 	~CSim();
 
+	void setDebug(int Debug);
+
 	void addBody(CBody* body);
+	void step();
+
+	void printForces();
 	void writeConfiguration(const std::string& filename);
 	void readConfiguration(const std::string& filename);
 
@@ -110,6 +115,7 @@ public:
 	double Radius();
 	double Speed();
 	double originDist();
+	Pos COM(CBody* target);
 	double distance(CBody* target);			// Calculate the distance to the target (CBody)
 	double distance(Pos pos);				// Calculate the distance to the target (Pos)
 

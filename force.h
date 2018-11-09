@@ -10,18 +10,16 @@
 #ifndef FORCE_H
 #define FORCE_H
 
-class Force
+#include "vec.h"
+
+class Force : public vec
 {
 public:
 	Force();
 	Force(double X, double Y, double Z);
 
 private:
-	double x;
-	double y;
-	double z;
 
-	void init();
 };
 
 #endif // FORCE_H

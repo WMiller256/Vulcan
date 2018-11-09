@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "force.h"
+#include "vec.h"
 #include "pos.h"
 
 class CBody;
@@ -42,8 +43,10 @@ public:
 	CBody* find(Pos pos);			// Returns a pointer to the (CBody) at the given (Pos) {pos}
 
 	void write(const std::string& filename);	// Defined in simio.c++
+	void printForces();
 
 	Force* force(CBody* target);	// Calculates the force on the given (CBody) {target}
+	void step();
 	
 	int size;
 };

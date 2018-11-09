@@ -9,7 +9,7 @@ MV		= /bin/mv -f
 
 LFLAGS	= -Wl,-rpath,/bin/g++.exe
 LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -lstdc++fs
-LIBS	= -lboost_program_options
+LIBS	= -lboost_program_options -lncurses
 
 INC		= -I /usr/lib/boost/
 CFLAGS	= -Wno-deprecated-declarations -fopenmp -std=c++17
@@ -30,8 +30,10 @@ SRCS	= $(ABS)/$(MAIN).c++	\
 		  $(ABS)/cbody.c++		\
 		  $(ABS)/hash.c++		\
 		  $(ABS)/simio.c++		\
+		  $(ABS)/baseio.c++		\
 		  $(ABS)/global.c++		\
 		  $(ABS)/vel.c++		\
+		  $(ABS)/vec.c++		\
 		  $(ABS)/force.c++		\
 		  $(ABS)/pos.c++
 OBJS	= $(BUILD)/$(MAIN).o	\
@@ -39,8 +41,10 @@ OBJS	= $(BUILD)/$(MAIN).o	\
 		  $(BUILD)/cbody.o		\
 		  $(BUILD)/pos.o		\
 		  $(BUILD)/vel.o		\
+		  $(BUILD)/vec.o		\
 		  $(BUILD)/force.o		\
 		  $(BUILD)/simio.o		\
+		  $(BUILD)/baseio.o		\
 		  $(BUILD)/global.o		\
 		  $(BUILD)/hash.o
 		  

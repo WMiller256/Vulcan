@@ -22,6 +22,7 @@ long int n;
 int nthreads;
 
 #ifndef TEST
+#ifndef SOLARSYSTEMCONFIG
 int main(int argn, char** argv) {
 	BulirschStoer* bs = new BulirschStoer();
 	double* y1 = new double;
@@ -102,6 +103,7 @@ int main(int argn, char** argv) {
 	std::cout << "Computation time: " << bright+magenta << microseconds << res << std::endl;
 	outfile << microseconds << " " << nthreads << "\n";
 }
+#endif // SOLARSYSTEMCONFIG
 #endif // TEST
 
 int BulirschStoer::attempts = 12;

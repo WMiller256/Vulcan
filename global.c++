@@ -8,25 +8,19 @@
 
 #include "global.h"
 
-double magnitude(Vel vel) {
-	double ret = sqrt(pow(vel.X(), 2) + pow(vel.Y(), 2) + pow(vel.Z(), 2));
-	println(in("","magnitude(Vel)")+"Vector "+vel.info()+" magnitude is "+bright+magenta+std::to_string(ret), 4);
+double magnitude(vec v) {
+	double ret = sqrt(pow(v.X(), 2) + pow(v.Y(), 2) + pow(v.Z(), 2));
+	println(in("","magnitude")+"     Vector "+v.info()+" magnitude is "+bright+magenta+scientific(ret), 4);
 	return ret;
-}
-double magnitude(Pos pos) {
-	double ret = sqrt(pow(pos.X(), 2) + pow(pos.Y(), 2) + pow(pos.Z(), 2));
-	println(in("","magnitude(Vel)")+"Vector "+pos.info()+" magnitude is "+bright+magenta+std::to_string(ret), 4);
-	return ret;	
 }
 
 std::string in(std::string prefix, std::string function) {
 	std::string ret;
 	if (prefix != "") {
-		ret = "In ["+cyan+prefix+yellow+"::"+bright+white+function+res+"()] ";
+		ret = "  "+cyan+prefix+yellow+"::"+bright+white+function+res+" ";
 	}
 	else {
-		ret = "In ["+bright+white+function+res+"()] ";
+		ret = "  "+bright+white+function+res+"] ";
 	}
 	return ret;
 }
-

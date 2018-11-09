@@ -1,5 +1,6 @@
 #include "csim.h"
 #include "simio.h"
+#include "global.h"
 
 CBody::CBody() {
 	init();
@@ -66,19 +67,42 @@ double CBody::Speed() {
 
 double CBody::originDist() {
 	double dist = pos().originDist();
-	print(in("CBody", "originDist"), 4);
-	println(pos().info()+" "+std::to_string(dist), 4);
+	printrln(in("CBody", "originDist")+pos().info(), scientific(dist), 4);
 	return dist;
+}
+Pos CBody::COM(CBody* target) {
+	if (this == target) {
+		error("{target} and {this} are the same, center of mass will be {this -> pos()}.", __LINE__, __FILE__);
+	}
+	Pos com(0,0,0);
+	double m1 = Mass();
+	double m2 = target -> Mass();
+	double M = m1 + m2;
+	Pos tpos = target -> pos();
+	Pos lpos = pos();
+	if (M > 0.0) {
+		com.setX((m1*lpos.X() + m2*tpos.X()) / M);
+		com.setY((m1*lpos.Y() + m2*tpos.Y()) / M);
+		com.setZ((m1*lpos.Z() + m2*tpos.Z()) / M);
+	}
+	else if (M == 0.0) {
+		warning("Sum of masses is zero - {"+green+"m1"+res+"}: "+scientific(m1)+" {"+green+"m2"+res+"}. Returning (0,0,0).", __LINE__, __FILE__);
+	}
+	else {
+		error("Sum of masses is negative - {"+green+"m1"+res+"}: "+scientific(m1)+" {"+green+"m2"+res+"}. Returning (0,0,0).", __LINE__, __FILE__);
+	}
+	printrln(in("CBody", "COM")+"     COM of "+Name()+" and "+target -> Name()+" is ", com.info(2), 4);
+	return com;
 }
 double CBody::distance(CBody* target) {
-	Pos pos = target -> pos();
-	double dist = sqrt(pow(pos.X(),2) + pow(pos.Y(), 2) + pow(pos.Z(), 2));
-	println(in("CBody", "distance")+"Distance to "+pos.info()+" is "+bright+magenta+std::to_string(dist)+res, 4);
+	Pos t = target -> pos();
+	double dist = sqrt(pow(t.X() - pos().X(),2) + pow(t.Y() - pos().Y(), 2) + pow(t.Z() - pos().Z(), 2));
+	printrln(in("CBody", "distance")+"Distance from "+pos().info(2)+" to "+t.info(2)+" is ", scientific(dist, 3)+res, 4);
 	return dist;
 }
-double CBody::distance(Pos pos) {
-	double dist = sqrt(pow(pos.X(),2) + pow(pos.Y(), 2) + pow(pos.Z(), 2));
-	println(in("CBody", "distance")+"Distance to "+pos.info()+" is "+bright+magenta+std::to_string(dist)+res, 4);
+double CBody::distance(Pos t) {
+	double dist = sqrt(pow(t.X() - pos().X(),2) + pow(t.Y() - pos().Y(), 2) + pow(t.Z() - pos().Z(), 2));
+	printrln(in("CBody", "distance")+"Distance from "+pos().info()+" to "+t.info()+" is ", scientific(dist)+res, 4);
 	return dist;
 }
 
