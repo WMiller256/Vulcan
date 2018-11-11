@@ -1,5 +1,6 @@
 #include "simio.h"
 
+#ifdef using_hash
 void Hash::write(const std::string&	filename) {
 	std::ofstream out;
 	if (exists(filename)) {
@@ -121,6 +122,7 @@ Hash* read(const std::string& filename) {
 	println(green+"done"+res);
 	return hash;
 }
+#endif // using_hash
 
 std::string CBody::writeFormat(format f) {
 	std::string formatted;

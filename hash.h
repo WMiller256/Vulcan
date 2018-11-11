@@ -32,9 +32,10 @@ private:
 		std::vector<CBody*> bodies;	// Other bodies in the given hash block
 	}* nodeptr; 
 	nodeptr node_search(Pos pos);
+	double h;
 
 public:
-	Hash(int n = 0);				// Constructor
+	Hash(int n = 0, double step = -1.0);	// Constructor
 
 	nodeptr* table;					// Table of pointers to all the nodes
 	long hash_f(Pos pos);			// Hash function
@@ -47,8 +48,12 @@ public:
 
 	Force* force(CBody* target);	// Calculates the force on the given (CBody) {target}
 	void step();
+	void step(CBody* body);
+	void sim(CBody* body, double end);
+	void sim(double end);
 	
 	int size;
+	std::vector<CBody*> l;
 };
 
 #endif // HASH_H

@@ -27,16 +27,24 @@ std::string scientific(double d, int precision) {
 	if (d == std::numeric_limits<double>::infinity()) {
 		return magenta+"inf"+res;
 	}
-	if (fabs(d) > 0.0) {
+	if (fabs(d) <= 1.0e-9) {
+		d = 0.0;
+	}
+	if (fabs(d) >= 1.0) {
 		int dec = str.find(".");
+		int start = 1;
 		if (dec != std::string::npos) {
 			ret += magenta;
 			ret += str[0];
+			if (d < 0.0) {
+				ret += str[1];
+				start = 2;
+			}
 			ret += ".";
 	 		if (precision > str.length()) {
 				precision = str.length();
 			}
-			for (int ii = 1; ii < precision+1; ii ++) {
+			for (int ii = start; ii < precision+start; ii ++) {
 				if (str[ii] != '.') {
 					ret += str[ii];
 				}
@@ -47,10 +55,13 @@ std::string scientific(double d, int precision) {
 			ret += res;
 			ret += "e";
 			ret += bright+red;
-			ret += std::to_string(dec - 1);
+			ret += std::to_string(dec - start);
+		}
+		else {
+			ret = red+"err"+res;
 		}
 	}
-	else if (d == 0.0) {
+	else if (fabs(d) == 0.0) {
 		ret += magenta;
 		ret = "0.";
 		for (int ii = 0; ii < precision; ii ++) {
@@ -59,6 +70,39 @@ std::string scientific(double d, int precision) {
 		ret += res;
 		ret += "e";
 		ret += bright+red+"0"+res;
+	}
+	else {
+		ret += magenta;
+		int dec = str.find(".");
+		while (str[dec++] == '0') {
+			if (dec+1 == str.length()) {
+				warning(" Failed to format given number in scientific notation", __LINE__, __FILE__);
+				break;
+			}
+		}
+		if (d < 0.0) {
+			ret += "-";
+		}
+		if (dec != std::string::npos) {
+			ret += str[dec];
+			ret += ".";
+			for (int ii = dec; ii < precision+dec; ii ++) {
+				ret += str[ii];
+			}
+			ret += res;
+			ret += "e-";
+			ret += bright+red;
+			if (d < 0.0) {
+				ret += std::to_string(dec+2);
+			}
+			else {
+				ret += std::to_string(dec+1);
+			} 
+			ret += res;
+		}
+		else {
+			ret = red+"err"+res;
+		}
 	}
 	ret += res;
 	return ret;

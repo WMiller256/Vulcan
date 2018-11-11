@@ -1,9 +1,10 @@
 #include "hash.h"
 #include "simio.h"
 
-Hash::Hash(int n) {
+Hash::Hash(int n, double step) {
 	table = new nodeptr[n];
 	size = n;
+	h = step;
 	blockwidth = (minradius - maxradius) / nbodies;
 	if (blockwidth <= 0) {
 		blockwidth = 1;
@@ -61,9 +62,11 @@ void Hash::addNode(CBody* body) {
 		target -> depth = 1;
 		target -> key = hash_v;
 		target -> bodies.push_back(body);
+		l.push_back(body);
 	}
 	else {
 		target -> bodies.push_back(body);
+		l.push_back(body);
 		target -> depth = target -> bodies.size();
 	}
 	for (int ii = 0; ii < size; ii ++) {
@@ -153,10 +156,11 @@ Force* Hash::force(CBody* target) {
 	for (int ii = 0; ii < nbodies; ii ++) {
 		current = table[ii];
 		if (current != NULL) {
-			int depth = current -> depth;
+			int depth = current -> bodies.size();
 			for (int kk = 0; kk < depth; kk ++) {
 				body = current -> bodies.at(kk);
 				if (body != target) {
+					printrln("\n"+in("Hash", "force")+"     Target: ", body -> Name(), 5); 
 					fmagnitude = (G * body -> Mass() * target -> Mass()) / pow(target -> distance(body), 2);
 					dir = body -> pos().direction(body -> COM(target));
 					v = dir * fmagnitude;
@@ -170,22 +174,57 @@ Force* Hash::force(CBody* target) {
 						target -> Name()+" is ", v.info(), 4);
 					printrln(in("Hash", "force")+"    Net force vector on "+body -> Name()+" is ", net -> info(), 4);
 				}
-			}			
+			}
 		}
+	}
+	std::cout << std::flush;
+}
+
+void Hash::sim(double end) {
+	double t = 0.0;
+	if (h > 0.0) {
+		while (t < end) {
+			if (t > 0.0) {
+				std::cout << char(8) << char(8) << char(8) << char(8);
+			}
+			std::cout << std::setw(3) << (int)(100 * (t / end)) << '%';
+			step();
+			t += h;
+		}
+	}
+	else {
+		error("{h} not defined, cannot simulate.", __LINE__, __FILE__);
 	}
 }
 
 void Hash::step() {
 	nodeptr current;
 	CBody* body;
+	vec f;
 	for (int ii = 0; ii < nbodies; ii ++) {
 		current = table[ii];
 		if (current != NULL) {
-			int depth = current -> depth;
+			int depth = current -> bodies.size();
+//#pragma omp parallel for schedule(dynamic)
 			for (int kk = 0; kk < depth; kk ++) {
 				body = current -> bodies.at(kk);
-				force(body);
+				f = *force(body);
+				body -> Velocity(f / body -> Mass() * h);
+				body -> Position(body -> Velocity() * h);
 			}
 		}
+	}
+}
+
+void Hash::step(CBody* body) {
+	f = *force(body);
+	body -> Velocity(f / body -> Mass() * h);
+	body -> Position(body -> Velocity() * h);
+}
+void Hash::sim(int ii, double end) {
+	double t = 0.0;
+	while (t < end) {
+		step(l[ii]);
+		t += h;
 	}
 }

@@ -23,18 +23,21 @@
 #include <math.h>
 #include <string.h>
 #include <vector>
+#include <thread>
 #include <limits>
 #include <omp.h>
 
 #include "force.h"
 #include "global.h"
 #include "vel.h"
+#include "vec.h"
 #include "pos.h"
 #include "hash.h"
 
 #define G 6.67408e-11
 
 extern int nbodies;
+extern int nthreads;
 extern bool warnings;
 extern int debug;
 extern double minradius;
@@ -57,22 +60,33 @@ class CSim
 public:
 	CSim();
 	CSim(int n);
-	CSim(int n, double max);
+	CSim(int n, double max, double h);
 	~CSim();
 
 	void setDebug(int Debug);
 
 	void addBody(CBody* body);
+	CBody* at(int ii);
 	void step();
+	Force* force(CBody* body);
 
 	void printForces();
 	void writeConfiguration(const std::string& filename);
-	void readConfiguration(const std::string& filename);
+	CSim* readConfiguration(const std::string& filename);
+
+	double H();
+	int count();
 
 private:
 	double tMax;		// The integration time
 	double tCurr;		// Current time
+	double h;			// The time step
+#ifdef using_hash
 	Hash* bodies;		// Hash table to hold the body objects
+#else
+	CBody** bodies;
+	int nadded;
+#endif
 
 	void init();
 };
@@ -114,6 +128,9 @@ public:
 	double Mass();
 	double Radius();
 	double Speed();
+	vec Velocity(vec v);
+	Vel Velocity();
+	void Position(vec v);
 	double originDist();
 	Pos COM(CBody* target);
 	double distance(CBody* target);			// Calculate the distance to the target (CBody)
@@ -139,4 +156,9 @@ private:
 	void init();
 };
 
+void sim(Hash* bodies, double tMax, threadmode t = threadmode::single);
+void sim(CSim* tsim, double tMax, threadmode t = threadmode::single);
+void simulate(Hash* h, CBody* body, double t);
+void man_simulate(CSim* tsim, int ii, double end);
+void simulate(CSim* sim, double end);
 #endif // HASH_H

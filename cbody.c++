@@ -64,6 +64,20 @@ double CBody::Radius() {
 double CBody::Speed() {
 	return magnitude(Vel(xv, yv, zv));
 }
+vec CBody::Velocity(vec v) {
+	xv = v.X();
+	yv = v.Y();
+	zv = v.Z();
+	return vec(xv, yv, zv);
+}
+Vel CBody::Velocity() {
+	return Vel(xv, yv, zv);
+}
+void CBody::Position(vec v) {
+	x = v.X();
+	y = v.Y();
+	z = v.Z();
+}
 
 double CBody::originDist() {
 	double dist = pos().originDist();
