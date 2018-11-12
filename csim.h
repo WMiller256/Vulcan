@@ -24,6 +24,7 @@
 #include <string.h>
 #include <vector>
 #include <thread>
+#include <chrono>
 #include <limits>
 #include <omp.h>
 
@@ -32,6 +33,7 @@
 #include "vel.h"
 #include "vec.h"
 #include "pos.h"
+#include "rpos.h"
 #include "hash.h"
 
 #define G 6.67408e-11
@@ -43,6 +45,7 @@ extern int debug;
 extern double minradius;
 extern double maxradius;
 extern double blockwidth;		// The width of each hash block
+extern long long cputime;
 
 class CBody;			// Forward declared for use in CSim
 
@@ -76,6 +79,7 @@ public:
 
 	double H();
 	int count();
+	void sim(threadmode t = threadmode::single);
 
 private:
 	double tMax;		// The integration time
@@ -157,8 +161,7 @@ private:
 };
 
 void sim(Hash* bodies, double tMax, threadmode t = threadmode::single);
-void sim(CSim* tsim, double tMax, threadmode t = threadmode::single);
 void simulate(Hash* h, CBody* body, double t);
-void man_simulate(CSim* tsim, int ii, double end);
+void man_simulate(CSim* tsim, int* data_pipe, int ii, int bytes, double* t, double* max);
 void simulate(CSim* sim, double end);
 #endif // HASH_H

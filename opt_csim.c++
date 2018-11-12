@@ -82,7 +82,7 @@ void CSim::step() {
 #endif
 }
 Force* CSim::force(CBody* body) {
-	println(in("CSim", "force")+"    Calculating net force", 5);
+//	println(in("CSim", "force")+"    Calculating net force", 5);//	println(in("CSim", "force")+"    Calculating net force", 5);
 	Force* net = new Force();
 	CBody* target = NULL;
 	double fmagnitude;
@@ -91,22 +91,19 @@ Force* CSim::force(CBody* body) {
 	for (int ii = 0; ii < nadded; ii ++) {
 		target = bodies[ii];
 		if (target != NULL && target != body) {
-			printrln("\n"+in("CSim", "force")+"    Target: ", body -> Name(), 5); 
+//			printrln("\n"+in("CSim", "force")+"    Target: ", body -> Name(), 5); //			printrln("\n"+in("CSim", "force")+"    Target: ", body -> Name(), 5); 
 			fmagnitude = (G * body -> Mass() * target -> Mass()) / pow(target -> distance(body), 2);
 			dir = body -> pos().direction(body -> COM(target));
 			v = dir * fmagnitude;
 			*net += v;
 
-			printrln(in("CSim", "force")+"    Magnitude of force between "+body -> Name()+" and "+
-				target -> Name()+" is ", scientific(fmagnitude), 4);
-			printrln(in("CSim", "force")+"    Direction of force between "+body -> Name()+" and "+
-				target -> Name()+" is ", dir.info(), 4);
-			printrln(in("CSim", "force")+"    Force vector between "+body -> Name()+" and "+
-				target -> Name()+" is ", v.info(), 4);
-			printrln(in("CSim", "force")+"    Net force vector on "+body -> Name()+" is ", net -> info(), 4);
+//			printrln(in("CSim", "force")+"    Magnitude of force between "+body -> Name()+" and "+//				target -> Name()+" is ", scientific(fmagnitude), 4);//				target -> Name()+" is ", scientific(fmagnitude), 4);
+//			printrln(in("CSim", "force")+"    Direction of force between "+body -> Name()+" and "+//				target -> Name()+" is ", dir.info(), 4);//				target -> Name()+" is ", dir.info(), 4);
+//			printrln(in("CSim", "force")+"    Force vector between "+body -> Name()+" and "+//				target -> Name()+" is ", v.info(), 4);//				target -> Name()+" is ", v.info(), 4);
+//			printrln(in("CSim", "force")+"    Net force vector on "+body -> Name()+" is ", net -> info(), 4);//			printrln(in("CSim", "force")+"    Net force vector on "+body -> Name()+" is ", net -> info(), 4);
 		}
 	}
-	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	
+//	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	//	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	
 	return net;
 }
 
@@ -122,14 +119,14 @@ void CSim::writeConfiguration(const std::string& filename) {
 	std::ofstream out;
 	if (exists(filename)) {
 		if (!prompt("File exists, overwrite? (y|n) ")) {
-			println("File will not be overwritten, exiting "+cyan+"CSim"+yellow+"::"+bright+white+"writeConfiguration"+res);
+//			println("File will not be overwritten, exiting "+cyan+"CSim"+yellow+"::"+bright+white+"writeConfiguration"+res);//			println("File will not be overwritten, exiting "+cyan+"CSim"+yellow+"::"+bright+white+"writeConfiguration"+res);
 			return;
 		}
 		else {
-			println("Overwriting "+yellow+filename+res);
+//			println("Overwriting "+yellow+filename+res);//			println("Overwriting "+yellow+filename+res);
 		}
 	}
-	print("Writing file "+yellow+filename+res+"... ");
+//	print("Writing file "+yellow+filename+res+"... ");//	print("Writing file "+yellow+filename+res+"... ");
 	out.open(filename);
 	out << nadded << "\n" << minradius << "\n" << maxradius << "\n";
 	CBody* current;
@@ -142,7 +139,7 @@ void CSim::writeConfiguration(const std::string& filename) {
 			error("Body "+std::to_string(ii)+" was "+bright+red+"NULL"+res+" - skipping.", __LINE__, __FILE__);
 		}
 	}
-	println(green+"done"+res);
+//	println(green+"done"+res);//	println(green+"done"+res);
 #endif
 }
 
@@ -155,8 +152,8 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 		error("File "+yellow+filename+res+" does not exist.",__LINE__,__FILE__);
 		return NULL;
 	}
-	print("Reading file "+yellow+filename+res+"... ");
-	print("\n", 2);
+//	print("Reading file "+yellow+filename+res+"... ");//	print("Reading file "+yellow+filename+res+"... ");
+//	print("\n", 2);//	print("\n", 2);
 	int gdebug = debug;
 	if (debug < 3) {
 		debug = 0;
@@ -180,10 +177,8 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 	maxradius = stof(line);
 	
 	blockwidth = (maxradius - minradius) / (nbodies - 1);
-	println("  {minradius}:  "+magenta+bright+std::to_string(minradius)+res+"\n  {maxradius}:  "+
-		bright+magenta+std::to_string(maxradius)+res+"\n  {blockwidth}: "+bright+magenta+
-		std::to_string(blockwidth)+res, 3);
-	println("Number of bodies: "+bright+red+std::to_string(nbodies)+res, 3);
+//	println("  {minradius}:  "+magenta+bright+std::to_string(minradius)+res+"\n  {maxradius}:  "+//		bright+magenta+std::to_string(maxradius)+res+"\n  {blockwidth}: "+bright+magenta+//		std::to_string(blockwidth)+res, 3);//		std::to_string(blockwidth)+res, 3);
+//	println("Number of bodies: "+bright+red+std::to_string(nbodies)+res, 3);//	println("Number of bodies: "+bright+red+std::to_string(nbodies)+res, 3);
 	while (std::getline(file, line)) {
 		n++;
 		if (line.substr(0, 4) == "Body") {
@@ -203,7 +198,7 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 			}
 			
 			std::getline(file, line); 
-			println(line, 3);
+//			println(line, 3);//			println(line, 3);
 			n++;
 			std::size_t start = line.find("(");
 			if (start != std::string::npos) {
@@ -212,29 +207,29 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 				z = stof(line.substr(line.find_last_of(",")+2,line.find(")")-1));
 			}
 			else {
-				println(red+white_back+" Error "+res+" File error at line "+std::to_string(n)+" in file "+yellow+filename+res);
+//				println(red+white_back+" Error "+res+" File error at line "+std::to_string(n)+" in file "+yellow+filename+res);//				println(red+white_back+" Error "+res+" File error at line "+std::to_string(n)+" in file "+yellow+filename+res);
 				return NULL;
 			}
 			std::getline(file, line); 
-			println(line, 3);
+//			println(line, 3);//			println(line, 3);
 			n++;
 			radius = stof(line.substr(line.find_last_of(" ")+1));
 			std::getline(file, line); 
-			println(line, 3);
+//			println(line, 3);//			println(line, 3);
 			n++;
 			mass = stof(line.substr(line.find_last_of(" ")+1));
 			std::getline(file, line); 
-			println(line, 3);
+//			println(line, 3);//			println(line, 3);
 			n++;
 			speed = stof(line.substr(line.find_last_of(" ")+1));
 			CBody* body = new CBody(mass, radius, speed, x, y, z);
 			body -> Name(name);
 			
-			print(body -> info(), 2);
+//			print(body -> info(), 2);//			print(body -> info(), 2);
 		}
 	}
 	debug = gdebug;
-	println(green+"done"+res);
+//	println(green+"done"+res);//	println(green+"done"+res);
 	return sim;
 #endif
 }
@@ -246,11 +241,11 @@ int CSim::count() {
 }
 
 void CSim::init() {
-	print("Initializing new "+cyan+bright+"CSim"+res+"...");
+//	print("Initializing new "+cyan+bright+"CSim"+res+"...");//	print("Initializing new "+cyan+bright+"CSim"+res+"...");
 	tMax = 0.0;
 	tCurr = 0.0;
 	h = -1.0;
-	print(green+" done\n"+res);
+//	print(green+" done\n"+res);//	print(green+" done\n"+res);
 }
 
 void sim(Hash* bodies, double tMax, threadmode t) {
@@ -300,7 +295,7 @@ void CSim::sim(threadmode t) {
 			std::thread threads[nthreads];
 			for (int ii = 0; ii < nthreads; ii ++) {
 				threads[ii] = std::thread(man_simulate, this, data_pipe, ii, bytes, t, max);
-				println("Thread "+std::to_string(ii+1)+" initialized.");
+//				println("Thread "+std::to_string(ii+1)+" initialized.");//				println("Thread "+std::to_string(ii+1)+" initialized.");
 			}
 			if (h > 0.0) {
 				rpos* p = new rpos();
@@ -336,7 +331,7 @@ void man_simulate(CSim* sim, int* data_pipe, int ii, int bytes, double* tCurr, d
 #ifdef using_hash
 	error ("Funtion "+in("", "simulate(CSim*, CBody*, double)")+" is invalid when using hash table. Use "+in("", "simulate(Hash*, CBody*, double)")+" instead", __LINE__, __FILE__);
 #else
-	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 5);
+//	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 5);//	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 5);
 	CBody* body = sim -> at(ii);
 	rpos* p = new rpos();
 	double h = sim -> H();
@@ -346,14 +341,14 @@ void man_simulate(CSim* sim, int* data_pipe, int ii, int bytes, double* tCurr, d
 		cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 		write(data_pipe[1], p, bytes);
 	}
-	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 5);
+//	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 5);//	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 5);
 #endif
 }
 void simulate(CSim* sim, double end) {
 #ifdef using_hash
 	error ("Funtion "+in("", "simulate(CSim*, double)")+" is invalid when using hash table.", __LINE__, __FILE__);
 #else
-	printrln(in("", "simulate(CSim*, double)"), "Simulating", 5);
+//	printrln(in("", "simulate(CSim*, double)"), "Simulating", 5);//	printrln(in("", "simulate(CSim*, double)"), "Simulating", 5);
 	double t = 0.0;
 	double h = sim -> H();
 	nbodies = sim -> count();
@@ -373,6 +368,6 @@ void simulate(CSim* sim, double end) {
 		error("{h} was less than or equal to zero. Cannot simulate",__LINE__,__FILE__);
 		return;
 	}
-	printrln(in("", "simulate(CSim*, double)"), green+"Complete"+res, 5);
+//	printrln(in("", "simulate(CSim*, double)"), green+"Complete"+res, 5);//	printrln(in("", "simulate(CSim*, double)"), green+"Complete"+res, 5);
 #endif
 }

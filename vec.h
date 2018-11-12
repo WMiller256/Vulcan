@@ -22,6 +22,7 @@ class vec
 public:
 	vec();
 	vec(double X, double Y, double Z);
+	vec( vec* v);
 
 	double X();
 	double Y();

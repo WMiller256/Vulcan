@@ -11,7 +11,7 @@
 #include "csim.h"
 #include "hash.h"
 
-Hash* read(const std::string& filename);
+Hash* readfile(const std::string& filename);
 bool exists(const std::string& filename);
 bool prompt(const std::string& p);
 
