@@ -36,16 +36,16 @@ int main(int argn, char** argv) {
 	std::cout << t << " " << h << std::endl;
 
 	CSim* tsim = new CSim(8, t, h);
-	tsim -> setDebug(1);
+	tsim -> setDebug(5);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0);
-	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e3, 6.98169e11, 0.0, 0.0);
-	CBody* venus = new CBody(4.8675e24, 6.0518e6, 3.502e3, 1.08939e11, 0.0, 0.0);
-	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e3, 1.521e11, 0.0, 0.0);
-	CBody* mars = new CBody(6.4171e23, 3.3895e6, 2.4007e3, 2.492e11, 0.0, 0.0);
-	CBody* jupiter = new CBody(1.8982e27, 6.991e7, 1.307e3, 8.1662e11, 0.0, 0.0);
-	CBody* saturn = new CBody(5.683e26, 5.8232e7, 9.68e3, 1.5155e12, 0.0, 0.0);
-	CBody* uranus = new CBody(8.681e25, 2.362e7, 6.8e3, 3.008e12, 0.0, 0.0);
-	CBody* neptune = new CBody(1.024e26, 2.431e7, 5.43e3, 4.54e12, 0.0, 0.0);
+	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e3, 0.0, 6.98169e11, 0.0);
+	CBody* venus = new CBody(4.8675e24, 6.0518e6, 3.502e3, 0.0, 1.08939e11, 0.0);
+	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e3, 0.0, 1.521e11, 0.0);
+	CBody* mars = new CBody(6.4171e23, 3.3895e6, 2.4007e3, 0.0, 2.492e11, 0.0);
+	CBody* jupiter = new CBody(1.8982e27, 6.991e7, 1.307e3, 0.0, 8.1662e11, 0.0);
+	CBody* saturn = new CBody(5.683e26, 5.8232e7, 9.68e3, 0.0, 1.5155e12, 0.0);
+	CBody* uranus = new CBody(8.681e25, 2.362e7, 6.8e3, 0.0, 3.008e12, 0.0);
+	CBody* neptune = new CBody(1.024e26, 2.431e7, 5.43e3, 0.0, 4.54e12, 0.0);
 
 	sun -> Name("Sun"); 
 	mercury -> Name("Mercury");
@@ -67,15 +67,27 @@ int main(int argn, char** argv) {
 	tsim -> addBody(uranus);
 	tsim -> addBody(neptune);
 
+	std::cout << green << " Initialization complete. " << res << std::endl;
+
 	auto start = std::chrono::high_resolution_clock::now();	
 	tsim -> sim(thread);
 	std::cout << std::endl;
 	auto end = std::chrono::high_resolution_clock::now();	
 	long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+#ifdef profiling
 	if (thread == threadmode::manual) {
 		cputime /= nthreads;
 	}
-	std::cout << "Computation time: " << bright+magenta << cputime << res << std::endl;
-	std::cout << "Total time:       " << bright+magenta << microseconds << res << std::endl;
-
+	std::cout << "Computation time:    " << bright+magenta << cputime << res << std::endl;
+#endif
+	std::cout << "Mutex time:          " << bright+magenta << mtxtime / 1000 << res << std::endl;
+	std::cout << "Wait time:           " << bright+magenta << waittime / 1000 / nthreads<< res << std::endl;
+	std::cout << "Total time:          " << bright+magenta << microseconds << res << std::endl;
+	if (thread == threadmode::manual) {
+		tsim -> writeConfiguration("explicit-test.txt");
+	}
+	else {
+		tsim -> writeConfiguration("single-test.txt");
+	}
+	
 }

@@ -126,10 +126,31 @@ Hash* readfile(const std::string& filename) {
 
 std::string CBody::writeFormat(format f) {
 	std::string formatted;
+	std::string xs;
+	std::string ys;
+	std::string zs;
+	if (isnan(x)) {
+		xs = "nan";
+	}
+	else {
+		xs = std::to_string(x);
+	}
+	if (isnan(y)) {
+		ys = "nan";
+	}
+	else {
+		ys = std::to_string(y);
+	}
+	if (isnan(z)) {
+		zs = "nan";
+	}
+	else {
+		zs = std::to_string(z);
+	}
 	switch(f) {
 		case text:
-			formatted.append("Body\n");
-			formatted.append("\t Position ("+std::to_string(x)+", "+std::to_string(y)+", "+std::to_string(z)+")\n");
+			formatted.append("Body - "+Name()+"\n");
+			formatted.append("\t Position ("+xs+", "+ys+", "+zs+")\n");
 			formatted.append("\t Radius   "+std::to_string(radius)+"\n");
 			formatted.append("\t Mass     "+std::to_string(mass)+"\n");
 			formatted.append("\t Speed    "+std::to_string(speed)+"\n\n");
@@ -207,7 +228,7 @@ void printr(const std::string& l, const std::string r, int depth) {
 		int right = nchar(r);
 		int termwidth = winwidth();
 		if (termwidth < left + right) {
-			print(l+r, depth);
+			println(l+" "+r, depth);
 		}
 		else {
 			int middle = termwidth - (left + right)-1;
@@ -222,9 +243,7 @@ void printr(const std::string& l, const std::string r, int depth) {
 void printrln(const std::string& l, const std::string r, int depth) {
 	if (debug >= depth && depth != -1) {
 		printr(l, r, depth);
-		if (nchar(l) + nchar(r) < winwidth()) {
-			std::cout << std::endl;
-		}
+		std::cout << std::endl;
 	}
 }
 

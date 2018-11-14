@@ -18,8 +18,11 @@ public:
 	Force();
 	Force(double X, double Y, double Z);
 
-private:
-
+	void zero() {
+		x = 0.0;
+		y = 0.0;
+		z = 0.0;
+	}
 };
 
 #endif // FORCE_H

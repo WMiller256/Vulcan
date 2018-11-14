@@ -22,11 +22,13 @@ int main(int argn, char** argv) {
 	bool verbose;
 	for (int ii = 1; ii < argn; ii ++) {
 		name = argv[ii];
-		if (strcmp(argv[ii], "verbose")) {
+		if (strcmp(argv[ii], "verbose") == 0) {
 			verbose = true;
 		}
 		else if (strcmp(argv[ii], __FILE__) != 0 && 
-			name.find("opt_") == std::string::npos) {
+			name.find("opt_") == std::string::npos &&
+			strcmp(argv[ii], "simio.c++") != 0 &&
+			strcmp(argv[ii], "vec.c++") != 0) {
 			filenames.push_back(argv[ii]);
 		}
 	}

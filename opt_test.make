@@ -4,7 +4,7 @@ MAIN    = test
 ABS		= .
 BIN		= .
 BUILD	= $(ABS)/build
-OPT		= 
+OPT		= opt_
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
@@ -54,7 +54,7 @@ OBJS	= $(BUILD)/$(OPT)$(MAIN).o	\
 all:
 	@printf "[      $(YELLOW)Building $(OPT)$(MAIN)$(WHITE)       ]\n"
 	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make -f test.make build
+	make -f opt_test.make build
 	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 

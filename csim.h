@@ -15,6 +15,8 @@
 
 #ifndef CSIM_H
 #define CSIM_H
+//#define profiling
+#define multhreading
 
 #include <iostream>
 #include <iomanip>
@@ -24,7 +26,10 @@
 #include <string.h>
 #include <vector>
 #include <thread>
+#include <mutex>
 #include <chrono>
+#include <condition_variable>
+#include <atomic>
 #include <limits>
 #include <omp.h>
 
@@ -46,6 +51,13 @@ extern double minradius;
 extern double maxradius;
 extern double blockwidth;		// The width of each hash block
 extern long long cputime;
+extern long long mtxtime;
+extern long long waittime;
+extern long long nCOMcalls;
+extern std::mutex mtx;
+extern std::atomic<int> counter;
+extern std::condition_variable cv;
+extern bool ready;
 
 class CBody;			// Forward declared for use in CSim
 
@@ -70,11 +82,13 @@ public:
 
 	void addBody(CBody* body);
 	CBody* at(int ii);
+	CBody copy(int ii);
 	void step();
-	Force* force(CBody* body);
+	void force(CBody* body);
+	Force force(CBody body);
 
 	void printForces();
-	void writeConfiguration(const std::string& filename);
+	void writeConfiguration(const std::string& filename, bool overwrite = false);
 	CSim* readConfiguration(const std::string& filename);
 
 	double H();
@@ -128,7 +142,6 @@ public:
 	void setParent(CBody* Parent);
 	CBody* getParent();
 
-	Pos pos();
 	double Mass();
 	double Radius();
 	double Speed();
@@ -137,11 +150,18 @@ public:
 	void Position(vec v);
 	double originDist();
 	Pos COM(CBody* target);
+	Pos COM(CBody target);
 	double distance(CBody* target);			// Calculate the distance to the target (CBody)
-	double distance(Pos pos);				// Calculate the distance to the target (Pos)
+	double distance(CBody target) const;
+	double distance(Pos* pos);				// Calculate the distance to the target (Pos)
 
 	std::string writeFormat(format f = text); 		// Defined in simio.c++
 	std::string info();
+	Force net;					// The net force acting on the body
+	Pos pos;
+
+	bool operator != (CBody r) const;
+	bool operator == (CBody r) const;
 
 private:
 	CBody* parent;				// Parent, i.e. the body that is being orbited
@@ -162,6 +182,6 @@ private:
 
 void sim(Hash* bodies, double tMax, threadmode t = threadmode::single);
 void simulate(Hash* h, CBody* body, double t);
-void man_simulate(CSim* tsim, int* data_pipe, int ii, int bytes, double* t, double* max);
+void man_simulate(CSim* tsim, int* data_pipe, int* ping, int ii, double* t, double* max);
 void simulate(CSim* sim, double end);
 #endif // HASH_H

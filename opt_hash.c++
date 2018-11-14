@@ -80,7 +80,7 @@ void Hash::addNode(CBody* body) {
 				table[ii] -> next = table[kk];
 			}
 			else {
-				error("Hash indexing failure - line "+cyan+"%d"+res+" in file "+cyan+"%s"+res, __LINE__, __FILE__);
+//				error("Hash indexing failure - line "+cyan+"%d"+res+" in file "+cyan+"%s"+res, __LINE__, __FILE__);//				error("Hash indexing failure - line "+cyan+"%d"+res+" in file "+cyan+"%s"+res, __LINE__, __FILE__);
 			}
 		}
 	}
@@ -187,7 +187,7 @@ void Hash::sim(double end) {
 		}
 	}
 	else {
-		error("{h} not defined, cannot simulate.", __LINE__, __FILE__);
+//		error("{h} not defined, cannot simulate.", __LINE__, __FILE__);//		error("{h} not defined, cannot simulate.", __LINE__, __FILE__);
 	}
 }
 

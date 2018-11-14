@@ -19,8 +19,10 @@ class Pos : public vec
 public:
 	Pos();
 	Pos(double X, double Y, double Z);
+	Pos(vec v);
 
 	double originDist();
+	vec direction(Pos* target);
 	vec direction(Pos target);
 
 private:

@@ -4,11 +4,18 @@
 bool warnings = true;
 int nthreads = 8;
 int debug = 0;
-int nbodies = 8;
+int nbodies = 9;
 double minradius = std::numeric_limits<double>::infinity();
 double maxradius = 0;
 double blockwidth;
 long long cputime = 0;
+long long mtxtime = 0;
+long long waittime = 0;
+long long nCOMcalls = 0;
+std::mutex mtx;
+std::atomic<int> counter = 0;
+bool ready = true;
+std::condition_variable cv;
 
 CSim::CSim() {
 	init();
@@ -66,8 +73,16 @@ CBody* CSim::at(int ii) {
 #ifndef using_hash
 	return bodies[ii];
 #else
-	error("Function "+in("CSim","at")+" is invalid when using (Hash) table.", __LINE__, __FILE__);
-	return -1;
+//	error("Function "+in("CSim","at")+" is invalid when using (Hash) table.", __LINE__, __FILE__);//	error("Function "+in("CSim","at")+" is invalid when using (Hash) table.", __LINE__, __FILE__);
+	return NULL;
+#endif
+}
+CBody CSim::copy(int ii) {
+#ifndef using_hash
+	return *bodies[ii];
+#else
+//	error("Function "+in("CSim","copy")+" is invalid when using (Hash) table.", __LINE__, __FILE__);//	error("Function "+in("CSim","copy")+" is invalid when using (Hash) table.", __LINE__, __FILE__);
+	return NULL;
 #endif
 }
 void CSim::step() {
@@ -77,30 +92,43 @@ void CSim::step() {
 	CBody* body;
 	for (int ii = 0; ii < nadded; ii ++) {
 		body = bodies[ii];
-		body -> Position(body -> Velocity(*force(body) / body -> Mass() * h) * h);
+		force(body);
+		body -> Position(body -> Velocity(body -> net / body -> Mass() * h) * h);
 	}
 #endif
 }
-Force* CSim::force(CBody* body) {
+void CSim::force(CBody* body) {
 //	println(in("CSim", "force")+"    Calculating net force", 5);//	println(in("CSim", "force")+"    Calculating net force", 5);
-	Force* net = new Force();
-	CBody* target = NULL;
+	body -> net.zero() ;
 	double fmagnitude;
-	vec dir;
-	vec v;
 	for (int ii = 0; ii < nadded; ii ++) {
-		target = bodies[ii];
-		if (target != NULL && target != body) {
-//			printrln("\n"+in("CSim", "force")+"    Target: ", body -> Name(), 5); //			printrln("\n"+in("CSim", "force")+"    Target: ", body -> Name(), 5); 
-			fmagnitude = (G * body -> Mass() * target -> Mass()) / pow(target -> distance(body), 2);
-			dir = body -> pos().direction(body -> COM(target));
-			v = dir * fmagnitude;
-			*net += v;
+		if (bodies[ii] != NULL) {
+			if (bodies[ii] != body) {
+//				printrln("\n"+in("CSim", "force")+"    Target: ", body -> Name(), 5); //				printrln("\n"+in("CSim", "force")+"    Target: ", body -> Name(), 5); 
+				fmagnitude = (G * body -> Mass() * bodies[ii] -> Mass()) / pow(bodies[ii] -> distance(body), 2);
+				body -> net += body -> pos.direction(bodies[ii] -> pos) * fmagnitude;
 
-//			printrln(in("CSim", "force")+"    Magnitude of force between "+body -> Name()+" and "+//				target -> Name()+" is ", scientific(fmagnitude), 4);//				target -> Name()+" is ", scientific(fmagnitude), 4);
-//			printrln(in("CSim", "force")+"    Direction of force between "+body -> Name()+" and "+//				target -> Name()+" is ", dir.info(), 4);//				target -> Name()+" is ", dir.info(), 4);
-//			printrln(in("CSim", "force")+"    Force vector between "+body -> Name()+" and "+//				target -> Name()+" is ", v.info(), 4);//				target -> Name()+" is ", v.info(), 4);
-//			printrln(in("CSim", "force")+"    Net force vector on "+body -> Name()+" is ", net -> info(), 4);//			printrln(in("CSim", "force")+"    Net force vector on "+body -> Name()+" is ", net -> info(), 4);
+//				printrln(in("CSim", "force")+"    Magnitude of force between "+body -> Name()+" and "+//					bodies[ii] -> Name()+" is ", scientific(fmagnitude), 4);//					bodies[ii] -> Name()+" is ", scientific(fmagnitude), 4);
+//				printrln(in("CSim", "force")+"    Net force vector on "+body -> Name()+" is ", body -> net.info(), 4);//				printrln(in("CSim", "force")+"    Net force vector on "+body -> Name()+" is ", body -> net.info(), 4);
+			}
+		}
+	}
+//	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	//	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	
+}
+Force CSim::force(CBody body) {
+//	println(in("CSim", "force")+"    Calculating net force", 5);//	println(in("CSim", "force")+"    Calculating net force", 5);
+	Force net(0,0,0);
+	double fmagnitude;
+	for (int ii = 0; ii < nadded; ii ++) {
+		if (bodies[ii] != NULL) {
+			if (*bodies[ii] != body) {
+//				printrln("\n"+in("CSim", "force")+"    Target: ", body.Name(), 5); //				printrln("\n"+in("CSim", "force")+"    Target: ", body.Name(), 5); 
+				fmagnitude = (G * body.Mass() * bodies[ii] -> Mass()) / pow(bodies[ii] -> distance(body), 2);
+				net += body.pos.direction(bodies[ii] -> pos) * fmagnitude;
+
+//				printrln(in("CSim", "force")+"    Magnitude of force between "+body.Name()+" and "+//					bodies[ii] -> Name()+" is ", scientific(fmagnitude), 4);//					bodies[ii] -> Name()+" is ", scientific(fmagnitude), 4);
+//				printrln(in("CSim", "force")+"    Net force vector on "+body.Name()+" is ", net.info(), 4);//				printrln(in("CSim", "force")+"    Net force vector on "+body.Name()+" is ", net.info(), 4);
+			}
 		}
 	}
 //	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	//	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	
@@ -112,12 +140,12 @@ void CSim::printForces() {
 	bodies -> printForces();
 #endif
 }
-void CSim::writeConfiguration(const std::string& filename) {
+void CSim::writeConfiguration(const std::string& filename, bool overwrite) {
 #ifdef using_hash
 	bodies -> write(filename);
 #else
 	std::ofstream out;
-	if (exists(filename)) {
+	if (exists(filename) && overwrite == false) {
 		if (!prompt("File exists, overwrite? (y|n) ")) {
 //			println("File will not be overwritten, exiting "+cyan+"CSim"+yellow+"::"+bright+white+"writeConfiguration"+res);//			println("File will not be overwritten, exiting "+cyan+"CSim"+yellow+"::"+bright+white+"writeConfiguration"+res);
 			return;
@@ -128,7 +156,7 @@ void CSim::writeConfiguration(const std::string& filename) {
 	}
 //	print("Writing file "+yellow+filename+res+"... ");//	print("Writing file "+yellow+filename+res+"... ");
 	out.open(filename);
-	out << nadded << "\n" << minradius << "\n" << maxradius << "\n";
+	out << nadded - 1 << "\n" << minradius << "\n" << maxradius << "\n";
 	CBody* current;
 	for (int ii = 0; ii < nadded; ii ++) {
 		current = bodies[ii];
@@ -136,7 +164,7 @@ void CSim::writeConfiguration(const std::string& filename) {
 			out << current -> writeFormat();
 		}
 		else {
-			error("Body "+std::to_string(ii)+" was "+bright+red+"NULL"+res+" - skipping.", __LINE__, __FILE__);
+//			error("Body "+std::to_string(ii)+" was "+bright+red+"NULL"+res+" - skipping.", __LINE__, __FILE__);//			error("Body "+std::to_string(ii)+" was "+bright+red+"NULL"+res+" - skipping.", __LINE__, __FILE__);
 		}
 	}
 //	println(green+"done"+res);//	println(green+"done"+res);
@@ -149,7 +177,7 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 	return NULL;
 #else
 	if (!exists(filename)) {
-		error("File "+yellow+filename+res+" does not exist.",__LINE__,__FILE__);
+//		error("File "+yellow+filename+res+" does not exist.",__LINE__,__FILE__);//		error("File "+yellow+filename+res+" does not exist.",__LINE__,__FILE__);
 		return NULL;
 	}
 //	print("Reading file "+yellow+filename+res+"... ");//	print("Reading file "+yellow+filename+res+"... ");
@@ -269,48 +297,46 @@ void sim(Hash* bodies, double tMax, threadmode t) {
 			break;
 	}
 #else
-	error("Function "+in("","sim(Hash, double, threadmode)")+" is invalid when not using hash table.", __LINE__, __FILE__);
+//	error("Function "+in("","sim(Hash, double, threadmode)")+" is invalid when not using hash table.", __LINE__, __FILE__);//	error("Function "+in("","sim(Hash, double, threadmode)")+" is invalid when not using hash table.", __LINE__, __FILE__);
 #endif
 }
 void CSim::sim(threadmode t) {
+	std::cout << " Starting simulation " << std::endl;
 #ifdef using_hash
-	error("Function "+in("","sim(CSim*, double, threadmode)")+" is invalid when using hash table. Use "+in("","sim(Hash*, double, threadmode)")+" instead", __LINE__, __FILE__);
+//	error("Function "+in("","sim(CSim*, double, threadmode)")+" is invalid when using hash table. Use "+in("","sim(Hash*, double, threadmode)")+" instead", __LINE__, __FILE__);//	error("Function "+in("","sim(CSim*, double, threadmode)")+" is invalid when using hash table. Use "+in("","sim(Hash*, double, threadmode)")+" instead", __LINE__, __FILE__);
 #else
 	switch(t) {
 		case single:
 			simulate(this, tMax);
 			break;
 		case manual:
-			if (nadded - 1 < nthreads) {
-				nthreads = nadded - 1;
+			if (nadded < nthreads) {
+				nthreads = nadded;
 			}
 			int data_pipe[2];
+			int ping[2];
 			pipe(data_pipe);
-			int bytes = sizeof(rpos*);
+			pipe(ping);
 			double* t = &tCurr;
 			double* max = &tMax;
 			vec pos[nthreads];
-			std::cout << "{bytes} " << bytes << std::endl;
-			std::cout << "Using " << nthreads << " threads" << std::endl;
+			std::cout << " Using " << nthreads << " threads" << std::endl;
 			std::thread threads[nthreads];
 			for (int ii = 0; ii < nthreads; ii ++) {
-				threads[ii] = std::thread(man_simulate, this, data_pipe, ii, bytes, t, max);
+				threads[ii] = std::thread(man_simulate, this, data_pipe, ping, ii, t, max);
 //				println("Thread "+std::to_string(ii+1)+" initialized.");//				println("Thread "+std::to_string(ii+1)+" initialized.");
 			}
 			if (h > 0.0) {
-				rpos* p = new rpos();
-				int n = 0;
-				while (tCurr < tMax) {
-					n = 0;
-					while (n++ != nthreads) {
-						read(data_pipe[0], p, bytes);
-						tCurr += h;
-					} 
+				while (tCurr < tMax) {					
+					counter = nthreads;
+					tCurr += h;
+					while (counter > 0) {
+						std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+					}
 				}
-				delete p;
 			}
 			else {
-				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);
+//				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);//				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);
 			}
 			for (int ii = 0; ii < nthreads; ii ++) {
 				threads[ii].join();
@@ -327,19 +353,59 @@ void simulate(Hash* bodies, CBody* body, double t) {
 	error ("Funtion "+in("", "simulate(Hash*, CBody*, double)")+" is invalid when not using hash table. Use "+in("", "simulate(CSim*, CBody*, double)")+" instead", __LINE__, __FILE__);
 #endif
 }
-void man_simulate(CSim* sim, int* data_pipe, int ii, int bytes, double* tCurr, double* tMax) {
+void man_simulate(CSim* sim, int* data_pipe, int* ping, int ii, double* tCurr, double* tMax) {
 #ifdef using_hash
 	error ("Funtion "+in("", "simulate(CSim*, CBody*, double)")+" is invalid when using hash table. Use "+in("", "simulate(Hash*, CBody*, double)")+" instead", __LINE__, __FILE__);
 #else
 //	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 5);//	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 5);
-	CBody* body = sim -> at(ii);
-	rpos* p = new rpos();
+	CBody* body;
+	//rpos* p = new rpos;
 	double h = sim -> H();
+	int test = 0;
+	int* complete = new int(0);
+	std::mutex m;
+	int time;
+	while (*tCurr == 0) {
+		std::this_thread::sleep_for(std::chrono::nanoseconds(10));
+	}
+	std::cout << std::to_string(ii)+" Starting "+std::to_string(*tCurr)+" "+std::to_string(*tMax)+"\n";
 	while (*tCurr < *tMax) {
+		time = *tCurr;
+#ifdef profiling
 		auto start = std::chrono::high_resolution_clock::now();
-		*p = rpos(body -> Velocity(*sim -> force(body) / body -> Mass() * h) * h, ii);
+#endif
+		body = sim -> at(ii);
+		// This needs to be switched off for non-debugging mode
+		Pos p = body -> pos;
+		vec a = sim -> force(*body) / body -> Mass();
+		vec v = body -> Velocity();
+		body -> Position(body -> pos + v * h + a * h * h * 0.5);
+		body -> Velocity(v + a * h);
+		//*p = rpos(body -> Velocity(body -> net / body -> Mass() * h) * h, ii);
+#ifdef profiling
 		cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
-		write(data_pipe[1], p, bytes);
+#endif
+//		printrln(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);//		printrln(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);
+//		printrln(in("", "man_Simulate")+"       Previous posiiton for {"+cyan+body -> Name()+res+"} is ", p.info(3), 4);//		printrln(in("", "man_Simulate")+"       Previous posiiton for {"+cyan+body -> Name()+res+"} is ", p.info(3), 4);
+//		printrln(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);//		printrln(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);
+//		auto mtxstart = std::chrono::high_resolution_clock::now();
+		counter--;
+//		mtxtime += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - mtxstart).count();		
+
+		auto waitstart = std::chrono::high_resolution_clock::now();		
+		while (time == *tCurr) {
+			std::this_thread::sleep_for(std::chrono::nanoseconds(5));
+			if (*tCurr == *tMax) {
+				std::cout << std::to_string(ii)+" Quitting, {*tCurr} - "+std::to_string(*tCurr)+" {*tMax} "+std::to_string(*tMax)+"\n";
+				break;
+			}
+		}
+		waittime += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - waitstart).count();
+	}
+	if (counter != 0) {
+		mtx.lock();
+		counter = 0;
+		mtx.unlock();
 	}
 //	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 5);//	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 5);
 #endif
@@ -357,15 +423,26 @@ void simulate(CSim* sim, double end) {
 		while (t < end) {
 			for (int ii = 0; ii < nbodies; ii ++) {
 				body = sim -> at(ii);
+#ifdef profiling
 				auto start = std::chrono::high_resolution_clock::now();
-				body -> Position(body -> Velocity(*sim -> force(body) / body -> Mass() * h) * h);
+#endif
+				Pos p = body -> pos;
+				vec a = sim -> force(*body) / body -> Mass();
+				vec v = body -> Velocity();
+				body -> Position(body -> pos + v * h + a * h * h * 0.5);
+				body -> Velocity(v + a * h);
+#ifdef profiling
 				cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
+#endif
+//				printrln(in("", "simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);//				printrln(in("", "simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);
+//				printrln(in("", "Simulate")+"       Previous posiiton for {"+cyan+body -> Name()+res+"} is ", p.info(3), 4);//				printrln(in("", "Simulate")+"       Previous posiiton for {"+cyan+body -> Name()+res+"} is ", p.info(3), 4);
+//				printrln(in("", "Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);//				printrln(in("", "Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);
 				t += h;
 			}
 		}
 	}
 	else {
-		error("{h} was less than or equal to zero. Cannot simulate",__LINE__,__FILE__);
+//		error("{h} was less than or equal to zero. Cannot simulate",__LINE__,__FILE__);//		error("{h} was less than or equal to zero. Cannot simulate",__LINE__,__FILE__);
 		return;
 	}
 //	printrln(in("", "simulate(CSim*, double)"), green+"Complete"+res, 5);//	printrln(in("", "simulate(CSim*, double)"), green+"Complete"+res, 5);

@@ -27,6 +27,9 @@ std::string scientific(double d, int precision) {
 	if (d == std::numeric_limits<double>::infinity()) {
 		return magenta+"inf"+res;
 	}
+	if (isnan(d)) {
+		return magenta+"nan"+res;
+	}
 	if (fabs(d) <= 1.0e-9) {
 		d = 0.0;
 	}
@@ -76,7 +79,7 @@ std::string scientific(double d, int precision) {
 		int dec = str.find(".");
 		while (str[dec++] == '0') {
 			if (dec+1 == str.length()) {
-				warning(" Failed to format given number in scientific notation", __LINE__, __FILE__);
+//				warning(" Failed to format given number in scientific notation", __LINE__, __FILE__);//				warning(" Failed to format given number in scientific notation", __LINE__, __FILE__);
 				break;
 			}
 		}
@@ -120,7 +123,7 @@ std::string stripcolors(const std::string& str) {
 		}
 		else {
 			std::cout << s << std::endl;
-			warning("Escape character with no color terminator, output formatting may fail", __LINE__, __FILE__);
+//			warning("Escape character with no color terminator, output formatting may fail", __LINE__, __FILE__);//			warning("Escape character with no color terminator, output formatting may fail", __LINE__, __FILE__);
 			exit(1);
 			break;
 		}

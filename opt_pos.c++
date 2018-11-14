@@ -6,9 +6,11 @@ Pos::Pos() : vec() {
 }
 Pos::Pos(double X, double Y, double Z) : vec(X, Y, Z) {
 }
+Pos::Pos(vec v) : vec(v) {
+}
 
 double Pos::originDist() {
-	double dist = sqrt(pow(X(),2) + pow(Y(),2) + pow(Z(),2));
+	double dist = sqrt(pow(x,2) + pow(y,2) + pow(z,2));
 //	printrln(in("Pos", "originDist")+"  "+info(), scientific(dist), 4);//	printrln(in("Pos", "originDist")+"  "+info(), scientific(dist), 4);
 	if (dist < minradius) {
 		minradius = dist;
@@ -30,10 +32,15 @@ double Pos::originDist() {
 
 	return dist;
 }
+vec Pos::direction(Pos* target) {
+	vec v(target -> x - x, target -> y - y, target -> z - z);
+	v = v / magnitude(v);
+//	printrln(in("Pos","direction")+" {"+green+"target"+res+"} - "+target -> info(2)+" to {"+green+"this"+res+"} - "+info(2), v.info(2), 4);//	printrln(in("Pos","direction")+" {"+green+"target"+res+"} - "+target -> info(2)+" to {"+green+"this"+res+"} - "+info(2), v.info(2), 4);
+	return v;
+}
 vec Pos::direction(Pos target) {
-	vec v(target.X() - X(), target.Y() - Y(), target.Z() - Z());
-	double m = magnitude(v);
-	v = v / m;
+	vec v(target.x - x, target.y - y, target.z - z);
+	v = v / magnitude(v);
 //	printrln(in("Pos","direction")+" {"+green+"target"+res+"} - "+target.info(2)+" to {"+green+"this"+res+"} - "+info(2), v.info(2), 4);//	printrln(in("Pos","direction")+" {"+green+"target"+res+"} - "+target.info(2)+" to {"+green+"this"+res+"} - "+info(2), v.info(2), 4);
 	return v;
 }

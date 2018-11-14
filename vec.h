@@ -24,24 +24,20 @@ public:
 	vec(double X, double Y, double Z);
 	vec( vec* v);
 
-	double X();
-	double Y();
-	double Z();
-	void setX(double X);
-	void setY(double Y);
-	void setZ(double Z);
-
-	std::string info(int precision = 5);
-
-	bool operator == (vec r) const;
-	vec operator / (double scalar);
-	vec operator * (double scalar);
-	vec operator += (vec r);
-
-private:
 	double x;
 	double y;
 	double z;
+
+	std::string info(int precision = 5) const;
+
+	bool operator != (vec r) const;
+	bool operator == (vec r) const;
+	vec operator / (double scalar);
+	vec operator * (double scalar);
+	vec operator + (vec const &r);
+	void operator += (vec const &r);
+
+private:
 	
 	void init();
 

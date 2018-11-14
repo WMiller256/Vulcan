@@ -27,6 +27,9 @@ std::string scientific(double d, int precision) {
 	if (d == std::numeric_limits<double>::infinity()) {
 		return magenta+"inf"+res;
 	}
+	if (isnan(d)) {
+		return magenta+"nan"+res;
+	}
 	if (fabs(d) <= 1.0e-9) {
 		d = 0.0;
 	}

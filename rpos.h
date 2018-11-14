@@ -22,7 +22,6 @@ public:
 	rpos();
 	rpos(vec p, int index);
 
-private:
 	int idx;
 };
 
