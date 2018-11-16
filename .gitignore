@@ -2,6 +2,8 @@
 #Ignore test code
 SIMscaling.c++
 SIMscaling.exe
+opt_SIMscaling.*
+opt_test.exe
 test.exe
 test.txt
 build/test.o
@@ -9,7 +11,7 @@ execute.sh
 
 #Ignore test outputs
 *.txt
-*.out
+*.out*
 
 #ignore binaries
 bin/*
