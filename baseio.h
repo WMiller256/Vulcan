@@ -14,7 +14,9 @@
 #define BASEIO_H
 
 #include <string>
+#include <sstream>
 #include <iostream>
+#include <iomanip>
 #include <math.h>
 
 #include "colors.h"

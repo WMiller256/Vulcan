@@ -24,6 +24,7 @@
 #include "colors.h"
 #include <math.h>
 #include <string.h>
+#include <sstream>
 #include <vector>
 #include <thread>
 #include <mutex>
@@ -54,10 +55,7 @@ extern long long cputime;
 extern long long mtxtime;
 extern long long waittime;
 extern long long nCOMcalls;
-extern std::mutex mtx;
-extern std::atomic<int> counter;
-extern std::condition_variable cv;
-extern bool ready;
+extern double cofactor;
 
 class CBody;			// Forward declared for use in CSim
 
@@ -147,6 +145,7 @@ public:
 	double Speed();
 	vec Velocity(vec v);
 	Vel Velocity();
+	vec accelerate(vec a);					// Update the velocity to reflect a given acceleration over given time
 	void Position(vec v);
 	double originDist();
 	Pos COM(CBody* target);
@@ -182,6 +181,6 @@ private:
 
 void sim(Hash* bodies, double tMax, threadmode t = threadmode::single);
 void simulate(Hash* h, CBody* body, double t);
-void man_simulate(CSim* tsim, int* data_pipe, int* ping, int ii, double* t, double* max);
+void man_simulate(CSim* tsim, int* data_pipe, int* ping, int ii, double* simTime);
 void simulate(CSim* sim, double end);
 #endif // HASH_H

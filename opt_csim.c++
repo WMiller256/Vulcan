@@ -12,10 +12,8 @@ long long cputime = 0;
 long long mtxtime = 0;
 long long waittime = 0;
 long long nCOMcalls = 0;
-std::mutex mtx;
-std::atomic<int> counter = 0;
-bool ready = true;
-std::condition_variable cv;
+double cofactor = 10000;
+double maxTime = 0;
 
 CSim::CSim() {
 	init();
@@ -46,6 +44,7 @@ CSim::CSim(int n, double max, double step) {
 	nbodies = n;
 	h = step;
 	tMax = max;
+	maxTime = max;
 #ifdef using_hash
 	bodies = new Hash(n, h);
 #else 
@@ -317,22 +316,19 @@ void CSim::sim(threadmode t) {
 			int ping[2];
 			pipe(data_pipe);
 			pipe(ping);
-			double* t = &tCurr;
-			double* max = &tMax;
-			vec pos[nthreads];
+			double* time = new double(0);
 			std::cout << " Using " << nthreads << " threads" << std::endl;
 			std::thread threads[nthreads];
 			for (int ii = 0; ii < nthreads; ii ++) {
-				threads[ii] = std::thread(man_simulate, this, data_pipe, ping, ii, t, max);
+				threads[ii] = std::thread(man_simulate, this, data_pipe, ping, ii, time);
 //				println("Thread "+std::to_string(ii+1)+" initialized.");//				println("Thread "+std::to_string(ii+1)+" initialized.");
 			}
 			if (h > 0.0) {
-				while (tCurr < tMax) {					
-					counter = nthreads;
-					tCurr += h;
-					while (counter > 0) {
-						std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-					}
+				int wait;
+				while (*time < maxTime) {
+					wait = 0;
+					*time += h;
+					while (wait++ < 5){}
 				}
 			}
 			else {
@@ -353,59 +349,38 @@ void simulate(Hash* bodies, CBody* body, double t) {
 	error ("Funtion "+in("", "simulate(Hash*, CBody*, double)")+" is invalid when not using hash table. Use "+in("", "simulate(CSim*, CBody*, double)")+" instead", __LINE__, __FILE__);
 #endif
 }
-void man_simulate(CSim* sim, int* data_pipe, int* ping, int ii, double* tCurr, double* tMax) {
+void man_simulate(CSim* sim, int* data_pipe, int* ping, int ii, double* simTime) {
 #ifdef using_hash
 	error ("Funtion "+in("", "simulate(CSim*, CBody*, double)")+" is invalid when using hash table. Use "+in("", "simulate(Hash*, CBody*, double)")+" instead", __LINE__, __FILE__);
 #else
 //	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 5);//	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 5);
 	CBody* body;
 	//rpos* p = new rpos;
-	double h = sim -> H();
-	int test = 0;
-	int* complete = new int(0);
-	std::mutex m;
-	int time;
-	while (*tCurr == 0) {
-		std::this_thread::sleep_for(std::chrono::nanoseconds(10));
-	}
-	std::cout << std::to_string(ii)+" Starting "+std::to_string(*tCurr)+" "+std::to_string(*tMax)+"\n";
-	while (*tCurr < *tMax) {
-		time = *tCurr;
+	double H = sim -> H();
+	double h;
+	body = sim -> at(ii);
+	std::string name = body -> Name();
+	vec v;
+	vec a;
+	double time = *simTime;
+	double prev = time;
+	while (time < maxTime) {
 #ifdef profiling
 		auto start = std::chrono::high_resolution_clock::now();
 #endif
-		body = sim -> at(ii);
-		// This needs to be switched off for non-debugging mode
-		Pos p = body -> pos;
-		vec a = sim -> force(*body) / body -> Mass();
-		vec v = body -> Velocity();
-		body -> Position(body -> pos + v * h + a * h * h * 0.5);
-		body -> Velocity(v + a * h);
-		//*p = rpos(body -> Velocity(body -> net / body -> Mass() * h) * h, ii);
+		time = *simTime;
+		h = (time - prev);
+		prev = time;
+		a = sim -> force(*body) / body -> Mass();
+		//if (ii == 0) {
+		//	std::cout << body -> Name()+a.info()+" "+std::to_string(h)+"\n";
+		//}		
+		v = body -> accelerate(a * h); body -> Position(body -> pos + v * h + a * h * h * 0.5);
 #ifdef profiling
 		cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif
 //		printrln(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);//		printrln(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);
-//		printrln(in("", "man_Simulate")+"       Previous posiiton for {"+cyan+body -> Name()+res+"} is ", p.info(3), 4);//		printrln(in("", "man_Simulate")+"       Previous posiiton for {"+cyan+body -> Name()+res+"} is ", p.info(3), 4);
 //		printrln(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);//		printrln(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);
-//		auto mtxstart = std::chrono::high_resolution_clock::now();
-		counter--;
-//		mtxtime += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - mtxstart).count();		
-
-		auto waitstart = std::chrono::high_resolution_clock::now();		
-		while (time == *tCurr) {
-			std::this_thread::sleep_for(std::chrono::nanoseconds(5));
-			if (*tCurr == *tMax) {
-				std::cout << std::to_string(ii)+" Quitting, {*tCurr} - "+std::to_string(*tCurr)+" {*tMax} "+std::to_string(*tMax)+"\n";
-				break;
-			}
-		}
-		waittime += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - waitstart).count();
-	}
-	if (counter != 0) {
-		mtx.lock();
-		counter = 0;
-		mtx.unlock();
 	}
 //	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 5);//	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 5);
 #endif
@@ -419,26 +394,30 @@ void simulate(CSim* sim, double end) {
 	double h = sim -> H();
 	nbodies = sim -> count();
 	CBody* body;
+	vec a;
+	vec v;
+	CBody** bodies = new CBody*[nbodies];
+	for (int ii = 0; ii < nbodies; ii ++) {
+		bodies[ii] = sim -> at(ii);
+	}
 	if (h > 0.0) {
 		while (t < end) {
 			for (int ii = 0; ii < nbodies; ii ++) {
-				body = sim -> at(ii);
+				body = bodies[ii];
 #ifdef profiling
 				auto start = std::chrono::high_resolution_clock::now();
 #endif
-				Pos p = body -> pos;
-				vec a = sim -> force(*body) / body -> Mass();
-				vec v = body -> Velocity();
+				a = sim -> force(*body) / body -> Mass();
+				v = body -> accelerate(a * h);
 				body -> Position(body -> pos + v * h + a * h * h * 0.5);
-				body -> Velocity(v + a * h);
 #ifdef profiling
 				cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif
 //				printrln(in("", "simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);//				printrln(in("", "simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);
 //				printrln(in("", "Simulate")+"       Previous posiiton for {"+cyan+body -> Name()+res+"} is ", p.info(3), 4);//				printrln(in("", "Simulate")+"       Previous posiiton for {"+cyan+body -> Name()+res+"} is ", p.info(3), 4);
 //				printrln(in("", "Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);//				printrln(in("", "Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);
-				t += h;
 			}
+			t += h;
 		}
 	}
 	else {

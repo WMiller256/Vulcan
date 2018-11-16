@@ -126,34 +126,13 @@ Hash* readfile(const std::string& filename) {
 
 std::string CBody::writeFormat(format f) {
 	std::string formatted;
-	std::string xs;
-	std::string ys;
-	std::string zs;
-	if (isnan(x)) {
-		xs = "nan";
-	}
-	else {
-		xs = std::to_string(x);
-	}
-	if (isnan(y)) {
-		ys = "nan";
-	}
-	else {
-		ys = std::to_string(y);
-	}
-	if (isnan(z)) {
-		zs = "nan";
-	}
-	else {
-		zs = std::to_string(z);
-	}
 	switch(f) {
 		case text:
 			formatted.append("Body - "+Name()+"\n");
-			formatted.append("\t Position ("+xs+", "+ys+", "+zs+")\n");
-			formatted.append("\t Radius   "+std::to_string(radius)+"\n");
-			formatted.append("\t Mass     "+std::to_string(mass)+"\n");
-			formatted.append("\t Speed    "+std::to_string(speed)+"\n\n");
+			formatted.append("   Position "+scientific(x,3)+" "+scientific(y,3)+" "+scientific(z,3)+"\n");
+			formatted.append("   Radius   "+scientific(radius)+"\n");
+			formatted.append("   Mass     "+scientific(mass)+"\n");
+			formatted.append("   Velocity "+scientific(xv,3)+" "+scientific(yv,3)+" "+scientific(zv,3)+"\n\n");
 			break;
 	}
 	print("--------- "+cyan+"Writestream "+res+"--------- \n"+formatted+"------------------------------- \n", 2);

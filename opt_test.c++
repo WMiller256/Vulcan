@@ -65,7 +65,7 @@ int main(int argn, char** argv) {
 	tsim -> addBody(jupiter);
 	tsim -> addBody(saturn);
 	tsim -> addBody(uranus);
-	tsim -> addBody(neptune);
+	//tsim -> addBody(neptune);
 
 	std::cout << green << " Initialization complete. " << res << std::endl;
 

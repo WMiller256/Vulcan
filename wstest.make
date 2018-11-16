@@ -9,12 +9,12 @@ RM      = /bin/rm -f
 MV		= /bin/mv -f
 
 LFLAGS	= -Wl,-rpath,/usr/bin/g++
-LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -lstdc++fs
+LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -L/lib/x86_64-linux-gnu/ -lstdc++fs
 LIBS	= -lboost_program_options -lncurses
 
 INC		= -I /usr/lib/boost/
 CFLAGS	= -Wno-deprecated-declarations -fopenmp -std=c++17 -O3
-CC      = /usr/bin/g++ $(CFLAGS) $(INC) $(LIBS) 
+CC      = /usr/bin/g++ $(CFLAGS) $(INC) $(LIBDIRS) $(LIBS) 
 
 #Output coloring
 GREEN   = \033[1;32m
