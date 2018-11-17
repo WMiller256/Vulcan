@@ -5,6 +5,7 @@
 int main(int argn, char** argv) {
 	double t;
 	double h;
+	std::string extension;
 	threadmode thread = threadmode::single;
 	
 	if (argn > 1) {
@@ -33,12 +34,18 @@ int main(int argn, char** argv) {
 	else {
 		nthreads = 1;
 	}
+	if (argn > 5) {
+		extension = std::string(argv[5]);
+	}
+	else {
+		extension = "";
+	}
 	std::cout << t << " " << h << std::endl;
 
 	CSim* tsim = new CSim(8, t, h);
-	tsim -> setDebug(5);
+	tsim -> setDebug(1);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0);
-	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e3, 0.0, 6.98169e11, 0.0);
+	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e3, 0.0, 6.98169e10, 0.0);
 	CBody* venus = new CBody(4.8675e24, 6.0518e6, 3.502e3, 0.0, 1.08939e11, 0.0);
 	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e3, 0.0, 1.521e11, 0.0);
 	CBody* mars = new CBody(6.4171e23, 3.3895e6, 2.4007e3, 0.0, 2.492e11, 0.0);
@@ -65,7 +72,7 @@ int main(int argn, char** argv) {
 	tsim -> addBody(jupiter);
 	tsim -> addBody(saturn);
 	tsim -> addBody(uranus);
-	//tsim -> addBody(neptune);
+	tsim -> addBody(neptune);
 
 	std::cout << green << " Initialization complete. " << res << std::endl;
 
@@ -84,10 +91,10 @@ int main(int argn, char** argv) {
 	std::cout << "Wait time:           " << bright+magenta << waittime / 1000 / nthreads<< res << std::endl;
 	std::cout << "Total time:          " << bright+magenta << microseconds << res << std::endl;
 	if (thread == threadmode::manual) {
-		tsim -> writeConfiguration("explicit-test.txt");
+		tsim -> writeConfiguration("explicit-test."+extension+".txt");
 	}
 	else {
-		tsim -> writeConfiguration("single-test.txt");
+		tsim -> writeConfiguration("single-test."+extension+".txt");
 	}
 	
 }

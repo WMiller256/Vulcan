@@ -5,6 +5,7 @@
 int main(int argn, char** argv) {
 	double t;
 	double h;
+	std::string extension;
 	threadmode thread = threadmode::single;
 	
 	if (argn > 1) {
@@ -32,6 +33,12 @@ int main(int argn, char** argv) {
 	}
 	else {
 		nthreads = 1;
+	}
+	if (argn > 5) {
+		extension = std::string(argv[5]);
+	}
+	else {
+		extension = "";
 	}
 	std::cout << t << " " << h << std::endl;
 
@@ -65,7 +72,7 @@ int main(int argn, char** argv) {
 	tsim -> addBody(jupiter);
 	tsim -> addBody(saturn);
 	tsim -> addBody(uranus);
-	//tsim -> addBody(neptune);
+	tsim -> addBody(neptune);
 
 	std::cout << green << " Initialization complete. " << res << std::endl;
 
@@ -84,10 +91,10 @@ int main(int argn, char** argv) {
 	std::cout << "Wait time:           " << bright+magenta << waittime / 1000 / nthreads<< res << std::endl;
 	std::cout << "Total time:          " << bright+magenta << microseconds << res << std::endl;
 	if (thread == threadmode::manual) {
-		tsim -> writeConfiguration("explicit-test.txt");
+		tsim -> writeConfiguration("explicit-test."+extension+".txt");
 	}
 	else {
-		tsim -> writeConfiguration("single-test.txt");
+		tsim -> writeConfiguration("single-test."+extension+".txt");
 	}
 	
 }

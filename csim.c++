@@ -14,6 +14,7 @@ long long waittime = 0;
 long long nCOMcalls = 0;
 double cofactor = 10000;
 double maxTime = 0;
+std::atomic<unsigned long long> simTime = 0;
 
 CSim::CSim() {
 	init();
@@ -316,29 +317,33 @@ void CSim::sim(threadmode t) {
 			if (nadded < nthreads) {
 				nthreads = nadded;
 			}
-			int data_pipe[2];
-			int ping[2];
-			pipe(data_pipe);
-			pipe(ping);
-			double* time = new double(0);
 			std::cout << " Using " << nthreads << " threads" << std::endl;
 			std::thread threads[nthreads];
-			for (int ii = 0; ii < nthreads; ii ++) {
-				threads[ii] = std::thread(man_simulate, this, data_pipe, ping, ii, time);
-				println("Thread "+std::to_string(ii+1)+" initialized.");
+			for (int ii = 1; ii < nthreads; ii ++) {
+				threads[ii] = std::thread(man_simulate, this, ii);
+				println("Thread "+std::to_string(ii)+" initialized.");
 			}
-			if (h > 0.0) {
-				int wait;
-				while (*time < maxTime) {
-					wait = 0;
-					*time += h;
-					while (wait++ < 5){}
+			if (h > 0) {
+				//CBody* body = at(0);
+				//vec a;
+				//vec v;
+				//double mass = body -> Mass();
+				while (simTime < maxTime) {
+					simTime += h;
+					println(in("CSim","sim")+"          Sim time - "+std::to_string(simTime),1);
+					/*a = force(*body) / (mass * h);
+					v = body -> accelerate(a); 
+					body -> Position(body -> pos + v * h + a * (h * 0.5));
+					print(in("CSim","sim")+"          {a} - "+a.info(3)+
+						"\n                      {v} - "+v.info(3)+"\n                      {pos} - "+body -> pos.info(3)+"\n", 1);
+					*/
 				}
 			}
 			else {
 				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);
 			}
 			for (int ii = 0; ii < nthreads; ii ++) {
+				std::cout << "Merging "+std::to_string(ii)+"\n";
 				threads[ii].join();
 				std::cout << "Thread " << ii << " finished" << std::endl;
 			}
@@ -353,40 +358,38 @@ void simulate(Hash* bodies, CBody* body, double t) {
 	error ("Funtion "+in("", "simulate(Hash*, CBody*, double)")+" is invalid when not using hash table. Use "+in("", "simulate(CSim*, CBody*, double)")+" instead", __LINE__, __FILE__);
 #endif
 }
-void man_simulate(CSim* sim, int* data_pipe, int* ping, int ii, double* simTime) {
+void man_simulate(CSim* sim, int ii) {
 #ifdef using_hash
 	error ("Funtion "+in("", "simulate(CSim*, CBody*, double)")+" is invalid when using hash table. Use "+in("", "simulate(Hash*, CBody*, double)")+" instead", __LINE__, __FILE__);
 #else
-	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 5);
+	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 1);
 	CBody* body;
 	//rpos* p = new rpos;
-	double H = sim -> H();
-	double h;
 	body = sim -> at(ii);
 	std::string name = body -> Name();
+	int h;
+	int tot = 0;
 	vec v;
 	vec a;
-	double time = *simTime;
+	double mass = body -> Mass();
+	double time = simTime;
 	double prev = time;
-	while (time < maxTime) {
+	while (simTime < maxTime) {
 #ifdef profiling
 		auto start = std::chrono::high_resolution_clock::now();
 #endif
-		time = *simTime;
-		h = (time - prev);
-		prev = time;
-		a = sim -> force(*body) / body -> Mass();
-		//if (ii == 0) {
-		//	std::cout << body -> Name()+a.info()+" "+std::to_string(h)+"\n";
-		//}		
-		v = body -> accelerate(a * h); body -> Position(body -> pos + v * h + a * h * h * 0.5);
+		h = (simTime - prev);
+		prev = simTime;
+		a = sim -> force(*body) / (mass * h);
+		v = body -> accelerate(a); 
+		body -> Position(body -> pos + v * h + a * (h * 0.5));
 #ifdef profiling
 		cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif
-		printrln(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);
-		printrln(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);
+		print(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is "+body -> Velocity().info(3)+"\n", 1);
+		print(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is "+body -> pos.info(3)+"\n", 1);
 	}
-	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 5);
+	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 1);
 #endif
 }
 void simulate(CSim* sim, double end) {
@@ -418,7 +421,6 @@ void simulate(CSim* sim, double end) {
 				cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif
 				printrln(in("", "simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);
-				printrln(in("", "Simulate")+"       Previous posiiton for {"+cyan+body -> Name()+res+"} is ", p.info(3), 4);
 				printrln(in("", "Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);
 			}
 			t += h;

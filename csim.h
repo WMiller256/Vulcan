@@ -56,6 +56,7 @@ extern long long mtxtime;
 extern long long waittime;
 extern long long nCOMcalls;
 extern double cofactor;
+extern std::atomic<unsigned long long> simTime;
 
 class CBody;			// Forward declared for use in CSim
 
@@ -181,6 +182,6 @@ private:
 
 void sim(Hash* bodies, double tMax, threadmode t = threadmode::single);
 void simulate(Hash* h, CBody* body, double t);
-void man_simulate(CSim* tsim, int* data_pipe, int* ping, int ii, double* simTime);
+void man_simulate(CSim* tsim, int ii);
 void simulate(CSim* sim, double end);
 #endif // HASH_H
