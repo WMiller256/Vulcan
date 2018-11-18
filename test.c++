@@ -44,15 +44,17 @@ int main(int argn, char** argv) {
 
 	CSim* tsim = new CSim(8, t, h);
 	tsim -> setDebug(1);
-	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0);
-	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e3, 0.0, 6.98169e10, 0.0);
-	CBody* venus = new CBody(4.8675e24, 6.0518e6, 3.502e3, 0.0, 1.08939e11, 0.0);
-	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e3, 0.0, 1.521e11, 0.0);
-	CBody* mars = new CBody(6.4171e23, 3.3895e6, 2.4007e3, 0.0, 2.492e11, 0.0);
-	CBody* jupiter = new CBody(1.8982e27, 6.991e7, 1.307e3, 0.0, 8.1662e11, 0.0);
-	CBody* saturn = new CBody(5.683e26, 5.8232e7, 9.68e3, 0.0, 1.5155e12, 0.0);
-	CBody* uranus = new CBody(8.681e25, 2.362e7, 6.8e3, 0.0, 3.008e12, 0.0);
-	CBody* neptune = new CBody(1.024e26, 2.431e7, 5.43e3, 0.0, 4.54e12, 0.0);
+	int day = int(h);
+	std::cout << day*4 << std::endl;
+	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day*4);
+	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e3, 0.0, 6.98169e10, 0.0, day*4);
+	CBody* venus = new CBody(4.8675e24, 6.0518e6, 3.502e3, 0.0, 1.08939e11, 0.0, day*22);
+	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e3, 0.0, 1.521e11, 0.0, day*36.5);
+	CBody* mars = new CBody(6.4171e23, 3.3895e6, 2.4007e3, 0.0, 2.492e11, 0.0, day*68.7);
+	CBody* jupiter = new CBody(1.8982e27, 6.991e7, 1.307e3, 0.0, 8.1662e11, 0.0, day*430);
+	CBody* saturn = new CBody(5.683e26, 5.8232e7, 9.68e3, 0.0, 1.5155e12, 0.0, day*1100);
+	CBody* uranus = new CBody(8.681e25, 2.362e7, 6.8e3, 0.0, 3.008e12, 0.0, day*3100);
+	CBody* neptune = new CBody(1.024e26, 2.431e7, 5.43e3, 0.0, 4.54e12, 0.0, day*6020);
 
 	sun -> Name("Sun"); 
 	mercury -> Name("Mercury");

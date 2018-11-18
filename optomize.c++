@@ -9,12 +9,15 @@
  *
  *
  */
-
+ 
+#include <experimental/filesystem>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <string.h>
 #include "colors.h"
+
+bool exists(const std::string& filename);
 
 int main(int argn, char** argv) {
 	std::vector<std::string> filenames;
@@ -29,7 +32,9 @@ int main(int argn, char** argv) {
 			name.find("opt_") == std::string::npos &&
 			strcmp(argv[ii], "simio.c++") != 0 &&
 			strcmp(argv[ii], "vec.c++") != 0) {
-			filenames.push_back(argv[ii]);
+			if (exists(std::string(argv[ii]))) {
+				filenames.push_back(argv[ii]);
+			}
 		}
 	}
 	std::ifstream file;
@@ -71,4 +76,8 @@ int main(int argn, char** argv) {
 		out.close();
 		std::cout << green+" done"+res << std::endl;
 	}	
+}
+
+bool exists(const std::string& filename) {
+	return std::experimental::filesystem::exists(filename);
 }

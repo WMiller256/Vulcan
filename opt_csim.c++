@@ -131,6 +131,7 @@ Force CSim::force(CBody body) {
 			}
 		}
 	}
+	body.fix = simTime;
 //	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	//	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	
 	return net;
 }
@@ -319,28 +320,25 @@ void CSim::sim(threadmode t) {
 				threads[ii] = std::thread(man_simulate, this, ii);
 //				println("Thread "+std::to_string(ii)+" initialized.");//				println("Thread "+std::to_string(ii)+" initialized.");
 			}
-			if (h > 0) {
+			if (int(h) > 0) {
 				CBody* body = at(0);
 				vec a;
 				vec v;
 				double mass = body -> Mass();
-				std::cout << body -> Name()+" "+std::to_string(mass)+"\n";
-				std::cout << body -> pos.info(4)+"\n";
 				while (simTime < maxTime) {
-					std::cout << "Looping" << std::endl;
 					simTime += h;
-					std::cout << "Time: "+std::to_string(simTime)+"\n";
+//					println(in("CSim","sim")+"          Sim time - "+std::to_string(simTime),1);//					println(in("CSim","sim")+"          Sim time - "+std::to_string(simTime),1);
 					a = force(*body) / (mass * h);
-					std::cout << "{a} - "+a.info(4)+"\n";
 					v = body -> accelerate(a); 
-					std::cout << "{v} - "+v.info(4)+"\n";
 					body -> Position(body -> pos + v * h + a * (h * 0.5));
+//					print(in("CSim","sim")+"          {a} - "+a.info(3)+//						"\n                      {v} - "+v.info(3)+"\n                      {pos} - "+body -> pos.info(3)+"\n", 1);//						"\n                      {v} - "+v.info(3)+"\n                      {pos} - "+body -> pos.info(3)+"\n", 1);
+					
 				}
 			}
 			else {
 //				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);//				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);
 			}
-			for (int ii = 0; ii < nthreads; ii ++) {
+			for (int ii = 1; ii < nthreads; ii ++) {
 				threads[ii].join();
 				std::cout << "Thread " << ii << " finished" << std::endl;
 			}
@@ -359,12 +357,12 @@ void man_simulate(CSim* sim, int ii) {
 #ifdef using_hash
 	error ("Funtion "+in("", "simulate(CSim*, CBody*, double)")+" is invalid when using hash table. Use "+in("", "simulate(Hash*, CBody*, double)")+" instead", __LINE__, __FILE__);
 #else
-//	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 5);//	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 5);
+//	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 1);//	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 1);
 	CBody* body;
 	//rpos* p = new rpos;
 	body = sim -> at(ii);
 	std::string name = body -> Name();
-	int h;
+	int h = body -> h;
 	int tot = 0;
 	vec v;
 	vec a;
@@ -375,18 +373,21 @@ void man_simulate(CSim* sim, int ii) {
 #ifdef profiling
 		auto start = std::chrono::high_resolution_clock::now();
 #endif
-		h = (simTime - prev);
-		prev = simTime;
-		a = sim -> force(*body) / (mass * h);
-		v = body -> accelerate(a); 
-		body -> Position(body -> pos + v * h + a * (h * 0.5));
+		if (simTime - body -> fix > h) {
+			tot++;
+			a = sim -> force(*body) / mass;
+			v = body -> accelerate(a * h); 
+			body -> Position(body -> pos + v * h + a * (h * h * 0.5));
+			body -> fix = simTime;
 #ifdef profiling
 		cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif
-//		printrln(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);//		printrln(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);
-//		printrln(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);//		printrln(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);
+//			print(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is "+body -> Velocity().info(3)+"\n", 1);//			print(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is "+body -> Velocity().info(3)+"\n", 1);
+//			print(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is "+body -> pos.info(3)+"\n", 1);//			print(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is "+body -> pos.info(3)+"\n", 1);
+		}
 	}
-//	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 5);//	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 5);
+	std::cout << "  "+body -> Name()+" {tot} - "+std::to_string(tot)+"\n";
+//	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 1);//	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 1);
 #endif
 }
 void simulate(CSim* sim, double end) {
@@ -418,7 +419,6 @@ void simulate(CSim* sim, double end) {
 				cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif
 //				printrln(in("", "simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);//				printrln(in("", "simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 4);
-//				printrln(in("", "Simulate")+"       Previous posiiton for {"+cyan+body -> Name()+res+"} is ", p.info(3), 4);//				printrln(in("", "Simulate")+"       Previous posiiton for {"+cyan+body -> Name()+res+"} is ", p.info(3), 4);
 //				printrln(in("", "Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);//				printrln(in("", "Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 4);
 			}
 			t += h;

@@ -132,7 +132,7 @@ class CBody
 public:
 	CBody();
 	CBody(double Mass, double Radius, double Velocity);
-	CBody(double Mass, double Radius, double Velocity, double X, double Y, double Z);
+	CBody(double Mass, double Radius, double Velocity, double X, double Y, double Z, int H=1);
 	CBody(double Mass, double Radius, double Velocity, Pos pos);
 	~CBody();
 
@@ -159,6 +159,8 @@ public:
 	std::string info();
 	Force net;					// The net force acting on the body
 	Pos pos;
+	int h;
+	int fix;					// The fix time for this body's position in simulation time
 
 	bool operator != (CBody r) const;
 	bool operator == (CBody r) const;

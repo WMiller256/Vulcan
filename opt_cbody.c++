@@ -13,11 +13,13 @@ CBody::CBody(double Mass, double Radius, double Speed) {
 	xv = Speed;
 //	print(info(), 2);//	print(info(), 2);
 }
-CBody::CBody(double Mass, double Radius, double Speed, double X, double Y, double Z) {
+CBody::CBody(double Mass, double Radius, double Speed, double X, double Y, double Z, int H) {
 	init();
 	x = X;
 	y = Y;
 	z = Z;
+	h = H;
+	std::cout << H << std::endl;
 	pos = Pos(x, y, z);
 	mass = Mass;
 	radius = Radius;
@@ -170,7 +172,9 @@ void CBody::init() {
 
 	net = Force(0,0,0);
 	pos = Pos(0,0,0);
-
+	h = 1;
+	fix = 0;
+	
 //	print(green+"done\n"+res);//	print(green+"done\n"+res);
 }
 
