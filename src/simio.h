@@ -6,10 +6,23 @@
 #include <fstream>
 #include <string>
 #include <ncurses.h>
+#include <sstream>
+#include <math.h>
 #include <unistd.h>
 
 #include "csim.h"
 #include "hash.h"
+#include "colors.h"
+
+std::string in(std::string prefix, std::string function);
+
+void error(const std::string& s, const int line, const char* file);
+void warning(const std::string& s, const int line, const char* file);
+
+std::string scientific(double d, int precision = 5);
+std::string stripcolors(const std::string& str);
+
+bool iscolor(std::string str);
 
 Hash* readfile(const std::string& filename);
 bool exists(const std::string& filename);

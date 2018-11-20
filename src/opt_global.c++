@@ -13,14 +13,3 @@ double magnitude(vec v) {
 //	printrln(in("","magnitude")+"      Vector "+v.info()+" magnitude is ", scientific(ret), 4);//	printrln(in("","magnitude")+"      Vector "+v.info()+" magnitude is ", scientific(ret), 4);
 	return ret;
 }
-
-std::string in(std::string prefix, std::string function) {
-	std::string ret;
-	if (prefix != "") {
-		ret = "  "+cyan+prefix+yellow+"::"+bright+white+function+res+" ";
-	}
-	else {
-		ret = "  "+bright+white+function+res+" ";
-	}
-	return ret;
-}

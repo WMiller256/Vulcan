@@ -11,6 +11,8 @@
 
 #include "vec.h"
 
+#include "simio.h"		// For [scientific]
+
 vec::vec() {
 	init();
 }
@@ -28,8 +30,8 @@ vec::vec(vec* v) {
 
 std::string vec::info(int precision) const {
 	std::string s;
-	s = bright+magenta+scientific(x, precision)+res+", "+bright+magenta;
-	s += scientific(y, precision)+res+", "+bright+magenta+scientific(z, precision)+res;
+//	s = bright+magenta+scientific(x, precision)+res+" "+bright+magenta;//	s = bright+magenta+scientific(x, precision)+res+" "+bright+magenta;
+//	s += scientific(y, precision)+res+" "+bright+magenta+scientific(z, precision)+res;//	s += scientific(y, precision)+res+" "+bright+magenta+scientific(z, precision)+res;
 	return s;
 }
 

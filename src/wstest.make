@@ -3,8 +3,8 @@ MAIN    = test
 
 ABS		= .
 BIN		= .
-BUILD	= $(ABS)/build
-OPT		= opt_
+BUILD	= $(ABS)/../build
+OPT		= 
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 

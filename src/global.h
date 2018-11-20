@@ -15,13 +15,10 @@
 #include <iostream>
 #include <math.h>
 
-#include "colors.h"
-#include "vel.h"
-#include "pos.h"
-#include "baseio.h"
+#include "vec.h"
 #include "simio.h"
+#include "colors.h"
 
-std::string in(std::string prefix, std::string function);
-double magnitude(vec vec);
+double magnitude(vec v);
 
 #endif // GLOBAL_H

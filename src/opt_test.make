@@ -3,7 +3,7 @@ MAIN    = test
 
 ABS		= .
 BIN		= .
-BUILD	= $(ABS)/build
+BUILD	= $(ABS)/../build
 OPT		= opt_
 RM      = /bin/rm -f
 MV		= /bin/mv -f
@@ -30,7 +30,6 @@ SRCS	= $(ABS)/$(OPT)$(MAIN).c++	\
 		  $(ABS)/$(OPT)csim.c++		\
 		  $(ABS)/$(OPT)cbody.c++	\
 		  $(ABS)/$(OPT)simio.c++	\
-		  $(ABS)/$(OPT)baseio.c++	\
 		  $(ABS)/$(OPT)global.c++	\
 		  $(ABS)/$(OPT)vel.c++		\
 		  $(ABS)/$(OPT)vec.c++		\
@@ -46,7 +45,6 @@ OBJS	= $(BUILD)/$(OPT)$(MAIN).o	\
 		  $(BUILD)/$(OPT)rpos.o		\
 		  $(BUILD)/$(OPT)force.o	\
 		  $(BUILD)/$(OPT)simio.o	\
-		  $(BUILD)/$(OPT)baseio.o	\
 		  $(BUILD)/$(OPT)global.o
 		  
 
@@ -54,7 +52,7 @@ OBJS	= $(BUILD)/$(OPT)$(MAIN).o	\
 all:
 	@printf "[      $(YELLOW)Building $(OPT)$(MAIN)$(WHITE)       ]\n"
 	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make -f opt_test.make build
+	make -f $(OPT)test.make build
 	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 

@@ -1,18 +1,82 @@
 #include "simio.h"
 
+
+std::string in(std::string prefix, std::string function) {
+	std::string ret;
+	if (prefix != "") {
+		ret = "  "+cyan+prefix+yellow+"::"+bright+white+function+res+" ";
+	}
+	else {
+		ret = "  "+bright+white+function+res+" ";
+	}
+	return ret;
+}
+
+void error(const std::string& s, const int line, const char* file) {
+	printf(std::string(red+white_back+" Error "+res+" [File "+yellow+"%s"+res+" line "+bright+red+"%d"+
+		res+"] - "+s+"\n").c_str(), file, line);
+}
+void warning(const std::string& s, const int line, const char* file) {
+	printf(std::string(bright+blue+white_back+" Warning "+res+" [File "+yellow+"%s"+res+" line "+bright+red+"%d"
+		+res+"] - "+s+"\n").c_str(), file, line);
+}
+
+std::string scientific(double d, int precision) {
+	std::stringstream ret;
+	ret << std::scientific << std::setprecision(precision) << d;
+	return ret.str();
+}
+
+std::string stripcolors(const std::string& str) {
+	std::string s = str;
+	int found = s.find('\033');
+	while (found != std::string::npos) {
+		if (iscolor(s.substr(found + 1, 3))) {
+			s.erase(found, 4);
+		}
+		else if (iscolor(s.substr(found + 1, 4))) {
+			s.erase(found, 5);
+		}
+		else {
+			std::cout << s << std::endl;
+			warning("Escape character with no color terminator, output formatting may fail", __LINE__, __FILE__);			warning("Escape character with no color terminator, output formatting may fail", __LINE__, __FILE__);
+			exit(1);
+			break;
+		}
+		found = s.find('\033');
+	}
+	return s;
+}
+bool iscolor(std::string str) {
+	if (str[0] == '[' && str.back() == 'm') {
+		str.erase(0,1);
+		str.erase(str.end()-1, str.end());
+		int code = stof(str);
+		if (code == 0 || code == 1 || code == 4 || code == 7 || code == 21 || code == 24 || code == 27) {
+			return true;
+		}
+		else if (30 <= code && code <= 37) {
+			return true;
+		}
+		else if (40 <= code && code <= 47) {
+			return true;
+		}
+	}
+}
+
 #ifdef using_hash
 void Hash::write(const std::string&	filename) {
 	std::ofstream out;
 	if (exists(filename)) {
 		if (!prompt("File exists, overwrite? (y|n) ")) {
-			println("File will not be overwritten, exiting "+cyan+"Hash"+yellow+"::"+bright+white+"write"+res);
+			println("File will not be overwritten, exiting "+cyan+"Hash"+yellow+"::"+bright+white+"write"+res);			println("File will not be overwritten, exiting "+cyan+"Hash"+yellow+"::"+bright+white+"write"+res);
 			return;
 		}
 		else {
-			println("Overwriting "+yellow+filename+res);
+			println("Overwriting "+yellow+filename+res);			println("Overwriting "+yellow+filename+res);
 		}
 	}
-	print("Writing file "+yellow+filename+res+"... ");
+	print("Writing file "+yellow+filename+res+"... ");	print("Writing file "+yellow+filename+res+"... ");
 	out.open(filename);
 	out << size << "\n" << minradius << "\n" << maxradius << "\n";
 	nodeptr current = new node;
@@ -32,7 +96,7 @@ void Hash::write(const std::string&	filename) {
 			}
 		}
 	}
-	println(green+"done"+res);
+	println(green+"done"+res);	println(green+"done"+res);
 }
 
 Hash* readfile(const std::string& filename) {
@@ -40,8 +104,8 @@ Hash* readfile(const std::string& filename) {
 		std::cout << red+white_back << " Error " << black_back << " file does not exist." << std::endl;
 		return NULL;
 	}
-	print("Reading file "+yellow+filename+res+"... ");
-	print("\n", 2);
+	print("Reading file "+yellow+filename+res+"... ");	print("Reading file "+yellow+filename+res+"... ");
+	print("\n", 2);	print("\n", 2);
 	int gdebug = debug;
 	if (debug < 3) {
 		debug = 0;
@@ -65,10 +129,8 @@ Hash* readfile(const std::string& filename) {
 	maxradius = stof(line);
 	
 	blockwidth = (maxradius - minradius) / (nbodies - 1);
-	println("  {minradius}:  "+magenta+bright+std::to_string(minradius)+res+"\n  {maxradius}:  "+
-		bright+magenta+std::to_string(maxradius)+res+"\n  {blockwidth}: "+bright+magenta+
-		std::to_string(blockwidth)+res, 3);
-	println("Number of bodies: "+bright+red+std::to_string(nbodies)+res, 3);
+	println("  {minradius}:  "+magenta+bright+std::to_string(minradius)+res+"\n  {maxradius}:  "+		bright+magenta+std::to_string(maxradius)+res+"\n  {blockwidth}: "+bright+magenta+		std::to_string(blockwidth)+res, 3);		std::to_string(blockwidth)+res, 3);
+	println("Number of bodies: "+bright+red+std::to_string(nbodies)+res, 3);	println("Number of bodies: "+bright+red+std::to_string(nbodies)+res, 3);
 	while (std::getline(file, line)) {
 		n++;
 		if (line.substr(0, 4) == "Body") {
@@ -88,7 +150,7 @@ Hash* readfile(const std::string& filename) {
 			}
 			
 			std::getline(file, line); 
-			println(line, 3);
+			println(line, 3);			println(line, 3);
 			n++;
 			std::size_t start = line.find("(");
 			if (start != std::string::npos) {
@@ -97,29 +159,29 @@ Hash* readfile(const std::string& filename) {
 				z = stof(line.substr(line.find_last_of(",")+2,line.find(")")-1));
 			}
 			else {
-				println(red+white_back+" Error "+res+" File error at line "+std::to_string(n)+" in file "+yellow+filename+res);
+				println(red+white_back+" Error "+res+" File error at line "+std::to_string(n)+" in file "+yellow+filename+res);				println(red+white_back+" Error "+res+" File error at line "+std::to_string(n)+" in file "+yellow+filename+res);
 				return NULL;
 			}
 			std::getline(file, line); 
-			println(line, 3);
+			println(line, 3);			println(line, 3);
 			n++;
 			radius = stof(line.substr(line.find_last_of(" ")+1));
 			std::getline(file, line); 
-			println(line, 3);
+			println(line, 3);			println(line, 3);
 			n++;
 			mass = stof(line.substr(line.find_last_of(" ")+1));
 			std::getline(file, line); 
-			println(line, 3);
+			println(line, 3);			println(line, 3);
 			n++;
 			speed = stof(line.substr(line.find_last_of(" ")+1));
 			CBody* body = new CBody(mass, radius, speed, x, y, z);
 			body -> Name(name);
 			hash -> addNode(body);
-			print(body -> info(), 2);
+			print(body -> info(), 2);			print(body -> info(), 2);
 		}
 	}
 	debug = gdebug;
-	println(green+"done"+res);
+	println(green+"done"+res);	println(green+"done"+res);
 	return hash;
 }
 #endif // using_hash
@@ -129,13 +191,13 @@ std::string CBody::writeFormat(format f) {
 	switch(f) {
 		case text:
 			formatted.append("Body - "+Name()+"\n");
-			formatted.append("   Position "+scientific(x,3)+" "+scientific(y,3)+" "+scientific(z,3)+"\n");
-			formatted.append("   Radius   "+scientific(radius)+"\n");
-			formatted.append("   Mass     "+scientific(mass)+"\n");
-			formatted.append("   Velocity "+scientific(xv,3)+" "+scientific(yv,3)+" "+scientific(zv,3)+"\n\n");
+			formatted.append("   Position "+scientific(x,3)+" "+scientific(y,3)+" "+scientific(z,3)+"\n");			formatted.append("   Position "+scientific(x,3)+" "+scientific(y,3)+" "+scientific(z,3)+"\n");
+			formatted.append("   Radius   "+scientific(radius)+"\n");			formatted.append("   Radius   "+scientific(radius)+"\n");
+			formatted.append("   Mass     "+scientific(mass)+"\n");			formatted.append("   Mass     "+scientific(mass)+"\n");
+			formatted.append("   Velocity "+scientific(xv,3)+" "+scientific(yv,3)+" "+scientific(zv,3)+"\n\n");			formatted.append("   Velocity "+scientific(xv,3)+" "+scientific(yv,3)+" "+scientific(zv,3)+"\n\n");
 			break;
 	}
-	print("--------- "+cyan+"Writestream "+res+"--------- \n"+formatted+"------------------------------- \n", 2);
+	print("--------- "+cyan+"Writestream "+res+"--------- \n"+formatted+"------------------------------- \n", 2);	print("--------- "+cyan+"Writestream "+res+"--------- \n"+formatted+"------------------------------- \n", 2);
 	return formatted;
 }
 
@@ -178,25 +240,25 @@ void print(const float& f, int depth) {
 }
 void println(const std::string& s, int depth) {
 	if (debug >= depth && depth != -1) {
-		print(s, depth);
+		print(s, depth);		print(s, depth);
 		std::cout << std::endl;
 	}
 }
 void println(const double& d, int depth) {
 	if (debug >= depth && depth != -1) {
-		print(d, depth);
+		print(d, depth);		print(d, depth);
 		std::cout << std::endl;
 	}
 }
 void println(const float& f, int depth) {
 	if (debug >= depth && depth != -1) {
-		print(f, depth);
+		print(f, depth);		print(f, depth);
 		std::cout << std::endl;
 	}
 }
 void println(const int& i, int depth) {
 	if (debug >= depth && depth != -1) {
-		print(i, depth);
+		print(i, depth);		print(i, depth);
 		std::cout << std::endl;
 	}
 }
@@ -207,7 +269,7 @@ void printr(const std::string& l, const std::string r, int depth) {
 		int right = nchar(r);
 		int termwidth = winwidth();
 		if (termwidth < left + right) {
-			println(l+" "+r, depth);
+			println(l+" "+r, depth);			println(l+" "+r, depth);
 		}
 		else {
 			int middle = termwidth - (left + right)-1;
@@ -221,7 +283,7 @@ void printr(const std::string& l, const std::string r, int depth) {
 }
 void printrln(const std::string& l, const std::string r, int depth) {
 	if (debug >= depth && depth != -1) {
-		printr(l, r, depth);
+		printr(l, r, depth);		printr(l, r, depth);
 		std::cout << std::endl;
 	}
 }

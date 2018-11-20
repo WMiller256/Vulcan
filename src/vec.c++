@@ -11,6 +11,8 @@
 
 #include "vec.h"
 
+#include "simio.h"		// For [scientific]
+
 vec::vec() {
 	init();
 }

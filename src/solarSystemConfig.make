@@ -3,7 +3,7 @@ MAIN    = solarSystemConfig
 
 ABS		= .
 BIN		= ./bin
-BUILD	= $(ABS)/build
+BUILD	= $(ABS)/../build
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
