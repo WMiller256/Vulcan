@@ -1,20 +1,20 @@
 #Name of program
-MAIN    = test.2
+MAIN    = test
 
 ABS		= .
 BIN		= .
 BUILD	= $(ABS)/../build
-OPT		= opt_
+OPT		= 
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
-LFLAGS	= -Wl,-rpath,/usr/local/bin/g++
+LFLAGS	= -Wl,-rpath,/usr/local/bin/g++.exe
 LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -lstdc++fs
 LIBS	= -lboost_program_options -lncurses
 
 INC		= -I /usr/lib/boost/
 CFLAGS	= -Wno-deprecated-declarations -fopenmp -std=c++17 -O3
-CC      = /usr/local/bin/g++ $(CFLAGS) $(INC) $(LIBS) 
+CC      = /usr/local/bin/g++.exe $(CFLAGS) $(INC) $(LIBS) 
 
 #Output coloring
 GREEN   = \033[1;32m
@@ -52,7 +52,7 @@ OBJS	= $(BUILD)/$(OPT)$(MAIN).o	\
 all:
 	@printf "[      $(YELLOW)Building $(OPT)$(MAIN)$(WHITE)       ]\n"
 	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make -f $(OPT)test.make build
+	gmake -f gnu_$(OPT)test.gmake build
 	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 
@@ -70,7 +70,7 @@ build: $(OBJS)
 clean:
 	$(RM) *.core $(BUILD)/*.o *.d *.stackdump
 
-#Disable command echoing, reenabled with make verbose=1
+#Disable command echoing, reenabled with gmake verbose=1
 ifndef verbose
 .SILENT:
 endif
