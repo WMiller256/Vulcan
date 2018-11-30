@@ -146,7 +146,7 @@ Force CSim::mforce(CBody body) {
 		if (bodies[ii] != NULL) {
 			if (*bodies[ii] != body) {
 //				printrln("\n"+in("CSim", "force")+"    Target: ", body.Name(), 5); //				printrln("\n"+in("CSim", "force")+"    Target: ", body.Name(), 5); 
-				delta = bodies[ii] -> Velocity() * long(simTime - bodies[ii] -> fix);
+				delta = bodies[ii] -> Velocity(); // * long(simTime - bodies[ii] -> fix);
 				fmagnitude = (G * body.Mass() * bodies[ii] -> Mass()) / pow(bodies[ii] -> distance(body.pos + delta), 2);
 				net += body.pos.direction(bodies[ii] -> pos + delta) * fmagnitude;
 
@@ -359,13 +359,13 @@ void CSim::sim(threadmode t) {
 //					println(in("CSim","sim")+"          Sim time - "+std::to_string(simTime),1);//					println(in("CSim","sim")+"          Sim time - "+std::to_string(simTime),1);
 					a = force(*body) / (mass * h);
 					v = body -> accelerate(a); 
-					body -> Position(body -> pos + v * h + a * (h * 0.5));
 //					print(in("CSim","sim")+"          {a} - "+a.info(3)+//						"\n                      {v} - "+v.info(3)+"\n                      {pos} - "+body -> pos.info(3)+"\n", 1);//						"\n                      {v} - "+v.info(3)+"\n                      {pos} - "+body -> pos.info(3)+"\n", 1);
 					while (tocalc > 0) {
 						if (simTime == maxTime) {
 							break;
 						}
 					}
+					body -> Position(body -> pos + v * h + a * (h * 0.5));
 				}
 				std::cout << " "+body->Name()+" {tot} - "+std::to_string(tot)+"\n";
 			}
@@ -404,7 +404,6 @@ void CSim::man_simulate(int ii) {
 	double mass = body -> Mass();
 	double prev = 0;
 	while (simTime == 0) {}				// Wait for the simulation to start
-	std::cout << "  "+name+" starting - "+std::to_string(int(simTime))+" "+std::to_string(maxTime)+"\n";
 	while (simTime < maxTime) {
 #ifdef profiling
 		auto start = std::chrono::high_resolution_clock::now();
@@ -415,11 +414,18 @@ void CSim::man_simulate(int ii) {
 				tot++;
 				a = mforce(*body) / mass;
 				v = body -> accelerate(a * h); 
-				body -> Position(body -> pos + v * h + a * (h * h * 0.5));
-				body -> fix = simTime;
 			}
 			tocalc--;
 			decs++;
+			if (simTime - body -> fix >=h) {
+				while (tocalc > 0) {
+					if (simTime == maxTime) {
+						break;
+					}
+				}
+				body -> Position(body -> pos + v * h + a * (h * h * 0.5));
+				body -> fix = simTime;
+			}
 		}
 #ifdef profiling
 		cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
@@ -428,13 +434,11 @@ void CSim::man_simulate(int ii) {
 //		print(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is "+body -> pos.info(3)+"\n", 1);//		print(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is "+body -> pos.info(3)+"\n", 1);
 	}
 	h = simTime - body -> fix;
-	std::cout << name+" "+std::to_string(h)+"\n";
 	a = mforce(*body) / mass;
 	v = body -> accelerate(a * h); 
 	body -> Position(body -> pos + v * h + a * (h * h * 0.5));
 	body -> fix = simTime;
 	
-	std::cout << name+"  Decrements - "+std::to_string(decs)+"\n";
 	std::cout << "  "+body -> Name()+" {tot} - "+std::to_string(tot)+"\n";
 //	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 1);//	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 1);
 #endif
