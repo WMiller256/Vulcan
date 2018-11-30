@@ -14,7 +14,8 @@ long long waittime = 0;
 long long nCOMcalls = 0;
 double cofactor = 10000;
 double maxTime = 0;
-std::atomic<unsigned long long> simTime = 0;
+std::atomic<unsigned long long> simTime;
+std::atomic<int> tocalc;
 
 CSim::CSim() {
 	init();
@@ -125,6 +126,29 @@ Force CSim::force(CBody body) {
 //				printrln("\n"+in("CSim", "force")+"    Target: ", body.Name(), 5); //				printrln("\n"+in("CSim", "force")+"    Target: ", body.Name(), 5); 
 				fmagnitude = (G * body.Mass() * bodies[ii] -> Mass()) / pow(bodies[ii] -> distance(body), 2);
 				net += body.pos.direction(bodies[ii] -> pos) * fmagnitude;
+
+//				printrln(in("CSim", "force")+"    Magnitude of force between "+body.Name()+" and "+//					bodies[ii] -> Name()+" is ", scientific(fmagnitude), 4);//					bodies[ii] -> Name()+" is ", scientific(fmagnitude), 4);
+//				printrln(in("CSim", "force")+"    Net force vector on "+body.Name()+" is ", net.info(), 4);//				printrln(in("CSim", "force")+"    Net force vector on "+body.Name()+" is ", net.info(), 4);
+			}
+		}
+	}
+	body.fix = simTime;
+//	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	//	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	
+	return net;
+}
+
+Force CSim::mforce(CBody body) {
+//	print(in("CSim", "mforce")+"    Calculating net force\n", 5);//	print(in("CSim", "mforce")+"    Calculating net force\n", 5);
+	Force net(0,0,0);
+	Pos delta;
+	double fmagnitude;
+	for (int ii = 0; ii < nadded; ii ++) {
+		if (bodies[ii] != NULL) {
+			if (*bodies[ii] != body) {
+//				printrln("\n"+in("CSim", "force")+"    Target: ", body.Name(), 5); //				printrln("\n"+in("CSim", "force")+"    Target: ", body.Name(), 5); 
+				delta = bodies[ii] -> Velocity() * long(simTime - bodies[ii] -> fix);
+				fmagnitude = (G * body.Mass() * bodies[ii] -> Mass()) / pow(bodies[ii] -> distance(body.pos + delta), 2);
+				net += body.pos.direction(bodies[ii] -> pos + delta) * fmagnitude;
 
 //				printrln(in("CSim", "force")+"    Magnitude of force between "+body.Name()+" and "+//					bodies[ii] -> Name()+" is ", scientific(fmagnitude), 4);//					bodies[ii] -> Name()+" is ", scientific(fmagnitude), 4);
 //				printrln(in("CSim", "force")+"    Net force vector on "+body.Name()+" is ", net.info(), 4);//				printrln(in("CSim", "force")+"    Net force vector on "+body.Name()+" is ", net.info(), 4);
@@ -308,32 +332,42 @@ void CSim::sim(threadmode t) {
 #else
 	switch(t) {
 		case single:
-			simulate(this, tMax);
+			simulate(tMax);
 			break;
 		case manual:
+			simTime = 0;
+			tocalc = 0;
 			if (nadded < nthreads) {
 				nthreads = nadded;
 			}
 			std::cout << " Using " << nthreads << " threads" << std::endl;
 			std::thread threads[nthreads];
 			for (int ii = 1; ii < nthreads; ii ++) {
-				threads[ii] = std::thread(man_simulate, this, ii);
+				threads[ii] = std::thread(&CSim::man_simulate, this, ii);
 //				println("Thread "+std::to_string(ii)+" initialized.");//				println("Thread "+std::to_string(ii)+" initialized.");
 			}
 			if (int(h) > 0) {
+				int tot = 0;
 				CBody* body = at(0);
 				vec a;
 				vec v;
 				double mass = body -> Mass();
 				while (simTime < maxTime) {
+				    tocalc = nbodies;
 					simTime += h;
+					tot++;
 //					println(in("CSim","sim")+"          Sim time - "+std::to_string(simTime),1);//					println(in("CSim","sim")+"          Sim time - "+std::to_string(simTime),1);
 					a = force(*body) / (mass * h);
 					v = body -> accelerate(a); 
 					body -> Position(body -> pos + v * h + a * (h * 0.5));
 //					print(in("CSim","sim")+"          {a} - "+a.info(3)+//						"\n                      {v} - "+v.info(3)+"\n                      {pos} - "+body -> pos.info(3)+"\n", 1);//						"\n                      {v} - "+v.info(3)+"\n                      {pos} - "+body -> pos.info(3)+"\n", 1);
-					
+					while (tocalc > 0) {
+						if (simTime == maxTime) {
+							break;
+						}
+					}
 				}
+				std::cout << " "+body->Name()+" {tot} - "+std::to_string(tot)+"\n";
 			}
 			else {
 //				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);//				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);
@@ -353,57 +387,72 @@ void simulate(Hash* bodies, CBody* body, double t) {
 	error ("Funtion "+in("", "simulate(Hash*, CBody*, double)")+" is invalid when not using hash table. Use "+in("", "simulate(CSim*, CBody*, double)")+" instead", __LINE__, __FILE__);
 #endif
 }
-void man_simulate(CSim* sim, int ii) {
+void CSim::man_simulate(int ii) {
 #ifdef using_hash
 	error ("Funtion "+in("", "simulate(CSim*, CBody*, double)")+" is invalid when using hash table. Use "+in("", "simulate(Hash*, CBody*, double)")+" instead", __LINE__, __FILE__);
 #else
 //	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 1);//	printrln(in("", "simulate(CSim*, CBody*, double)"), "Simulating", 1);
 	CBody* body;
 	//rpos* p = new rpos;
-	body = sim -> at(ii);
+	body = at(ii);
 	std::string name = body -> Name();
-	int h = body -> h;
+	long h = body -> h;
 	int tot = 0;
+	int decs = 0;
 	vec v;
 	vec a;
 	double mass = body -> Mass();
-	double time = simTime;
-	double prev = time;
+	double prev = 0;
+	while (simTime == 0) {}				// Wait for the simulation to start
+	std::cout << "  "+name+" starting - "+std::to_string(int(simTime))+" "+std::to_string(maxTime)+"\n";
 	while (simTime < maxTime) {
 #ifdef profiling
 		auto start = std::chrono::high_resolution_clock::now();
 #endif
-		if (simTime - body -> fix > h) {
-			tot++;
-			a = sim -> force(*body) / mass;
-			v = body -> accelerate(a * h); 
-			body -> Position(body -> pos + v * h + a * (h * h * 0.5));
-			body -> fix = simTime;
+		if (simTime - prev > 0) {
+			prev = simTime;
+			if (simTime - body -> fix >= h) {
+				tot++;
+				a = mforce(*body) / mass;
+				v = body -> accelerate(a * h); 
+				body -> Position(body -> pos + v * h + a * (h * h * 0.5));
+				body -> fix = simTime;
+			}
+			tocalc--;
+			decs++;
+		}
 #ifdef profiling
 		cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif
-//			print(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is "+body -> Velocity().info(3)+"\n", 1);//			print(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is "+body -> Velocity().info(3)+"\n", 1);
-//			print(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is "+body -> pos.info(3)+"\n", 1);//			print(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is "+body -> pos.info(3)+"\n", 1);
-		}
+//		print(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is "+body -> Velocity().info(3)+"\n", 1);//		print(in("", "man_simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is "+body -> Velocity().info(3)+"\n", 1);
+//		print(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is "+body -> pos.info(3)+"\n", 1);//		print(in("", "man_Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is "+body -> pos.info(3)+"\n", 1);
 	}
+	h = simTime - body -> fix;
+	std::cout << name+" "+std::to_string(h)+"\n";
+	a = mforce(*body) / mass;
+	v = body -> accelerate(a * h); 
+	body -> Position(body -> pos + v * h + a * (h * h * 0.5));
+	body -> fix = simTime;
+	
+	std::cout << name+"  Decrements - "+std::to_string(decs)+"\n";
 	std::cout << "  "+body -> Name()+" {tot} - "+std::to_string(tot)+"\n";
 //	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 1);//	printrln(in("", "simulate(CSim*, CBody*, double)"), green+"Complete"+res, 1);
 #endif
 }
-void simulate(CSim* sim, double end) {
+void CSim::simulate(double end) {
 #ifdef using_hash
 	error ("Funtion "+in("", "simulate(CSim*, double)")+" is invalid when using hash table.", __LINE__, __FILE__);
 #else
 //	printrln(in("", "simulate(CSim*, double)"), "Simulating", 5);//	printrln(in("", "simulate(CSim*, double)"), "Simulating", 5);
 	double t = 0.0;
-	double h = sim -> H();
-	nbodies = sim -> count();
+	double h = H();
+	nbodies = count();
 	CBody* body;
 	vec a;
 	vec v;
 	CBody** bodies = new CBody*[nbodies];
 	for (int ii = 0; ii < nbodies; ii ++) {
-		bodies[ii] = sim -> at(ii);
+		bodies[ii] = at(ii);
 	}
 	if (h > 0.0) {
 		while (t < end) {
@@ -412,7 +461,7 @@ void simulate(CSim* sim, double end) {
 #ifdef profiling
 				auto start = std::chrono::high_resolution_clock::now();
 #endif
-				a = sim -> force(*body) / body -> Mass();
+				a = force(*body) / body -> Mass();
 				v = body -> accelerate(a * h);
 				body -> Position(body -> pos + v * h + a * h * h * 0.5);
 #ifdef profiling

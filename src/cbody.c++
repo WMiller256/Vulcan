@@ -19,7 +19,6 @@ CBody::CBody(double Mass, double Radius, double Speed, double X, double Y, doubl
 	y = Y;
 	z = Z;
 	h = H;
-	std::cout << H << std::endl;
 	pos = Pos(x, y, z);
 	mass = Mass;
 	radius = Radius;
@@ -152,6 +151,9 @@ double CBody::distance(Pos* t) {
 	double dist = sqrt(pow(t -> x - pos.x,2) + pow(t -> y - pos.y, 2) + pow(t -> z - pos.z, 2));
 	printrln(in("CBody", "distance")+"Distance from "+pos.info()+" to "+t -> info()+" is ", scientific(dist)+res, 4);
 	return dist;
+}
+double CBody::distance(Pos t) const {
+	return sqrt(pow(t.x - pos.x, 2) + pow(t.y - pos.y, 2) + pow(t.z - pos.z, 2));
 }
 
 void CBody::init() {

@@ -193,10 +193,10 @@ std::string CBody::writeFormat(format f) {
 	switch(f) {
 		case text:
 			formatted.append("Body - "+Name()+"\n");
-			formatted.append("   Position "+scientific(x,3)+" "+scientific(y,3)+" "+scientific(z,3)+"\n");
+			formatted.append("   Position "+scientific(x,5)+" "+scientific(y,5)+" "+scientific(z,5)+"\n");
 			formatted.append("   Radius   "+scientific(radius)+"\n");
 			formatted.append("   Mass     "+scientific(mass)+"\n");
-			formatted.append("   Velocity "+scientific(xv,3)+" "+scientific(yv,3)+" "+scientific(zv,3)+"\n\n");
+			formatted.append("   Velocity "+scientific(xv,5)+" "+scientific(yv,5)+" "+scientific(zv,5)+"\n\n");
 			break;
 	}
 	print("--------- "+cyan+"Writestream "+res+"--------- \n"+formatted+"------------------------------- \n", 2);
@@ -242,26 +242,22 @@ void print(const float& f, int depth) {
 }
 void println(const std::string& s, int depth) {
 	if (debug >= depth && depth != -1) {
-		print(s, depth);
-		std::cout << std::endl;
+		std::cout << s+"\n";
 	}
 }
 void println(const double& d, int depth) {
 	if (debug >= depth && depth != -1) {
-		print(d, depth);
-		std::cout << std::endl;
+		std::cout << std::to_string(d)+"\n";
 	}
 }
 void println(const float& f, int depth) {
 	if (debug >= depth && depth != -1) {
-		print(f, depth);
-		std::cout << std::endl;
+		std::cout << std::to_string(f)+"\n";
 	}
 }
 void println(const int& i, int depth) {
 	if (debug >= depth && depth != -1) {
-		print(i, depth);
-		std::cout << std::endl;
+		std::cout << std::to_string(i)+"\n";
 	}
 }
 
@@ -270,23 +266,22 @@ void printr(const std::string& l, const std::string r, int depth) {
 		int left = nchar(l);
 		int right = nchar(r);
 		int termwidth = winwidth();
+		std::string vl = l;
 		if (termwidth < left + right) {
 			println(l+" "+r, depth);
 		}
 		else {
 			int middle = termwidth - (left + right)-1;
-			std::cout << l;
 			for (int ii = 0; ii < middle; ii ++) {
-				std::cout << " ";
+				vl = vl+" ";
 			}
-			std::cout << r;
+			std::cout << vl+r;
 		}		
 	}	
 }
 void printrln(const std::string& l, const std::string r, int depth) {
 	if (debug >= depth && depth != -1) {
-		printr(l, r, depth);
-		std::cout << std::endl;
+		printr(l, r+"\n", depth);
 	}
 }
 

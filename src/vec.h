@@ -33,6 +33,7 @@ public:
 	bool operator == (vec r) const;
 	vec operator / (double scalar);
 	vec operator * (double scalar);
+	vec operator * (long scalar);
 	vec operator + (vec const &r);
 	void operator += (vec const &r);
 

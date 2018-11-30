@@ -57,6 +57,7 @@ extern long long waittime;
 extern long long nCOMcalls;
 extern double cofactor;
 extern std::atomic<unsigned long long> simTime;
+extern std::atomic<int> tocalc;
 
 class CBody;			// Forward declared for use in CSim
 
@@ -85,6 +86,7 @@ public:
 	void step();
 	void force(CBody* body);
 	Force force(CBody body);
+	Force mforce(CBody body);
 
 	void printForces();
 	void writeConfiguration(const std::string& filename, bool overwrite = false);
@@ -93,6 +95,8 @@ public:
 	double H();
 	int count();
 	void sim(threadmode t = threadmode::single);
+	void man_simulate(int ii);
+	void simulate(double end);
 
 private:
 	double tMax;		// The integration time
@@ -153,14 +157,15 @@ public:
 	Pos COM(CBody target);
 	double distance(CBody* target);			// Calculate the distance to the target (CBody)
 	double distance(CBody target) const;
-	double distance(Pos* pos);				// Calculate the distance to the target (Pos)
+	double distance(Pos* pos);				// Calculate the distance to the target (Pos*)
+	double distance(Pos v) const;			// Calculate the distance to the target (Pos)
 
 	std::string writeFormat(format f = text); 		// Defined in simio.c++
 	std::string info();
 	Force net;					// The net force acting on the body
 	Pos pos;
-	int h;
-	int fix;					// The fix time for this body's position in simulation time
+	long h;
+	long fix;					// The fix time for this body's position in simulation time
 
 	bool operator != (CBody r) const;
 	bool operator == (CBody r) const;
@@ -184,6 +189,4 @@ private:
 
 void sim(Hash* bodies, double tMax, threadmode t = threadmode::single);
 void simulate(Hash* h, CBody* body, double t);
-void man_simulate(CSim* tsim, int ii);
-void simulate(CSim* sim, double end);
 #endif // HASH_H

@@ -14,3 +14,4 @@ Vel::Vel() : vec() {
 }
 Vel::Vel(double X, double Y, double Z) : vec(X, Y, Z) {
 }
+

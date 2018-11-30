@@ -57,6 +57,9 @@ vec vec::operator / (double scalar) {
 vec vec::operator * (double scalar) {
 	return vec(x * scalar, y * scalar, z * scalar);
 }
+vec vec::operator * (long scalar) {
+	return vec(x * scalar, y * scalar, z * scalar);
+}
 vec vec::operator + (vec const &r) {
 	return vec(x + r.x, y + r.y, z + r.z);
 }
