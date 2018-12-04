@@ -58,6 +58,8 @@ extern long long nCOMcalls;
 extern double cofactor;
 extern std::atomic<unsigned long long> simTime;
 extern std::atomic<int> tocalc;
+extern std::atomic<int> toput;
+extern std::atomic<int> joinable;
 
 class CBody;			// Forward declared for use in CSim
 
@@ -96,7 +98,7 @@ public:
 	int count();
 	void sim(threadmode t = threadmode::single);
 	void man_simulate(int ii);
-	void simulate(double end);
+	void simulate(unsigned long end);
 
 private:
 	double tMax;		// The integration time

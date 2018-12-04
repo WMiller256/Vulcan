@@ -43,7 +43,7 @@ int main(int argn, char** argv) {
 	std::cout << t << " " << h << std::endl;
 
 	CSim* tsim = new CSim(8, t, h);
-	tsim -> setDebug(0);
+	tsim -> setDebug(1);
 	int day = int(h);
 	std::cout << day*4 << std::endl;
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day*4);
@@ -89,7 +89,6 @@ int main(int argn, char** argv) {
 	}
 	std::cout << "Computation time:    " << bright+magenta << cputime << res << std::endl;
 #endif
-	std::cout << "Mutex time:          " << bright+magenta << mtxtime / 1000 << res << std::endl;
 	std::cout << "Wait time:           " << bright+magenta << waittime / 1000 / nthreads<< res << std::endl;
 	std::cout << "Total time:          " << bright+magenta << microseconds << res << std::endl;
 	tsim -> setDebug(2);

@@ -43,9 +43,8 @@ int main(int argn, char** argv) {
 	std::cout << t << " " << h << std::endl;
 
 	CSim* tsim = new CSim(8, t, h);
-	tsim -> setDebug(1);
+	tsim -> setDebug(5);
 	int day = int(h);
-	std::cout << day*4 << std::endl;
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
 	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e3, 0.0, 6.98169e10, 0.0, day);
 	CBody* venus = new CBody(4.8675e24, 6.0518e6, 3.502e3, 0.0, 1.08939e11, 0.0, day);

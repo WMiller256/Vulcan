@@ -1,5 +1,5 @@
 #Name of program
-MAIN    = test
+MAIN    = test.2
 
 ABS		= .
 BIN		= .
@@ -63,7 +63,7 @@ $(BUILD)/%.o: %.c++
 
 build: $(OBJS)
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN) $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN).out $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 

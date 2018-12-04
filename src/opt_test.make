@@ -8,13 +8,13 @@ OPT		= opt_
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
-LFLAGS	= -Wl,-rpath,/usr/local/bin/g++
+LFLAGS	= -Wl,-rpath,/bin/g++.exe
 LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -lstdc++fs
 LIBS	= -lboost_program_options -lncurses
 
 INC		= -I /usr/lib/boost/
 CFLAGS	= -Wno-deprecated-declarations -fopenmp -std=c++17 -O3
-CC      = /usr/local/bin/g++ $(CFLAGS) $(INC) $(LIBS) 
+CC      = /bin/g++.exe $(CFLAGS) $(INC) $(LIBS) 
 
 #Output coloring
 GREEN   = \033[1;32m

@@ -3,10 +3,14 @@
 SIMscaling.c++
 SIMscaling.exe
 opt_SIMscaling.*
-opt_test.exe
-test.exe
+src/opt_test.exe
+src/test.exe
 test.txt
-build/test.o
+src/test
+src/test.2
+src/opt_test
+src/opt_test.2
+build/*.o
 execute.sh
 
 #Ignore test outputs
@@ -22,4 +26,5 @@ bin/*.stackdump
 
 #Ignore python files
 *.py
-
+src/plotting/.ipynb_checkpoints/*
+src/plotting/*.ipynb
