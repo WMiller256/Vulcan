@@ -14,7 +14,7 @@ build/*.o
 execute.sh
 
 #Ignore test outputs
-*.txt
+src/*.txt
 *.out*
 
 #ignore binaries
