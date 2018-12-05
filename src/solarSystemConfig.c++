@@ -33,10 +33,15 @@ int main(int argn, char** argv) {
 	sim.addBody(uranus);
 	sim.addBody(neptune);
 
-	sim.writeConfiguration("data/solarSystem.sim");
-	sim.readConfiguration("data/solarSystem.sim");
+	sim.writeConfiguration("../data/solarSystem.sim");
+	CSim* check = sim.readConfiguration("../data/solarSystem.sim");
 
-	print_special("Generated file "+yellow+"data/solarSystem.sim"+green+" successfully "+res, 'w', 'k');
+	if (check != NULL) {
+		print_special("Generated file "+yellow+"data/solarSystem.sim"+green+" successfully "+res, 'w', 'k');
+	}
+	else {
+		error("Failed to create "+yellow+"data/solarsystem.sim "+res+" - "+bright+red+"NULL"+res+" returned from "+in("CSim","writeConfiguration"), __LINE__, __FILE__);		
+	}
 
 	return 0;
 }

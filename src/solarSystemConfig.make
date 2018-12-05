@@ -2,7 +2,7 @@
 MAIN    = solarSystemConfig
 
 ABS		= .
-BIN		= ./bin
+BIN		= ../bin
 BUILD	= $(ABS)/../build
 RM      = /bin/rm -f
 MV		= /bin/mv -f
@@ -28,9 +28,7 @@ YELLOW  = \033[33m
 SRCS	= $(ABS)/$(MAIN).c++	\
 		  $(ABS)/csim.c++		\
 		  $(ABS)/cbody.c++		\
-		  $(ABS)/hash.c++		\
 		  $(ABS)/simio.c++		\
-		  $(ABS)/baseio.c++		\
 		  $(ABS)/global.c++		\
 		  $(ABS)/vel.c++		\
 		  $(ABS)/vec.c++		\
@@ -46,10 +44,7 @@ OBJS	= $(BUILD)/$(MAIN).o	\
 		  $(BUILD)/rpos.o		\
 		  $(BUILD)/force.o		\
 		  $(BUILD)/simio.o		\
-		  $(BUILD)/baseio.o		\
-		  $(BUILD)/global.o		\
-		  $(BUILD)/hash.o
-		  
+		  $(BUILD)/global.o		  
 
 #Builds
 all:

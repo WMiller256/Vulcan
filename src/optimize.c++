@@ -46,27 +46,29 @@ int main(int argn, char** argv) {
 		out.open("opt_"+filenames.at(ii));
 		while (std::getline(file, line)) {
 			if (verbose) std::cout << line;
-			if (line.find("print(") != std::string::npos || 
-				line.find("printr(") != std::string::npos ||
-				line.find("println(") != std::string::npos ||
-				line.find("printrln(") != std::string::npos ||
-				line.find("error(") != std::string::npos ||
-				line.find("warning(") != std::string::npos ||
-				line.find("scientific(") != std::string::npos) {
-				if (line.find("void print") == std::string::npos &&
-					line.find("string scientific") == std::string::npos &&
-					line.find("void error") == std::string::npos && 
-					line.find("void warning") == std::string::npos) {
-					if (filenames[ii] != "simio.c++" && filenames[ii] != "vec.h") {
-						line.insert(0, comment);
-					}
-					out << line;
-					while (line.find(";") == std::string::npos) {
-						std::getline(file, line);
+			if (line.find("// Exclude") == std::string::npos) {
+				if (line.find("print(") != std::string::npos || 
+					line.find("printr(") != std::string::npos ||
+					line.find("println(") != std::string::npos ||
+					line.find("printrln(") != std::string::npos ||
+					line.find("error(") != std::string::npos ||
+					line.find("warning(") != std::string::npos ||
+					line.find("scientific(") != std::string::npos) {
+					if (line.find("void print") == std::string::npos &&
+						line.find("string scientific") == std::string::npos &&
+						line.find("void error") == std::string::npos && 
+						line.find("void warning") == std::string::npos) {
 						if (filenames[ii] != "simio.c++" && filenames[ii] != "vec.h") {
 							line.insert(0, comment);
+							out << line;
 						}
-						out << line;
+						while (line.find(";") == std::string::npos) {
+							std::getline(file, line);
+							if (filenames[ii] != "simio.c++" && filenames[ii] != "vec.h") {
+								line.insert(0, comment);
+								out << line;
+							}
+						}
 					}
 				}
 			}

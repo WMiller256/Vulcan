@@ -88,7 +88,6 @@ int main(int argn, char** argv) {
 	}
 	std::cout << "Computation time:    " << bright+magenta << cputime << res << std::endl;
 #endif
-	std::cout << "Mutex time:          " << bright+magenta << mtxtime / 1000 << res << std::endl;
 	std::cout << "Wait time:           " << bright+magenta << waittime / 1000 / nthreads<< res << std::endl;
 	std::cout << "Total time:          " << bright+magenta << microseconds << res << std::endl;
 	tsim -> setDebug(2);

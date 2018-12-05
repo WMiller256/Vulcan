@@ -182,11 +182,10 @@ void CBody::init() {
 
 std::string CBody::info() {
 	std::string s = "";
-	s.append("Body info:\n");
-	s.append("\t Position ("+std::to_string(x)+", "+std::to_string(y)+", "+std::to_string(z)+")\n");
-	s.append("\t Radius   "+std::to_string(radius)+"\n");
-	s.append("\t Mass     "+std::to_string(mass)+"\n");
-	s.append("\t Speed    "+std::to_string(speed)+"\n\n");
+	s.append("Body "+name+"\n");
+	s.append("\t Position "+pos.info()+"\n");
+	s.append("\t Radius   "+scientific(radius, 5)+"\n");
+	s.append("\t Mass     "+scientific(mass, 5)+"\n");
 	return s;
 }
 

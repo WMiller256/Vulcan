@@ -40,7 +40,6 @@
 #include "vec.h"
 #include "pos.h"
 #include "rpos.h"
-#include "hash.h"
 
 #define G 6.67408e-11
 
@@ -48,18 +47,8 @@ extern int nbodies;
 extern int nthreads;
 extern bool warnings;
 extern int debug;
-extern double minradius;
-extern double maxradius;
-extern double blockwidth;		// The width of each hash block
-extern long long cputime;
-extern long long mtxtime;
-extern long long waittime;
-extern long long nCOMcalls;
-extern double cofactor;
-extern std::atomic<unsigned long long> simTime;
-extern std::atomic<int> tocalc;
-extern std::atomic<int> toput;
-extern std::atomic<int> joinable;
+extern unsigned long long cputime;
+extern unsigned long long waittime;
 
 class CBody;			// Forward declared for use in CSim
 
@@ -91,7 +80,7 @@ public:
 	Force mforce(CBody body);
 
 	void printForces();
-	void writeConfiguration(const std::string& filename, bool overwrite = false);
+	int writeConfiguration(const std::string& filename, bool overwrite = false);
 	CSim* readConfiguration(const std::string& filename);
 
 	double H();
@@ -104,12 +93,8 @@ private:
 	double tMax;		// The integration time
 	double tCurr;		// Current time
 	double h;			// The time step
-#ifdef using_hash
-	Hash* bodies;		// Hash table to hold the body objects
-#else
 	CBody** bodies;
 	int nadded;
-#endif
 
 	void init();
 };
@@ -189,6 +174,4 @@ private:
 	void init();
 };
 
-void sim(Hash* bodies, double tMax, threadmode t = threadmode::single);
-void simulate(Hash* h, CBody* body, double t);
 #endif // HASH_H

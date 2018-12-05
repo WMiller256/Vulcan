@@ -11,7 +11,6 @@
 #include <unistd.h>
 
 #include "csim.h"
-#include "hash.h"
 #include "colors.h"
 
 std::string in(std::string prefix, std::string function);
@@ -24,7 +23,6 @@ std::string stripcolors(const std::string& str);
 
 bool iscolor(std::string str);
 
-Hash* readfile(const std::string& filename);
 bool exists(const std::string& filename);
 bool prompt(const std::string& p);
 
