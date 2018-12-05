@@ -10,8 +10,11 @@ src/test
 src/test.2
 src/opt_test
 src/opt_test.2
-build/*.o
 execute.sh
+
+#Ignore build objects
+build/*.o
+wsbuild/*.o
 
 #Ignore test outputs
 src/*.txt
