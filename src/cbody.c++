@@ -176,6 +176,8 @@ void CBody::init() {
 	pos = Pos(0,0,0);
 	h = 1;
 	fix = 0;
+
+	ncalcs = 0;
 	
 	print(green+"done\n"+res);
 }

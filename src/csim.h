@@ -15,7 +15,7 @@
 
 #ifndef CSIM_H
 #define CSIM_H
-//#define profiling
+
 #define multhreading
 
 #include <iostream>
@@ -86,14 +86,17 @@ public:
 	double H();
 	int count();
 	void sim(threadmode t = threadmode::single);
-	void man_simulate(int ii);
+	void man_simulate();
 	void simulate(unsigned long end);
 
 private:
 	double tMax;		// The integration time
 	double tCurr;		// Current time
 	double h;			// The time step
-	CBody** bodies;
+	CBody** read;
+	CBody** write;
+	CBody** one;
+	CBody** two;
 	int nadded;
 
 	void init();
@@ -153,6 +156,7 @@ public:
 	Pos pos;
 	long h;
 	long fix;					// The fix time for this body's position in simulation time
+	unsigned long long ncalcs;
 
 	bool operator != (CBody r) const;
 	bool operator == (CBody r) const;
@@ -170,6 +174,7 @@ private:
 	double zv;					// velocity in z direction
 	double mass;				// Mass of the body
 	double speed;				// Magnitude of linear velocity
+
 
 	void init();
 };

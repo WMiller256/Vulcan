@@ -21,6 +21,7 @@ vec::vec(double X, double Y, double Z) {
 	x = X;
 	y = Y;
 	z = Z;
+	
 }
 vec::vec(vec* v) {
 	x = v -> x;
