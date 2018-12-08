@@ -42,6 +42,7 @@
 #include "rpos.h"
 
 #define G 6.67408e-11
+#define profiling
 
 extern int nbodies;
 extern int nthreads;
@@ -49,6 +50,8 @@ extern bool warnings;
 extern int debug;
 extern unsigned long long cputime;
 extern unsigned long long waittime;
+extern unsigned long long polltime;
+extern unsigned long long simulationtime;
 
 class CBody;			// Forward declared for use in CSim
 

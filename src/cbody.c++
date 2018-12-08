@@ -92,9 +92,6 @@ double CBody::originDist() {
 	return dist;
 }
 Pos CBody::COM(CBody* target) {
-#ifdef profiling
-	nCOMcalls++;
-#endif
 	if (this == target) {
 		error("{target} and {this} are the same, center of mass will be {this -> pos}.", __LINE__, __FILE__);
 	}
@@ -114,9 +111,6 @@ Pos CBody::COM(CBody* target) {
 	}
 }
 Pos CBody::COM(CBody target) {
-#ifdef profiling
-	nCOMcalls++;
-#endif
 	if (*this == target) {
 		error("{target} and {this} are the same, center of mass will be {this -> pos}.", __LINE__, __FILE__);
 	}

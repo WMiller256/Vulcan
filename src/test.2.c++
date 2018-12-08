@@ -84,10 +84,12 @@ int main(int argn, char** argv) {
 #ifdef profiling
 	if (thread == threadmode::manual) {
 		cputime /= nthreads;
+		polltime /= nthreads;
 	}
 	std::cout << "Computation time:    " << bright+magenta << cputime << res << std::endl;
 #endif
-	std::cout << "Wait time:           " << bright+magenta << waittime / 1000 / nthreads<< res << std::endl;
+	std::cout << "Poll time:           " << bright+magenta << polltime << res << std::endl;
+	std::cout << "Simulation total:    " << bright+magenta << simulationtime << res << std::endl;
 	std::cout << "Total time:          " << bright+magenta << microseconds << res << std::endl;
 	tsim -> setDebug(2);
 	if (thread == threadmode::manual) {

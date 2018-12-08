@@ -6,8 +6,9 @@ int nthreads;
 int debug = 0;
 int nbodies;
 unsigned long long cputime = 0;
-unsigned long long waittime = 0;
+unsigned long long polltime = 0;
 unsigned long long maxTime = 0;
+unsigned long long simulationtime = 0;
 std::atomic<unsigned long long> simTime;
 std::atomic<int> tocalc;
 std::atomic<int> next;
@@ -234,9 +235,16 @@ void CSim::init() {
 }
 
 void CSim::sim(threadmode t) {
+	auto start = std::chrono::high_resolution_clock::now();
 	switch(t) {
 		case single:
+#ifdef profiling
+			start = std::chrono::high_resolution_clock::now();
+#endif
 			simulate((unsigned long)tMax);
+#ifdef profiling
+			simulationtime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
+#endif
 			break;
 		case manual:
 			simTime = 0;
@@ -251,6 +259,9 @@ void CSim::sim(threadmode t) {
 			for (int ii = 0; ii < nthreads; ii ++) {
 				threads[ii] = std::thread(&CSim::man_simulate, this);
 			}
+#ifdef profiling
+			start = std::chrono::high_resolution_clock::now();
+#endif
 			if (int(h) > 0) {
 				vec a;
 				vec v;
@@ -274,15 +285,7 @@ void CSim::sim(threadmode t) {
 				    next = 0;
 					simTime += h;
 					println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);
-/*					a = force(*read[0]) / read[0] -> Mass() * h;
-					v = write[0] -> accelerate(a); 
-					write[0] -> Position(read[0] -> pos + v * h + a * (h * 0.5));
-					write[0] -> ncalcs++;
-					std::cout << read[0] -> Name()+" done\n";
-					print(in("CSim","sim")+"          {a} - "+a.info(3)+
-						"\n                      {v} - "+v.info(3)+"\n                      {pos} - "+body -> pos.info(3)+"\n", 1);
-*/					while (tocalc > 0) {}
-					
+					while (tocalc > 0) {}					
 					if (read == one) {
 						read = two;
 						write = one;
@@ -296,14 +299,13 @@ void CSim::sim(threadmode t) {
 			else {
 				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);
 			}
+#ifdef profiling
+			simulationtime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
+#endif
 			while (joinable < nbodies) {
 			}
 			for (int ii = 0; ii < nthreads; ii ++) {
 				threads[ii].join();
-				std::cout << "Thread " << ii << " finished" << std::endl;
-			}
-			for (int ii = 0; ii < nbodies; ii ++) {
-				std::cout << read[ii] -> Name() << " " << read[ii] -> ncalcs << std::endl;
 			}
 			break;
 	}
@@ -322,6 +324,10 @@ void CSim::man_simulate() {
 		auto start = std::chrono::high_resolution_clock::now();
 #endif
 		if (simTime - prev > 0) {
+#ifdef profiling
+			polltime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
+			start = std::chrono::high_resolution_clock::now();
+#endif
 			prev = simTime;
 			while (tocalc > 0) {
 				ii = next++;
@@ -339,13 +345,13 @@ void CSim::man_simulate() {
 				tocalc--;
 				wbody -> ncalcs++;
 			}
+#ifdef profiling
+			cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
+#endif
 			if (simTime == maxTime) {
 				break;
 			}
 		}
-#ifdef profiling
-		cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
-#endif
 	}
 	joinable++;
 }
@@ -372,22 +378,16 @@ void CSim::simulate(unsigned long end) {
 		}
 		while (t < end) {
 			if ((unsigned long)t / percent != past) {
-				std::cout << '\r' << " Progress: " << std::setw(3) << (t * 100) / (end - 1) << std::flush;
+				std::cout << '\r' << " Progress: " << std::setw(3) << ((unsigned long)t * 100) / (unsigned long)(end - h) << std::flush;
 				past = (unsigned long)t / percent;
-				if (t / end == 1) {
-					std::cout << "\r Progress: 100\n";
-				} 
 			}
-			for (int ii = 0; ii < nbodies; ii ++) {
-				body = bodies[ii];
 #ifdef profiling
 				auto start = std::chrono::high_resolution_clock::now();
 #endif
+			for (int ii = 0; ii < nbodies; ii ++) {
+				body = bodies[ii];
 				a[ii] = force(*body) / body -> Mass() * h;
 				v[ii] = body -> accelerate(a[ii]); 
-#ifdef profiling
-				cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
-#endif
 				printrln(in("", "simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 1);
 			}
 			for (int ii = 0; ii < nbodies; ii ++) {
@@ -395,8 +395,12 @@ void CSim::simulate(unsigned long end) {
 				body -> Position(body -> pos + v[ii] * h + a[ii] * (h * 0.5));
 				printrln(in("", "Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 1);
 			}
+#ifdef profiling
+				cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
+#endif
 			t += h;
 		}
+		std::cout << "\r Progress: 100\n";
 	}
 	else {
 		error("{h} was less than or equal to zero. Cannot simulate",__LINE__,__FILE__);
