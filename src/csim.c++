@@ -281,8 +281,8 @@ void CSim::sim(threadmode t) {
 					if (simTime == maxTime - h) {
 						std::cout << "\r Progress: 100\n";
 					}
-				    tocalc = nbodies;
-				    next = 0;
+					tocalc = nbodies;
+					next = 0;
 					simTime += h;
 					println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);
 					while (tocalc > 0) {}					
