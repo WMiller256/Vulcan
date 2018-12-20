@@ -1,6 +1,12 @@
 
 #Ignore test code
 SIMscaling.c++
+test.c++
+test.exe
+threadracing*
+a.out
+a.exe
+threads.exe
 SIMscaling.exe
 opt_SIMscaling.*
 src/opt_test.exe
@@ -11,6 +17,8 @@ src/test.2
 src/opt_test
 src/opt_test.2
 execute.sh
+*.c++
+*.exe
 
 #Ignore build objects
 build/*.o
