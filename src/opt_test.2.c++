@@ -7,6 +7,7 @@ int main(int argn, char** argv) {
 	double h;
 	std::string extension;
 	threadmode thread = threadmode::single;
+
 	
 	if (argn > 1) {
 		if (strcmp(argv[1], "single") == 0) {
@@ -85,12 +86,15 @@ int main(int argn, char** argv) {
 	if (thread == threadmode::manual) {
 		cputime /= nthreads;
 		polltime /= nthreads;
+		std::cout << "Computation time per thread: " << bright+magenta << cputime << res << std::endl;
 	}
-	std::cout << "Computation time:    " << bright+magenta << cputime << res << std::endl;
+	else {
+		std::cout << "Computation time:            " << bright+magenta << cputime << res << std::endl;
+	}
 #endif
-	std::cout << "Poll time:           " << bright+magenta << polltime << res << std::endl;
-	std::cout << "Simulation total:    " << bright+magenta << simulationtime << res << std::endl;
-	std::cout << "Total time:          " << bright+magenta << microseconds << res << std::endl;
+	std::cout << "Poll time:                   " << bright+magenta << polltime << res << std::endl;
+	std::cout << "Simulation total:            " << bright+magenta << simulationtime << res << std::endl;
+	std::cout << "Total time:                  " << bright+magenta << microseconds << res << std::endl;
 	tsim -> setDebug(2);
 	if (thread == threadmode::manual) {
 		tsim -> writeConfiguration("explicit-test."+extension+".txt");

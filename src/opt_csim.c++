@@ -15,25 +15,13 @@ std::atomic<int> next;
 std::atomic<int> joinable;
 
 CSim::CSim() {
-	init();
-	one = new CBody*[nbodies];
-	two = new CBody*[nbodies];
-	for (int ii = 0; ii < nbodies; ii ++) {
-		one[ii] = new CBody();
-		two[ii] = new CBody();
-	}
+	init();	
 	read = one;
 	write = two;
 }
 CSim::CSim(int n) {
 	init();
 	nbodies = n;
-	one = new CBody*[nbodies];
-	two = new CBody*[nbodies];
-	for (int ii = 0; ii < nbodies; ii ++) {
-		one[ii] = new CBody();
-		two[ii] = new CBody();
-	}
 	read = one;
 	write = two;
 }
@@ -44,12 +32,6 @@ CSim::CSim(int n, double max, double step) {
 	h = step;
 	tMax = max;
 	maxTime = max;
-	one = new CBody*[nbodies];
-	two = new CBody*[nbodies];
-	for (int ii = 0; ii < nbodies; ii ++) {
-		one[ii] = new CBody();
-		two[ii] = new CBody();
-	}
 	read = one;
 	write = two;
 }
@@ -61,8 +43,9 @@ void CSim::setDebug(int Debug) {
 }
 
 void CSim::addBody(CBody* body) {
-	one[nadded] = body;
-	two[nadded++] = body;
+	one.push_back(body);
+	two.push_back(body);
+	nadded++;
 }
 CBody* CSim::at(int ii) {
 	return read[ii];
@@ -71,16 +54,16 @@ CBody CSim::copy(int ii) {
 	return *read[ii];
 }
 
-void CSim::force(CBody* body) {
+Force CSim::force(CBody* body) {
 //	println(in("CSim", "force")+"    Calculating net force", 4);//	println(in("CSim", "force")+"    Calculating net force", 4);
-	body -> net.zero() ;
+	Force net(0,0,0);
 	double fmagnitude;
 	for (int ii = 0; ii < nadded; ii ++) {
 		if (read[ii] != NULL) {
 			if (read[ii] != body) {
 //				printrln("\n"+in("CSim", "force")+"    Target: ", body -> Name(), 5); //				printrln("\n"+in("CSim", "force")+"    Target: ", body -> Name(), 5); 
 				fmagnitude = (G * body -> Mass() * read[ii] -> Mass()) / pow(read[ii] -> distance(body -> pos), 2);
-				body -> net += body -> pos.direction(read[ii] -> pos) * fmagnitude;
+				net += body -> pos.direction(read[ii] -> pos) * fmagnitude;
 
 //				printrln(in("CSim", "force")+"    Magnitude of force between "+body -> Name()+" and "+//					read[ii] -> Name()+" is ", scientific(fmagnitude), 4);//					read[ii] -> Name()+" is ", scientific(fmagnitude), 4);
 //				printrln(in("CSim", "force")+"    Net force vector on "+body -> Name()+" is ", body -> net.info(), 4);//				printrln(in("CSim", "force")+"    Net force vector on "+body -> Name()+" is ", body -> net.info(), 4);
@@ -88,6 +71,7 @@ void CSim::force(CBody* body) {
 		}
 	}
 //	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	//	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	
+	return net;
 }
 Force CSim::force(CBody body) {
 //	println(in("CSim", "force")+"    Calculating net force", 5);//	println(in("CSim", "force")+"    Calculating net force", 5);
@@ -234,6 +218,8 @@ void CSim::init() {
 
 void CSim::sim(threadmode t) {
 	auto start = std::chrono::high_resolution_clock::now();
+	read = one;
+	write = two;
 	switch(t) {
 		case single:
 #ifdef profiling
@@ -250,13 +236,16 @@ void CSim::sim(threadmode t) {
 			joinable = 0;
 			next = 0;
 			nbodies = nadded;
-			if (nadded < nthreads) {
-				nthreads = nadded;
+			if (nbodies < nthreads) {
+				nthreads = nbodies;
 			}
+
+			int block = nbodies / nthreads;
 			std::thread threads[nthreads];
-			for (int ii = 0; ii < nthreads; ii ++) {
-				threads[ii] = std::thread(&CSim::man_simulate, this);
+			for (int ii = 0; ii < nthreads - 1; ii ++) {
+				threads[ii] = std::thread(&CSim::man_simulate, this, block * ii, block * (ii + 1));
 			}
+			threads[nthreads - 1] = std::thread(&CSim::man_simulate, this, block * (nthreads - 1), nbodies);
 #ifdef profiling
 			start = std::chrono::high_resolution_clock::now();
 #endif
@@ -279,8 +268,7 @@ void CSim::sim(threadmode t) {
 					if (simTime == maxTime - h) {
 						std::cout << "\r Progress: 100\n";
 					}
-				    tocalc = nbodies;
-				    next = 0;
+					tocalc = nbodies;
 					simTime += h;
 //					println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);//					println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);
 					while (tocalc > 0) {}					
@@ -300,20 +288,19 @@ void CSim::sim(threadmode t) {
 #ifdef profiling
 			simulationtime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif
-			while (joinable < nbodies) {
-			}
+			while (joinable < nthreads - 1) {}
 			for (int ii = 0; ii < nthreads; ii ++) {
 				threads[ii].join();
 			}
 			break;
 	}
 }
-void CSim::man_simulate() {
+void CSim::man_simulate(int min, int max) {
 	int tot = 0;
 	vec v;
 	vec a;
 	double prev = 0;
-	int ii;
+	int ii = 0;
 	CBody* body = NULL;
 	CBody* wbody = NULL;
 	while (simTime == 0) {}				// Wait for the simulation to start
@@ -327,19 +314,16 @@ void CSim::man_simulate() {
 			start = std::chrono::high_resolution_clock::now();
 #endif
 			prev = simTime;
-			while (tocalc > 0) {
-				ii = next++;
-				if (ii >= nbodies) {
-					break;
-				} 
+			for (int ii = min; ii < max; ii ++) {
 				body = read[ii];
 				wbody = write[ii];
-				a = force(*body) / body -> Mass() * h;
+				a = force(body) / body -> Mass() * h;
 				v = wbody -> accelerate(a); 
 				wbody -> Position(body -> pos + v * h + a * (h * 0.5));
 				wbody -> fix = simTime;
 //				print(in("CSim", "man_simulate")+"       Velocity of {"+cyan+wbody -> Name()+res+"} is "+wbody -> Velocity().info(3)+"\n", 1);//				print(in("CSim", "man_simulate")+"       Velocity of {"+cyan+wbody -> Name()+res+"} is "+wbody -> Velocity().info(3)+"\n", 1);
 //				print(in("CSim", "man_simulate")+"       New posiiton for {"+cyan+wbody -> Name()+res+"} is "+wbody -> pos.info(3)+"\n", 1);//				print(in("CSim", "man_simulate")+"       New posiiton for {"+cyan+wbody -> Name()+res+"} is "+wbody -> pos.info(3)+"\n", 1);
+
 				tocalc--;
 				wbody -> ncalcs++;
 			}
@@ -362,10 +346,6 @@ void CSim::simulate(unsigned long end) {
 	CBody* body;
 	vec a[nbodies];
 	vec v[nbodies];
-	CBody** bodies = new CBody*[nbodies];
-	for (int ii = 0; ii < nbodies; ii ++) {
-		bodies[ii] = at(ii);
-	}
 	if (h > 0.0) {
 		unsigned long percent;
 		if (end > 100 * h) {
@@ -383,13 +363,13 @@ void CSim::simulate(unsigned long end) {
 				auto start = std::chrono::high_resolution_clock::now();
 #endif
 			for (int ii = 0; ii < nbodies; ii ++) {
-				body = bodies[ii];
-				a[ii] = force(*body) / body -> Mass() * h;
+				body = one[ii];
+				a[ii] = force(body) / body -> Mass() * h;
 				v[ii] = body -> accelerate(a[ii]); 
 //				printrln(in("", "simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 1);//				printrln(in("", "simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 1);
 			}
 			for (int ii = 0; ii < nbodies; ii ++) {
-				body = bodies[ii];
+				body = one[ii];
 				body -> Position(body -> pos + v[ii] * h + a[ii] * (h * 0.5));
 //				printrln(in("", "Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 1);//				printrln(in("", "Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 1);
 			}

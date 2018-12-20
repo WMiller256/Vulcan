@@ -42,7 +42,7 @@
 #include "rpos.h"
 
 #define G 6.67408e-11
-#define profiling
+//#define profiling
 
 extern int nbodies;
 extern int nthreads;
@@ -78,9 +78,8 @@ public:
 	CBody* at(int ii);
 	CBody copy(int ii);
 	void step();
-	void force(CBody* body);
+	Force force(CBody* body);
 	Force force(CBody body);
-	Force mforce(CBody body);
 
 	void printForces();
 	int writeConfiguration(const std::string& filename, bool overwrite = false);
@@ -89,17 +88,17 @@ public:
 	double H();
 	int count();
 	void sim(threadmode t = threadmode::single);
-	void man_simulate();
+	void man_simulate(int min, int max);
 	void simulate(unsigned long end);
 
 private:
 	double tMax;		// The integration time
 	double tCurr;		// Current time
 	double h;			// The time step
-	CBody** read;
-	CBody** write;
-	CBody** one;
-	CBody** two;
+	std::vector<CBody*> one;
+	std::vector<CBody*> two;
+	std::vector<CBody*> read;
+	std::vector<CBody*> write;
 	int nadded;
 
 	void init();
