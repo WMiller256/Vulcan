@@ -11,7 +11,6 @@ unsigned long long maxTime = 0;
 unsigned long long simulationtime = 0;
 std::atomic<unsigned long long> simTime;
 std::atomic<int> tocalc;
-std::atomic<int> next;
 std::atomic<int> joinable;
 
 CSim::CSim() {
@@ -68,26 +67,6 @@ Force CSim::force(CBody* body) {
 				printrln(in("CSim", "force")+"    Magnitude of force between "+body -> Name()+" and "+
 					read[ii] -> Name()+" is ", scientific(fmagnitude), 4);
 				printrln(in("CSim", "force")+"    Net force vector on "+body -> Name()+" is ", body -> net.info(), 4);
-			}
-		}
-	}
-	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	
-	return net;
-}
-Force CSim::force(CBody body) {
-	println(in("CSim", "force")+"    Calculating net force", 5);
-	Force net(0,0,0);
-	double fmagnitude;
-	for (int ii = 0; ii < nadded; ii ++) {
-		if (read[ii] != NULL) {
-			if (*read[ii] != body) {
-				printrln("\n"+in("CSim", "force")+"    Target: ", body.Name(), 5); 
-				fmagnitude = (G * body.Mass() * read[ii] -> Mass()) / pow(read[ii] -> distance(body.pos), 2);
-				net += body.pos.direction(read[ii] -> pos) * fmagnitude;
-
-				printrln(in("CSim", "force")+"    Magnitude of force between "+body.Name()+" and "+
-					read[ii] -> Name()+" is ", scientific(fmagnitude), 4);
-				printrln(in("CSim", "force")+"    Net force vector on "+body.Name()+" is ", net.info(), 4);
 			}
 		}
 	}
@@ -236,7 +215,6 @@ void CSim::sim(threadmode t) {
 			simTime = 0;
 			tocalc = 0;
 			joinable = 0;
-			next = 0;
 			nbodies = nadded;
 			if (nbodies < nthreads) {
 				nthreads = nbodies;
@@ -270,7 +248,7 @@ void CSim::sim(threadmode t) {
 					if (simTime == maxTime - h) {
 						std::cout << "\r Progress: 100\n";
 					}
-					tocalc = nbodies;
+					tocalc = nthreads;
 					simTime += h;
 					println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);
 					while (tocalc > 0) {}					
@@ -326,9 +304,9 @@ void CSim::man_simulate(int min, int max) {
 				print(in("CSim", "man_simulate")+"       Velocity of {"+cyan+wbody -> Name()+res+"} is "+wbody -> Velocity().info(3)+"\n", 1);
 				print(in("CSim", "man_simulate")+"       New posiiton for {"+cyan+wbody -> Name()+res+"} is "+wbody -> pos.info(3)+"\n", 1);
 
-				tocalc--;
 				wbody -> ncalcs++;
 			}
+			tocalc--;
 #ifdef profiling
 			cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif

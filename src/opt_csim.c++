@@ -268,7 +268,7 @@ void CSim::sim(threadmode t) {
 					if (simTime == maxTime - h) {
 						std::cout << "\r Progress: 100\n";
 					}
-					tocalc = nbodies;
+					tocalc = nthreads;
 					simTime += h;
 //					println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);//					println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);
 					while (tocalc > 0) {}					
@@ -324,9 +324,9 @@ void CSim::man_simulate(int min, int max) {
 //				print(in("CSim", "man_simulate")+"       Velocity of {"+cyan+wbody -> Name()+res+"} is "+wbody -> Velocity().info(3)+"\n", 1);//				print(in("CSim", "man_simulate")+"       Velocity of {"+cyan+wbody -> Name()+res+"} is "+wbody -> Velocity().info(3)+"\n", 1);
 //				print(in("CSim", "man_simulate")+"       New posiiton for {"+cyan+wbody -> Name()+res+"} is "+wbody -> pos.info(3)+"\n", 1);//				print(in("CSim", "man_simulate")+"       New posiiton for {"+cyan+wbody -> Name()+res+"} is "+wbody -> pos.info(3)+"\n", 1);
 
-				tocalc--;
 				wbody -> ncalcs++;
 			}
+			tocalc--;
 #ifdef profiling
 			cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif
