@@ -28,6 +28,7 @@ YELLOW  = \033[33m
 SRCS	= $(ABS)/$(MAIN).c++	\
 		  $(ABS)/csim.c++		\
 		  $(ABS)/cbody.c++		\
+		  $(ABS)/cghost.c++		\
 		  $(ABS)/simio.c++		\
 		  $(ABS)/global.c++		\
 		  $(ABS)/vel.c++		\
@@ -38,6 +39,7 @@ SRCS	= $(ABS)/$(MAIN).c++	\
 OBJS	= $(BUILD)/$(MAIN).o	\
 		  $(BUILD)/csim.o		\
 		  $(BUILD)/cbody.o		\
+		  $(BUILD)/cghost.o		\
 		  $(BUILD)/pos.o		\
 		  $(BUILD)/vel.o		\
 		  $(BUILD)/vec.o		\

@@ -1,5 +1,5 @@
 #Name of program
-MAIN    = test.2
+MAIN    = test
 
 ABS		= .
 BIN		= .
@@ -29,6 +29,7 @@ YELLOW  = \033[33m
 SRCS	= $(ABS)/$(OPT)$(MAIN).c++	\
 		  $(ABS)/$(OPT)csim.c++		\
 		  $(ABS)/$(OPT)cbody.c++	\
+		  $(ABS)/$(OPT)cghost.c++	\
 		  $(ABS)/$(OPT)simio.c++	\
 		  $(ABS)/$(OPT)global.c++	\
 		  $(ABS)/$(OPT)vel.c++		\
@@ -39,6 +40,7 @@ SRCS	= $(ABS)/$(OPT)$(MAIN).c++	\
 OBJS	= $(BUILD)/$(OPT)$(MAIN).o	\
 		  $(BUILD)/$(OPT)csim.o		\
 		  $(BUILD)/$(OPT)cbody.o	\
+		  $(BUILD)/$(OPT)cghost.o	\
 		  $(BUILD)/$(OPT)pos.o		\
 		  $(BUILD)/$(OPT)vel.o		\
 		  $(BUILD)/$(OPT)vec.o		\
@@ -65,7 +67,6 @@ build: $(OBJS)
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN) $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-
 
 clean:
 	$(RM) *.core $(BUILD)/*.o *.d *.stackdump

@@ -13,3 +13,10 @@ double magnitude(vec v) {
 	printrln(in("","magnitude")+"      Vector "+v.info()+" magnitude is ", scientific(ret), 4);
 	return ret;
 }
+
+double fetch_add(std::atomic<double>* shared, double h) {
+	double expected = shared -> load();
+	while (!atomic_compare_exchange_weak(shared, &expected, expected + h))
+	  ;
+	return expected;
+}

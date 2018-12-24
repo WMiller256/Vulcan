@@ -17,6 +17,23 @@
 #define CSIM_H
 
 #define multhreading
+#define G 6.67408e-11
+//#define profiling
+#define SIMTIME_TYPE 2
+
+enum threadmode {
+	single,
+	omp,
+	manual
+};
+enum format {
+	text
+};
+enum bodyType {
+	def,
+	planet,
+	ghost
+};
 
 #include <iostream>
 #include <iomanip>
@@ -29,11 +46,11 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
-#include <condition_variable>
 #include <atomic>
 #include <limits>
 #include <omp.h>
 
+#include "cbody.h"
 #include "force.h"
 #include "global.h"
 #include "vel.h"
@@ -41,8 +58,6 @@
 #include "pos.h"
 #include "rpos.h"
 
-#define G 6.67408e-11
-//#define profiling
 
 extern int nbodies;
 extern int nthreads;
@@ -53,16 +68,8 @@ extern unsigned long long waittime;
 extern unsigned long long polltime;
 extern unsigned long long simulationtime;
 
-class CBody;			// Forward declared for use in CSim
-
-enum threadmode {
-	single,
-	omp,
-	manual
-};
-enum format {
-	text
-};
+class CBody;		// Forward declaration here is mandatory
+class CGhost;
 
 class CSim
 {
@@ -75,11 +82,9 @@ public:
 	void setDebug(int Debug);
 
 	void addBody(CBody* body);
+	void addGhost(CGhost* ghost);
 	CBody* at(int ii);
 	CBody copy(int ii);
-	void step();
-	Force force(CBody* body);
-	Force force(CBody body);
 
 	void printForces();
 	int writeConfiguration(const std::string& filename, bool overwrite = false);
@@ -87,18 +92,29 @@ public:
 
 	double H();
 	int count();
+	int NReal();
+	int NGhost();
+
+	void step();
+	Force force(CBody* body);
+	void fixedHForce(CBody* body, CBody* wbody);
 	void sim(threadmode t = threadmode::single);
-	void man_simulate(int min, int max);
-	void simulate(unsigned long end);
+	void threadedFixedH(int min, int max);
+	void unthreadedFixedH(unsigned long end);
 
 private:
-	double tMax;		// The integration time
-	double tCurr;		// Current time
+	double tMax;
+	double tCurr;
 	double h;			// The time step
-	std::vector<CBody*> one;
-	std::vector<CBody*> two;
-	std::vector<CBody*> read;
-	std::vector<CBody*> write;
+	std::vector<CBody*> bOne;		// Vector of 'real' (non-ghost) bodies
+	std::vector<CBody*> bTwo;		// Second vector of 'real' bodies to allow pointer-toggle for 
+	std::vector<CBody*> bRead;		// fastest possible I/O.
+	std::vector<CBody*> bWrite;		// The toggling pointers for the 'real' bodies
+	std::vector<CGhost*> gOne;		// Vector of 'ghost' bodies (test particles)
+	std::vector<CGhost*> gTwo;		// Second vector of 'ghosts' for pointer toggling
+	std::vector<CGhost*> gRead;		// Pointer toggles
+	std::vector<CGhost*> gWrite;
+
 	int nadded;
 
 	void init();
@@ -121,64 +137,6 @@ private:
 	static int attempts;
 	static int steps[];
 	threadmode threading;
-};
-
-class CBody
-{
-public:
-	CBody();
-	CBody(double Mass, double Radius, double Velocity);
-	CBody(double Mass, double Radius, double Velocity, double X, double Y, double Z, int H=1);
-	CBody(double Mass, double Radius, double Velocity, Pos pos);
-	~CBody();
-
-	std::string Name();
-	void Name(std::string newName);
-	void setParent(CBody* Parent);
-	CBody* getParent();
-
-	double Mass();
-	double Radius();
-	double Speed();
-	vec Velocity(vec v);
-	Vel Velocity();
-	vec accelerate(vec a);					// Update the velocity to reflect a given acceleration over given time
-	void Position(vec v);
-	double originDist();
-	Pos COM(CBody* target);
-	Pos COM(CBody target);
-	double distance(CBody* target);			// Calculate the distance to the target (CBody)
-	double distance(CBody target) const;
-	double distance(Pos* pos);				// Calculate the distance to the target (Pos*)
-	double distance(Pos v) const;			// Calculate the distance to the target (Pos)
-
-	std::string writeFormat(format f = text); 		// Defined in simio.c++
-	std::string info();
-	Force net;					// The net force acting on the body
-	Pos pos;
-	long h;
-	long fix;					// The fix time for this body's position in simulation time
-	unsigned long long ncalcs;
-
-	bool operator != (CBody r) const;
-	bool operator == (CBody r) const;
-
-private:
-	CBody* parent;				// Parent, i.e. the body that is being orbited
-	std::string name;			// The (optional) name of the body
-
-	double radius;				// Radius of the body
-	double x;					// x pos
-	double y;					// y pos
-	double z;					// z pos
-	double xv;					// velocity in x direction
-	double yv;					// velocity in y direction
-	double zv;					// velocity in z direction
-	double mass;				// Mass of the body
-	double speed;				// Magnitude of linear velocity
-
-
-	void init();
 };
 
 #endif // HASH_H

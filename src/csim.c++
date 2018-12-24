@@ -9,20 +9,24 @@ unsigned long long cputime = 0;
 unsigned long long polltime = 0;
 unsigned long long maxTime = 0;
 unsigned long long simulationtime = 0;
+#if SIMTIME_TYPE == 1
 std::atomic<unsigned long long> simTime;
+#elif SIMTIME_TYPE == 2
+std::atomic<double> simTime;
+#endif
 std::atomic<int> tocalc;
 std::atomic<int> joinable;
 
 CSim::CSim() {
 	init();	
-	read = one;
-	write = two;
+	bRead = bOne;
+	bWrite = bTwo;
 }
 CSim::CSim(int n) {
 	init();
 	nbodies = n;
-	read = one;
-	write = two;
+	bRead = bOne;
+	bWrite = bTwo;
 }
 CSim::CSim(int n, double max, double step) {
 	init();
@@ -31,8 +35,8 @@ CSim::CSim(int n, double max, double step) {
 	h = step;
 	tMax = max;
 	maxTime = max;
-	read = one;
-	write = two;
+	bRead = bOne;
+	bWrite = bTwo;
 }
 CSim::~CSim() {
 }
@@ -42,43 +46,56 @@ void CSim::setDebug(int Debug) {
 }
 
 void CSim::addBody(CBody* body) {
-	one.push_back(body);
-	two.push_back(body);
+	bOne.push_back(body);
+	bTwo.push_back(body);
+	nadded++;
+}
+void CSim::addGhost(CGhost* ghost) {
+//	gOne.push_back(ghost);
+//	gTwo.push_back(ghost);
 	nadded++;
 }
 CBody* CSim::at(int ii) {
-	return read[ii];
+	return bRead[ii];
 }
 CBody CSim::copy(int ii) {
-	return *read[ii];
+	return *bRead[ii];
 }
 
-Force CSim::force(CBody* body) {
-	println(in("CSim", "force")+"    Calculating net force", 4);
+void CSim::fixedHForce(CBody* body, CBody* wbody) {
+	println(in("CSim", "fixedHForce")+"    Calculating net force", 4);
 	Force net(0,0,0);
+	vec v;
+	vec a;
 	double fmagnitude;
 	for (int ii = 0; ii < nadded; ii ++) {
-		if (read[ii] != NULL) {
-			if (read[ii] != body) {
-				printrln("\n"+in("CSim", "force")+"    Target: ", body -> Name(), 5); 
-				fmagnitude = (G * body -> Mass() * read[ii] -> Mass()) / pow(read[ii] -> distance(body -> pos), 2);
-				net += body -> pos.direction(read[ii] -> pos) * fmagnitude;
+		if (bRead[ii] != NULL) {
+			if (bRead[ii] != body) {
+				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body -> Name(), 5); 
+	
+				fmagnitude = (G * body -> Mass() * bRead[ii] -> Mass()) / pow(bRead[ii] -> distance(body -> pos), 2);
+				net += body -> pos.direction(bRead[ii] -> pos) * fmagnitude; 
 
-				printrln(in("CSim", "force")+"    Magnitude of force between "+body -> Name()+" and "+
-					read[ii] -> Name()+" is ", scientific(fmagnitude), 4);
-				printrln(in("CSim", "force")+"    Net force vector on "+body -> Name()+" is ", body -> net.info(), 4);
+				printrln(in("CSim", "fixedHForce")+"    Magnitude of force between "+body -> Name()+" and "+
+					bRead[ii] -> Name()+" is ", scientific(fmagnitude), 4);
+				printrln(in("CSim", "fixedHForce")+"    Net force vector on "+body -> Name()+" is ", body -> net.info(), 4);
 			}
 		}
 	}
-	println(in("CSim", "force")+green+"    Done"+res+" net force", 5);	
-	return net;
+	a = net / body -> Mass() * h;
+	v = wbody -> accelerate(a); 
+	wbody -> Position(body -> pos + v + a * (h * 0.5));
+	wbody -> fix = simTime;
+	wbody -> ncalcs++;
+
+	println(in("CSim", "fixedHForce")+green+"    Done"+res+" net force", 5);	
 }
 
 int CSim::writeConfiguration(const std::string& filename, bool overwrite) {
 	std::ofstream out;
 	if (exists(filename) && overwrite == false) {
 		if (!prompt("File "+yellow+filename+res+" exists, overwrite? (y|n) ")) {
-			println("File will not be overwritten, exiting "+cyan+"CSim"+yellow+"::"+bright+white+"writeConfiguration"+res);
+			println("File will not be overwritten, exiting "+cyan+"CSim"+yellow+"::"+bright+white+"bWriteConfiguration"+res);
 			return 0;
 		}
 		else {
@@ -89,9 +106,9 @@ int CSim::writeConfiguration(const std::string& filename, bool overwrite) {
 	out.open(filename);
 	out << nadded - 1 << "\n";
 	CBody* current;
-	print_special("Writestream", 'c', 'k');		// Exclude
+	print_special("bWritestream", 'c', 'k');		// Exclude
 	for (int ii = 0; ii < nadded; ii ++) {
-		current = read[ii];
+		current = bRead[ii];
 		if (current != NULL) {
 			out << current -> writeFormat();
 			std::cout << current -> writeFormat();
@@ -111,7 +128,7 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 		error("File "+yellow+filename+res+" does not exist.",__LINE__,__FILE__);
 		return NULL;
 	}
-	print("Reading file "+yellow+filename+res+"... ");
+	print("bReading file "+yellow+filename+res+"... ");
 	print("\n", 2);
 	int gdebug = debug;
 	if (debug < 3) {
@@ -159,7 +176,7 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 				line = line.substr(0, line.find_last_of(" "));
 			}
 			else {
-				error(" Read error", __LINE__, __FILE__);
+				error(" bRead error", __LINE__, __FILE__);
 				return NULL;
 			}
 			std::getline(file, line); 
@@ -187,6 +204,12 @@ double CSim::H() {
 int CSim::count() {
 	return nadded;
 }
+int CSim::NReal() {
+	return bRead.size();
+}
+int CSim::NGhost() {
+	return gRead.size();
+}
 
 void CSim::init() {
 	print("Initializing new "+cyan+bright+"CSim"+res+"...");
@@ -199,14 +222,16 @@ void CSim::init() {
 
 void CSim::sim(threadmode t) {
 	auto start = std::chrono::high_resolution_clock::now();
-	read = one;
-	write = two;
+	bRead = bOne;
+	bWrite = bTwo;
+	int nreal = NReal();
+	int nghost = NGhost();
 	switch(t) {
 		case single:
 #ifdef profiling
 			start = std::chrono::high_resolution_clock::now();
 #endif
-			simulate((unsigned long)tMax);
+			unthreadedFixedH((unsigned long)tMax);
 #ifdef profiling
 			simulationtime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif
@@ -223,13 +248,13 @@ void CSim::sim(threadmode t) {
 			int block = nbodies / nthreads;
 			std::thread threads[nthreads];
 			for (int ii = 0; ii < nthreads - 1; ii ++) {
-				threads[ii] = std::thread(&CSim::man_simulate, this, block * ii, block * (ii + 1));
+				threads[ii] = std::thread(&CSim::threadedFixedH, this, block * ii, block * (ii + 1));
 			}
-			threads[nthreads - 1] = std::thread(&CSim::man_simulate, this, block * (nthreads - 1), nbodies);
+			threads[nthreads - 1] = std::thread(&CSim::threadedFixedH, this, block * (nthreads - 1), nbodies);
 #ifdef profiling
 			start = std::chrono::high_resolution_clock::now();
 #endif
-			if (int(h) > 0) {
+			if (h > 0) {
 				vec a;
 				vec v;
 				unsigned long long percent;
@@ -241,6 +266,7 @@ void CSim::sim(threadmode t) {
 					percent = h;
 				}
 				while (simTime < maxTime) {
+#if SIMTIME_TYPE == 1
 					if (simTime / percent != past) {
 						std::cout << '\r' << " Progress: " << std::setw(3) << (simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)h) << std::flush;						
 						past = simTime / percent;
@@ -248,17 +274,30 @@ void CSim::sim(threadmode t) {
 					if (simTime == maxTime - h) {
 						std::cout << "\r Progress: 100\n";
 					}
+#elif SIMTIME_TYPE == 2
+					if ((unsigned long long)simTime / percent != past) {
+						std::cout << '\r' << " Progress: " << std::setw(3) << ((unsigned long long)simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)h) << std::flush;						
+						past = (unsigned long long)simTime / percent;
+					}
+					if ((unsigned long long)maxTime - (unsigned long long)simTime <= h) {
+						std::cout << "\r Progress: 100\n";
+					}
+#endif
 					tocalc = nthreads;
+#if SIMTIME_TYPE == 1
 					simTime += h;
+#elif SIMTIME_TYPE == 2
+					fetch_add(&simTime, h);
+#endif
 					println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);
 					while (tocalc > 0) {}					
-					if (read == one) {
-						read = two;
-						write = one;
+					if (bRead == bOne) {
+						bRead = bTwo;
+						bWrite = bOne;
 					}
 					else {
-						read = one;
-						write = two;
+						bRead = bOne;
+						bWrite = bTwo;
 					}
 				}
 			}
@@ -275,8 +314,7 @@ void CSim::sim(threadmode t) {
 			break;
 	}
 }
-void CSim::man_simulate(int min, int max) {
-	int tot = 0;
+void CSim::threadedFixedH(int min, int max) {
 	vec v;
 	vec a;
 	double prev = 0;
@@ -295,16 +333,10 @@ void CSim::man_simulate(int min, int max) {
 #endif
 			prev = simTime;
 			for (int ii = min; ii < max; ii ++) {
-				body = read[ii];
-				wbody = write[ii];
-				a = force(body) / body -> Mass() * h;
-				v = wbody -> accelerate(a); 
-				wbody -> Position(body -> pos + v * h + a * (h * 0.5));
-				wbody -> fix = simTime;
-				print(in("CSim", "man_simulate")+"       Velocity of {"+cyan+wbody -> Name()+res+"} is "+wbody -> Velocity().info(3)+"\n", 1);
-				print(in("CSim", "man_simulate")+"       New posiiton for {"+cyan+wbody -> Name()+res+"} is "+wbody -> pos.info(3)+"\n", 1);
-
-				wbody -> ncalcs++;
+				fixedHForce(bRead[ii], bWrite[ii]);
+						
+				print(in("CSim", "threadedFixedH")+"       Velocity of {"+cyan+wbody -> Name()+res+"} is "+wbody -> Velocity().info(3)+"\n", 1);
+				print(in("CSim", "threadedFixedH")+"       New posiiton for {"+cyan+wbody -> Name()+res+"} is "+wbody -> pos.info(3)+"\n", 1);
 			}
 			tocalc--;
 #ifdef profiling
@@ -317,8 +349,8 @@ void CSim::man_simulate(int min, int max) {
 	}
 	joinable++;
 }
-void CSim::simulate(unsigned long end) {
-	printrln(in("", "simulate(CSim*, double)"), "Simulating", 5);
+void CSim::unthreadedFixedH(unsigned long end) {
+	printrln(in("", "unthreadedFixedH(CSim*, double)"), "Simulating", 5);
 	unsigned long t = 0.0;
 	double h = H();
 	nbodies = count();
@@ -343,15 +375,16 @@ void CSim::simulate(unsigned long end) {
 				auto start = std::chrono::high_resolution_clock::now();
 #endif
 			for (int ii = 0; ii < nbodies; ii ++) {
-				body = one[ii];
-				a[ii] = force(body) / body -> Mass() * h;
-				v[ii] = body -> accelerate(a[ii]); 
-				printrln(in("", "simulate")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 1);
+				fixedHForce(bRead[ii], bWrite[ii]);
+				printrln(in("", "unthreadedFixedH")+"       Velocity of {"+cyan+body -> Name()+res+"} is ", body -> Velocity().info(3), 1);
 			}
-			for (int ii = 0; ii < nbodies; ii ++) {
-				body = one[ii];
-				body -> Position(body -> pos + v[ii] * h + a[ii] * (h * 0.5));
-				printrln(in("", "Simulate")+"       New posiiton for {"+cyan+body -> Name()+res+"} is ", body -> pos.info(3), 1);
+			if (bRead == bOne) {
+				bRead = bTwo;
+				bWrite = bOne;
+			}
+			else {
+				bRead = bOne;
+				bWrite = bTwo;
 			}
 #ifdef profiling
 				cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
@@ -364,5 +397,5 @@ void CSim::simulate(unsigned long end) {
 		error("{h} was less than or equal to zero. Cannot simulate",__LINE__,__FILE__);
 		return;
 	}
-	printrln(in("", "simulate(CSim*, double)"), green+"Complete"+res, 5);
+	printrln(in("", "unthreadedFixedH(CSim*, double)"), green+"Complete"+res, 5);
 }

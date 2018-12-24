@@ -13,6 +13,7 @@
 
 #include <string>
 #include <iostream>
+#include <atomic>
 #include <math.h>
 
 #include "vec.h"
@@ -20,5 +21,6 @@
 #include "colors.h"
 
 double magnitude(vec v);
+double fetch_add(std::atomic<double>* shared, double h);
 
 #endif // GLOBAL_H

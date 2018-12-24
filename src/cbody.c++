@@ -1,4 +1,4 @@
-#include "csim.h"
+#include "cbody.h"
 #include "simio.h"
 #include "global.h"
 
@@ -53,6 +53,12 @@ void CBody::setParent(CBody* Parent) {
 }
 CBody* CBody::getParent() {
 	return parent;
+}
+void CBody::Type(bodyType t) {
+	type = t;
+}
+bodyType CBody::Type() {
+	return type;
 }
 
 double CBody::Mass() {
@@ -155,6 +161,7 @@ void CBody::init() {
 
 	parent = NULL;
 	name = "";
+	type = bodyType::def;
 	
 	radius = 0;
 	x = 0;
