@@ -29,7 +29,7 @@ YELLOW  = \033[33m
 SRCS	= $(ABS)/$(OPT)$(MAIN).c++	\
 		  $(ABS)/$(OPT)csim.c++		\
 		  $(ABS)/$(OPT)cbody.c++	\
-		  $(ABS)/$(OPT)cghost.c++	\
+		  $(ABS)/$(OPT)cghost.o		\
 		  $(ABS)/$(OPT)simio.c++	\
 		  $(ABS)/$(OPT)global.c++	\
 		  $(ABS)/$(OPT)vel.c++		\
@@ -67,6 +67,7 @@ build: $(OBJS)
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN) $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+
 
 clean:
 	$(RM) *.core $(BUILD)/*.o *.d *.stackdump

@@ -1,6 +1,5 @@
 #include "simio.h"
 
-
 std::string in(std::string prefix, std::string function) {
 	std::string ret;
 	if (prefix != "") {
@@ -62,20 +61,6 @@ bool iscolor(std::string str) {
 			return true;
 		}
 	}
-}
-
-std::string CBody::writeFormat(format f) {
-	std::string formatted = "";
-	switch(f) {
-		case text:
-			formatted.append("Body - "+Name()+"\n");
-			formatted.append("   Position "+scientific(x,5)+" "+scientific(y,5)+" "+scientific(z,5)+"\n");
-			formatted.append("   Radius   "+scientific(radius)+"\n");
-			formatted.append("   Mass     "+scientific(mass)+"\n");
-			formatted.append("   Velocity "+scientific(xv,5)+" "+scientific(yv,5)+" "+scientific(zv,5)+"\n\n");
-			break;
-	}
-	return formatted;
 }
 
 bool exists(const std::string& filename) {

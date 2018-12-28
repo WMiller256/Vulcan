@@ -192,6 +192,20 @@ std::string CBody::info() {
 	return s;
 }
 
+std::string CBody::writeFormat(format f) {
+	std::string formatted = "";
+	switch(f) {
+		case text:
+			formatted.append("Body - "+Name()+"\n");															// Exclude
+			formatted.append("   Position "+scientific(x,5)+" "+scientific(y,5)+" "+scientific(z,5)+"\n"); 		// Exclude
+			formatted.append("   Radius   "+scientific(radius)+"\n");											// Exclude
+			formatted.append("   Mass     "+scientific(mass)+"\n");												// Exclude
+			formatted.append("   Velocity "+scientific(xv,5)+" "+scientific(yv,5)+" "+scientific(zv,5)+"\n\n");	// Exclude
+			break;
+	}
+	return formatted;
+}
+
 bool CBody::operator != (CBody r) const {
 	if (r == *this) {
 		return false;

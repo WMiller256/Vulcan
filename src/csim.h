@@ -19,21 +19,9 @@
 #define multhreading
 #define G 6.67408e-11
 //#define profiling
-#define SIMTIME_TYPE 2
-
-enum threadmode {
-	single,
-	omp,
-	manual
-};
-enum format {
-	text
-};
-enum bodyType {
-	def,
-	planet,
-	ghost
-};
+#define INT 1
+#define DOUBLE 2
+#define SIMTIME_TYPE INT
 
 #include <iostream>
 #include <iomanip>
@@ -46,11 +34,14 @@ enum bodyType {
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <condition_variable>
 #include <atomic>
 #include <limits>
 #include <omp.h>
 
-#include "cbody.h"
+#include "cghost.h"
+#include "externs.h"
+#include "format.h"
 #include "force.h"
 #include "global.h"
 #include "vel.h"
@@ -58,18 +49,13 @@ enum bodyType {
 #include "pos.h"
 #include "rpos.h"
 
+class CBody;
 
-extern int nbodies;
-extern int nthreads;
-extern bool warnings;
-extern int debug;
-extern unsigned long long cputime;
-extern unsigned long long waittime;
-extern unsigned long long polltime;
-extern unsigned long long simulationtime;
-
-class CBody;		// Forward declaration here is mandatory
-class CGhost;
+enum threadmode {
+	single,
+	omp,
+	manual
+};
 
 class CSim
 {
@@ -82,40 +68,35 @@ public:
 	void setDebug(int Debug);
 
 	void addBody(CBody* body);
-	void addGhost(CGhost* ghost);
+	void addPlanet(CBody* body);
+	void addGhost(CGhost* body);
 	CBody* at(int ii);
 	CBody copy(int ii);
+	double H();
+	int count();
+	void sort();
 
 	void printForces();
 	int writeConfiguration(const std::string& filename, bool overwrite = false);
 	CSim* readConfiguration(const std::string& filename);
 
-	double H();
-	int count();
-	int NReal();
-	int NGhost();
-
-	void step();
-	Force force(CBody* body);
 	void fixedHForce(CBody* body, CBody* wbody);
 	void sim(threadmode t = threadmode::single);
 	void threadedFixedH(int min, int max);
 	void unthreadedFixedH(unsigned long end);
 
 private:
-	double tMax;
-	double tCurr;
+	double tMax;		// The integration time
+	double tCurr;		// Current time
 	double h;			// The time step
-	std::vector<CBody*> bOne;		// Vector of 'real' (non-ghost) bodies
-	std::vector<CBody*> bTwo;		// Second vector of 'real' bodies to allow pointer-toggle for 
-	std::vector<CBody*> bRead;		// fastest possible I/O.
-	std::vector<CBody*> bWrite;		// The toggling pointers for the 'real' bodies
-	std::vector<CGhost*> gOne;		// Vector of 'ghost' bodies (test particles)
-	std::vector<CGhost*> gTwo;		// Second vector of 'ghosts' for pointer toggling
-	std::vector<CGhost*> gRead;		// Pointer toggles
-	std::vector<CGhost*> gWrite;
-
+	std::vector<CBody*> one;
+	std::vector<CBody*> two;
+	std::vector<CBody*> read;
+	std::vector<CBody*> write;
 	int nadded;
+	int ndefs;
+	int nplanets;
+	int nghosts;
 
 	void init();
 };

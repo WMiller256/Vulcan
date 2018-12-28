@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <experimental/filesystem>
 #include <fstream>
 #include <string>
 #include <ncurses.h>
@@ -10,8 +11,9 @@
 #include <math.h>
 #include <unistd.h>
 
-#include "csim.h"
 #include "colors.h"
+#include "externs.h"
+#include "format.h"
 
 std::string in(std::string prefix, std::string function);
 

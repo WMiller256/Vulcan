@@ -1,23 +1,19 @@
-/*
- * cbody.h
- * 
- * William Miller
- * Dec 24, 2018 1:08 AM
- *
- * Class definition for CBody, a Body object for calculations
- * (differs from Body class which is for display)
- *
- */
-
 #ifndef CBODY_H
 #define CBODY_H
 
+#include "format.h"
 #include "force.h"
 #include "global.h"
 #include "vel.h"
 #include "vec.h"
 #include "pos.h"
 #include "rpos.h"
+
+enum bodyType {
+	def,
+	planet,
+	ghost
+};
 
 class CBody
 {
@@ -64,7 +60,7 @@ public:
 private:
 	CBody* parent;				// Parent, i.e. the body that is being orbited
 	std::string name;			// The (optional) name of the body
-	bodyType type;				// The type of the body
+	bodyType type;
 
 	double radius;				// Radius of the body
 	double x;					// x pos
@@ -80,4 +76,4 @@ private:
 	void init();
 };
 
-#endif // CBODY_H
+#endif

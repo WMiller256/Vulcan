@@ -15,8 +15,9 @@ double magnitude(vec v) {
 }
 
 double fetch_add(std::atomic<double>* shared, double h) {
-	double expected = shared -> load();
-	while (!atomic_compare_exchange_weak(shared, &expected, expected + h))
-	  ;
-	return expected;
+    double expected = shared -> load();
+    while (!atomic_compare_exchange_weak(shared, &expected, expected + h))
+      ;
+    return expected;
 }
+
