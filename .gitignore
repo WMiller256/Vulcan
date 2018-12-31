@@ -26,6 +26,7 @@ wsbuild/*.o
 
 #Ignore test outputs
 src/*.txt
+opt_test
 *.out*
 
 #ignore binaries

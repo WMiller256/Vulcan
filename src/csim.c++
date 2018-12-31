@@ -285,6 +285,9 @@ void CSim::sim(threadmode t) {
 			simTime = 0;
 			tocalc = 0;
 			joinable = 0;
+			if (nthreads > std::thread::hardware_concurrency - 1) {		// If the specified number of threads is greater than the maximum 
+				nthreads = std::thread::hardware_concurrency - 1;		// of the current machine adjust accordingly.
+			}
 			if (nbodies < nthreads) {
 				nthreads = nbodies;
 			}
