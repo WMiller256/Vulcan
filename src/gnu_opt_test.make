@@ -1,5 +1,5 @@
 #Name of program
-MAIN    = test.2
+MAIN    = test
 
 ABS		= .
 BIN		= .
