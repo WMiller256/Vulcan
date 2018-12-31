@@ -106,6 +106,27 @@ void CSim::sort() {
 	write = two;
 }
 
+int CSim::NVirtual() {
+	int size = one.size();
+	int ret = 0;
+	for (int ii = 0; ii < size; ii ++) {
+		if (one[ii] -> Type() == bodyType::def) {
+			ret++;
+		}
+	}
+	return ret;
+}
+int CSim::NReal() {
+	const int size = one.size();
+	int ret = 0;
+	for (int ii = 0; ii < size; ii ++) {
+		if (one[ii] -> Type() != bodyType::def) {
+			ret++;
+		}
+	}
+	return ret;
+}
+
 int CSim::writeConfiguration(const std::string& filename, bool overwrite) {
 	std::ofstream out;
 	if (exists(filename) && overwrite == false) {
@@ -119,7 +140,7 @@ int CSim::writeConfiguration(const std::string& filename, bool overwrite) {
 	}
 //	print("Writing file "+yellow+filename+res+"... ");//	print("Writing file "+yellow+filename+res+"... ");
 	out.open(filename);
-	out << nadded - 1 << "\n";
+	out << nadded - ndefs - 1 << "\n";
 	CBody* current;
 	print_special("Writestream", 'c', 'k');		// Exclude
 	for (int ii = 0; ii < nadded; ii ++) {
@@ -220,30 +241,34 @@ void CSim::fixedHForce(CBody* body, CBody* wbody) {
 	vec v;
 	vec a;
 	double fmagnitude;
-	if (body -> Type() != bodyType::def) {
-		for (int ii = 0; ii < nplanets; ii ++) {
-			if (read[ii] != NULL) {
-				if (read[ii] != body) {
-//					printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body -> Name(), 5); //					printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body -> Name(), 5); 
-					fmagnitude = (G * body -> Mass() * read[ii] -> Mass()) / pow(read[ii] -> distance(body -> pos), 2);
-					net += body -> pos.direction(read[ii] -> pos) * fmagnitude;
+	for (int ii = 0; ii < nplanets; ii ++) {
+		if (read[ii] != NULL) {
+			if (read[ii] != body) {
+//				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body -> Name(), 5); //				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body -> Name(), 5); 
+				fmagnitude = (G * body -> Mass() * read[ii] -> Mass()) / pow(read[ii] -> distance(body -> pos), 2);
+				net += body -> pos.direction(read[ii] -> pos) * fmagnitude;
 
-//					printrln(in("CSim", "fixedHForce")+"    Magnitude of force between "+body -> Name()+" and "+//						read[ii] -> Name()+" is ", scientific(fmagnitude), 4);//						read[ii] -> Name()+" is ", scientific(fmagnitude), 4);
-//					printrln(in("CSim", "fixedHForce")+"    Net force vector on "+body -> Name()+" is ", body -> net.info(), 4);//					printrln(in("CSim", "fixedHForce")+"    Net force vector on "+body -> Name()+" is ", body -> net.info(), 4);
-				}
+//				printrln(in("CSim", "fixedHForce")+"    Magnitude of force between "+body -> Name()+" and "+//					read[ii] -> Name()+" is ", scientific(fmagnitude), 4);//					read[ii] -> Name()+" is ", scientific(fmagnitude), 4);
+//				printrln(in("CSim", "fixedHForce")+"    Net force vector on "+body -> Name()+" is ", body -> net.info(), 4);//				printrln(in("CSim", "fixedHForce")+"    Net force vector on "+body -> Name()+" is ", body -> net.info(), 4);
 			}
 		}
-	    a = net / body -> Mass() * h;
-	    v = wbody -> accelerate(a);
-	    wbody -> Position(body -> pos + v + a * (h * 0.5));
-	    wbody -> fix = simTime;
-	    wbody -> ncalcs++;
 	}
+    a = net / body -> Mass() * h;
+    v = wbody -> accelerate(a);
+    wbody -> Position(body -> pos + v + a * (h * 0.5));
+    wbody -> fix = simTime;
+    wbody -> ncalcs++;
 //	println(in("CSim", "fixedHForce")+green+"    Done"+res+" net force", 5);	//	println(in("CSim", "fixedHForce")+green+"    Done"+res+" net force", 5);	
 }
 
 void CSim::sim(threadmode t) {
 	auto start = std::chrono::high_resolution_clock::now();
+	void (CSim::*f)(CBody*, CBody*);
+	if (forces) {
+		f = &CSim::fixedHForce;
+		calcs.push_back(f);
+	}
+	ncalcs = calcs.size();
 	sort();
 	switch(t) {
 		case single:
@@ -259,15 +284,20 @@ void CSim::sim(threadmode t) {
 			simTime = 0;
 			tocalc = 0;
 			joinable = 0;
-			while (nadded % nthreads != 0) {
-				CBody* body = new CBody(0, 0, 0, 0, 0, 0, 1);
-				addBody(body);
-			}
-			sort();
-			nbodies = nadded;
 			if (nbodies < nthreads) {
 				nthreads = nbodies;
 			}
+			else {
+				while (nadded % nthreads != 0) {
+					CBody* body = new CBody(0, 0, 0, 0, 0, 0, 1);
+					addBody(body);
+				}
+			}
+			sort();
+			nbodies = nadded;
+			std::cout << " Bodies -     "+bright+magenta+std::to_string(nbodies)+res+"\n";
+			std::cout << "     Real:    "+bright+magenta+std::to_string(NReal())+res+"\n";
+			std::cout << "     Virtual: "+bright+magenta+std::to_string(NVirtual())+res+"\n";
 
 			int block = nbodies / nthreads;
 			std::thread threads[nthreads];
@@ -341,6 +371,7 @@ void CSim::threadedFixedH(int min, int max) {
 	int ii = 0;
 	CBody* body = NULL;
 	CBody* wbody = NULL;
+	if (max > NReal()) max = NReal();	// Neglect the virtual bodies (they exist only to create an optimal block width)
 	while (simTime == 0) {}				// Wait for the simulation to start
 	while (true) {
 #ifdef profiling
@@ -353,7 +384,9 @@ void CSim::threadedFixedH(int min, int max) {
 #endif
 			prev = simTime;
 			for (int ii = min; ii < max; ii ++) {
-				fixedHForce(read[ii], write[ii]);
+				for (int jj = 0; jj < ncalcs; jj ++) {
+					(this->*(calcs[jj]))(read[ii], write[ii]);
+				}
 
 //				print(in("CSim", "threadedFixedH")+"       Velocity of {"+cyan+wbody -> Name()+res+"} is "+wbody -> Velocity().info(3)+"\n", 1);//				print(in("CSim", "threadedFixedH")+"       Velocity of {"+cyan+wbody -> Name()+res+"} is "+wbody -> Velocity().info(3)+"\n", 1);
 //				print(in("CSim", "threadedFixedH")+"       New posiiton for {"+cyan+wbody -> Name()+res+"} is "+wbody -> pos.info(3)+"\n", 1);//				print(in("CSim", "threadedFixedH")+"       New posiiton for {"+cyan+wbody -> Name()+res+"} is "+wbody -> pos.info(3)+"\n", 1);
@@ -422,6 +455,9 @@ void CSim::unthreadedFixedH(unsigned long end) {
 
 void CSim::init() {
 //	print("Initializing new "+cyan+bright+"CSim"+res+"...");//	print("Initializing new "+cyan+bright+"CSim"+res+"...");
+	forces = true;
+	ncalcs = 0;
+	
 	tMax = 0.0;
 	tCurr = 0.0;
 	h = -1.0;

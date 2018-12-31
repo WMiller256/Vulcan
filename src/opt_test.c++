@@ -75,7 +75,7 @@ int main(int argn, char** argv) {
 	tsim -> addPlanet(uranus);
 	tsim -> addPlanet(neptune);
 
-	for (int ii = 0; ii < 10; ii ++) {
+	for (int ii = 0; ii < 0; ii ++) {
 		CBody* ghost = new CBody(1e3, 1e4, 1e3, 1000*ii, 1e11, 0, day);
 		ghost -> Name(std::to_string(ii));
 		tsim -> addPlanet(ghost);

@@ -75,6 +75,8 @@ public:
 	double H();
 	int count();
 	void sort();
+	int NVirtual();
+	int NReal();
 
 	void printForces();
 	int writeConfiguration(const std::string& filename, bool overwrite = false);
@@ -97,6 +99,11 @@ private:
 	int ndefs;
 	int nplanets;
 	int nghosts;
+
+	bool forces;
+
+	std::vector<void (CSim::*)(CBody*, CBody*)> calcs;
+	int ncalcs;
 
 	void init();
 };
