@@ -285,11 +285,11 @@ void CSim::sim(threadmode t) {
 			simTime = 0;
 			tocalc = 0;
 			joinable = 0;
-			if (nthreads > std::thread::hardware_concurrency - 1) {		// If the specified number of threads is greater than the maximum 
-				nthreads = std::thread::hardware_concurrency - 1;		// of the current machine adjust accordingly.
+			if (nthreads > std::thread::hardware_concurrency() - 1) {		// If the specified number of threads is greater than the maximum 
+				nthreads = std::thread::hardware_concurrency() - 1;			// of the current machine adjust accordingly.
 			}
-			if (nbodies < nthreads) {
-				nthreads = nbodies;
+			if (nadded < nthreads) {
+				nthreads = nadded;
 			}
 			else {
 				while (nadded % nthreads != 0) {
@@ -302,6 +302,7 @@ void CSim::sim(threadmode t) {
 			std::cout << " Bodies -     "+bright+magenta+std::to_string(nbodies)+res+"\n";
 			std::cout << "     Real:    "+bright+magenta+std::to_string(NReal())+res+"\n";
 			std::cout << "     Virtual: "+bright+magenta+std::to_string(NVirtual())+res+"\n";
+			std::cout << " Threads -    "+bright+magenta+std::to_string(nthreads)+res+"\n\n";
 
 			int block = nbodies / nthreads;
 			std::thread threads[nthreads];
