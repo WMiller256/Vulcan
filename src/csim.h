@@ -56,6 +56,11 @@ enum threadmode {
 	omp,
 	manual
 };
+enum simType {
+	basic,
+	bulirschStoer,
+	symplectic
+};
 
 class CSim
 {
@@ -66,6 +71,8 @@ public:
 	~CSim();
 
 	void setDebug(int Debug);
+	void Type(simType t);
+	simType Type();
 
 	void addBody(CBody* body);
 	void addPlanet(CBody* body);
@@ -87,7 +94,26 @@ public:
 	void threadedFixedH(int min, int max);
 	void unthreadedFixedH(unsigned long end);
 
+	class BulirschStoer {
+	
+	public:
+		BulirschStoer(CSim* sim = NULL);
+		int step(CBody* body, CBody* wbody);
+		Pos BSForce(CBody* body, CBody* wbody, double h);
+
+	private:
+		CSim* sim;				// To access the owning (CSim) methods and members
+		double threshold;
+		static int attempts;
+		static int nsteps;
+		static int steps[];
+
+		void init();
+	};
+
 private:
+	simType type;		// The simulation type
+
 	double tMax;		// The integration time
 	double tCurr;		// Current time
 	double h;			// The time step
@@ -106,25 +132,6 @@ private:
 	int ncalcs;
 
 	void init();
-};
-
-class BulirschStoer : public CSim
-{
-public:
-	BulirschStoer();
-	double step(double (*f)(double, double), double y0, double x0, double x, int nsteps);
-	int simulate(double (*f)(double, double), double y0, double* y1, double x, double h, double* h_new, 
-		double epsilon, double yscale, int rational_extrapolate);
-	static int rationalExtrapolation(double* fzero, double* tableau, double* x, double f, int n);
-	static int polynomialExtrapolation(double* fzero, double* tableau, double* x, double f, int n);
-
-	void setThreading(threadmode t);
-	threadmode getThreading();
-
-private:
-	static int attempts;
-	static int steps[];
-	threadmode threading;
 };
 
 #endif // HASH_H

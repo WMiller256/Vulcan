@@ -79,10 +79,10 @@ vec CBody::Velocity(vec v) {
 Vel CBody::Velocity() {
 	return Vel(xv, yv, zv);
 }
-vec CBody::accelerate(vec a) {		// Accelerate the body by the given vector
-	xv += a.x;
-	yv += a.y;
-	zv += a.z;
+vec CBody::accelerate(vec dv) {		// Accelerate the body by the given vector
+	xv += dv.x;
+	yv += dv.y;
+	zv += dv.z;
 	return vec(xv, yv, zv);
 }
 void CBody::Position(vec v) {

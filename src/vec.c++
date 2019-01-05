@@ -64,6 +64,9 @@ vec vec::operator * (long scalar) {
 vec vec::operator + (vec const &r) {
 	return vec(x + r.x, y + r.y, z + r.z);
 }
+vec vec::operator - (vec const &r) {
+	return vec(x - r.x, y - r.y, z - r.z);
+}
 void vec::operator += (vec const &r) {
 	x = x + r.x;
 	y = y + r.y;
