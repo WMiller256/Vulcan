@@ -3,18 +3,18 @@ MAIN    = test
 
 ABS		= .
 BIN		= .
-BUILD	= $(ABS)/../wsbuild
-OPT		= opt_
+BUILD	= $(ABS)/../build
+OPT		= 
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
-LFLAGS	= -Wl,-rpath,/usr/bin/g++
+LFLAGS	= -Wl,-rpath,/bin/g++.exe
 LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -lstdc++fs
 LIBS	= -lboost_program_options -lncurses
 
 INC		= -I /usr/lib/boost/
 CFLAGS	= -Wno-deprecated-declarations -fopenmp -std=c++17 -O3
-CC      = /usr/bin/g++ $(CFLAGS) $(INC) $(LIBS) 
+CC      = /bin/g++.exe $(CFLAGS) $(INC) $(LIBS) 
 
 #Output coloring
 GREEN   = \033[1;32m
@@ -52,7 +52,7 @@ OBJS	= $(BUILD)/$(OPT)$(MAIN).o	\
 all:
 	@printf "[      $(YELLOW)Building $(OPT)$(MAIN)$(WHITE)       ]\n"
 	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make -f ws$(OPT)test.make build
+	make -f $(OPT)test.ghosts.make build
 	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 
@@ -63,7 +63,7 @@ $(BUILD)/%.o: %.c++
 
 build: $(OBJS)
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN).out $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN) $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 

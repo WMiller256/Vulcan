@@ -99,7 +99,7 @@ public:
 	public:
 		BulirschStoer(CSim* sim = NULL);
 		int step(CBody* body, CBody* wbody);
-		Pos BSForce(CBody* body, CBody* wbody, double h);
+		Pos BSForce(CBody* body, CBody* wbody, int steps);
 
 	private:
 		CSim* sim;				// To access the owning (CSim) methods and members
@@ -110,6 +110,8 @@ public:
 
 		void init();
 	};
+
+	BulirschStoer* BS = new BulirschStoer(this);
 
 private:
 	simType type;		// The simulation type

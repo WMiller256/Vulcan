@@ -398,13 +398,20 @@ void CSim::threadedFixedH(int min, int max) {
 			start = std::chrono::high_resolution_clock::now();
 #endif
 			prev = simTime;
-			for (int ii = min; ii < max; ii ++) {
-				for (int jj = 0; jj < ncalcs; jj ++) {
-					(this->*(calcs[jj]))(read[ii], write[ii]);
-				}
+			if (type == simType::basic) {
+				for (int ii = min; ii < max; ii ++) {
+					for (int jj = 0; jj < ncalcs; jj ++) {
+						(this->*(calcs[jj]))(read[ii], write[ii]);
+					}
 
-//				print(in("CSim", "threadedFixedH")+"       Velocity of {"+cyan+wbody->Name()+res+"} is "+wbody->Velocity().info(3)+"\n", 1);//				print(in("CSim", "threadedFixedH")+"       Velocity of {"+cyan+wbody->Name()+res+"} is "+wbody->Velocity().info(3)+"\n", 1);
-//				print(in("CSim", "threadedFixedH")+"       New posiiton for {"+cyan+wbody->Name()+res+"} is "+wbody->pos.info(3)+"\n", 1);//				print(in("CSim", "threadedFixedH")+"       New posiiton for {"+cyan+wbody->Name()+res+"} is "+wbody->pos.info(3)+"\n", 1);
+//					print(in("CSim", "threadedFixedH")+"       Velocity of {"+cyan+wbody->Name()+res+"} is "+wbody->Velocity().info(3)+"\n", 1);//					print(in("CSim", "threadedFixedH")+"       Velocity of {"+cyan+wbody->Name()+res+"} is "+wbody->Velocity().info(3)+"\n", 1);
+//					print(in("CSim", "threadedFixedH")+"       New posiiton for {"+cyan+wbody->Name()+res+"} is "+wbody->pos.info(3)+"\n", 1);//					print(in("CSim", "threadedFixedH")+"       New posiiton for {"+cyan+wbody->Name()+res+"} is "+wbody->pos.info(3)+"\n", 1);
+				}
+			}
+			else if (type == simType::bulirschStoer) {
+				for (int ii = min; ii < max; ii ++) {
+					BS->step(read[ii], write[ii]);
+				}
 			}
 			tocalc--;
 #ifdef profiling
@@ -482,9 +489,8 @@ int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
 	Pos p = BSForce(body, wbody, sim->h / steps[0]);
 	Pos c;
 	for (int ii = 1; ii < nsteps; ii ++) {
-		h = sim->h / steps[ii];
-		if (h > 0.0) {
-			c = BSForce(body, wbody, h);
+		if (sim->h / steps[ii] > 0.0) {
+			c = BSForce(body, wbody, steps[ii]);
 			if (abs(magnitude(p - c)) < threshold) {
 				break;
 			}
@@ -497,26 +503,31 @@ int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
 	}
 	wbody->Position(p);
 }
-Pos CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, double h) {
+Pos CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps) {
 	Force net(0,0,0);
 	vec v;
 	vec a;
+	vec p = body->pos;
 	double fmagnitude;
-	for (int ii = 0; ii < sim->nplanets; ii ++) {
-		if (sim->read[ii] != NULL) {
-			if (sim->read[ii] != body) {
-//				printrln("\n"+in("BulirschStoer", "BSForce")+"    Target: ", body->Name(), 5); //				printrln("\n"+in("BulirschStoer", "BSForce")+"    Target: ", body->Name(), 5); 
-				fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / pow(sim->read[ii]->distance(body->pos), 2);
-				net += body->pos.direction(sim->read[ii]->pos) * fmagnitude;
+	double dt = sim->h / steps;
+	for (int kk = 0; kk < steps; kk ++) {
+		for (int ii = 0; ii < sim->nplanets; ii ++) {
+			if (sim->read[ii] != NULL) {
+				if (sim->read[ii] != body) {
+//					printrln("\n"+in("BulirschStoer", "BSForce")+"    Target: ", body->Name(), 5); //					printrln("\n"+in("BulirschStoer", "BSForce")+"    Target: ", body->Name(), 5); 
+					fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / pow(sim->read[ii]->distance(body->pos), 2);
+					net += body->pos.direction(sim->read[ii]->pos) * fmagnitude;
 
-//				printrln(in("BulirschStoer", "BSForce")+"    Magnitude of force between "+body->Name()+" and "+//					sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);//					sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);
-//				printrln(in("BulirschStoer", "BSForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);//				printrln(in("BulirschStoer", "BSForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
+//					printrln(in("BulirschStoer", "BSForce")+"    Magnitude of force between "+body->Name()+" and "+//						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);//						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);
+//					printrln(in("BulirschStoer", "BSForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);//					printrln(in("BulirschStoer", "BSForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
+				}
 			}
 		}
+    	a = net / body->Mass() * dt;
+    	v = wbody->accelerate(a);
+    	p = p + v + a * (dt * 0.5);
 	}
-    a = net / body->Mass() * h;
-    v = wbody->accelerate(a);
-    return body->pos + v + a * (h * 0.5);
+    return p;
 }
 
 void CSim::init() {

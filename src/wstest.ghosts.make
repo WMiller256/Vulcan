@@ -1,15 +1,15 @@
 #Name of program
-MAIN    = test
+MAIN    = test.ghosts
 
 ABS		= .
 BIN		= .
 BUILD	= $(ABS)/../wsbuild
-OPT		= opt_
+OPT		= 
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
-LFLAGS	= -Wl,-rpath,/usr/bin/g++
-LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -lstdc++fs
+LFLAGS	= -Wl,-rpath,/usr/bin/g++ -lstdc++fs -lstdc++
+LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -L/usr/lib/x86_64-linux-gnu/
 LIBS	= -lboost_program_options -lncurses
 
 INC		= -I /usr/lib/boost/
@@ -52,7 +52,7 @@ OBJS	= $(BUILD)/$(OPT)$(MAIN).o	\
 all:
 	@printf "[      $(YELLOW)Building $(OPT)$(MAIN)$(WHITE)       ]\n"
 	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make -f ws$(OPT)test.make build
+	make -f wstest.ghosts.make build
 	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 
@@ -63,7 +63,7 @@ $(BUILD)/%.o: %.c++
 
 build: $(OBJS)
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN).out $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN) $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 
