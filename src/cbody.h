@@ -71,7 +71,7 @@ private:
 	double zv;					// velocity in z direction
 	double mass;				// Mass of the body
 	double speed;				// Magnitude of linear velocity
-
+	double period;				// Orbital period in seconds
 
 	void init();
 };

@@ -482,19 +482,22 @@ CSim::BulirschStoer::BulirschStoer(CSim* sim) {
 }
 
 void CSim::BulirschStoer::init() {
-	threshold = 0.001;
+	threshold = 0.0001;
 }
 
 int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
 	double h;
-	Pos p = BSForce(body, wbody, sim->h / steps[0]);
-	Pos c;
+	Pos p = BSForce(body, wbody, steps[0]);
+	Pos c = body->pos;
+//	std::cout << c.info(4)+" "+p.info(4)+" "+body->Name()+" "+std::to_string(steps[0])+"\n";
 	for (int ii = 1; ii < nsteps; ii ++) {
 		if (sim->h / steps[ii] > 0.0) {
-			c = BSForce(body, wbody, steps[ii]);
-			if (abs(magnitude(p - c)) < threshold) {
+			if (abs(magnitude(p - c)) < threshold*magnitude(p)) {
+//				std::cout << "Broke after "+std::to_string(steps[ii])+" steps. Result "+c.info()+"\n";
 				break;
 			}
+			c = BSForce(body, wbody, steps[ii]);
+//			std::cout << c.info(4)+" "+p.info(4)+" "+body->Name()+" "+std::to_string(steps[ii])+"\n";
 			p = c;
 		}
 		else {
@@ -509,7 +512,7 @@ Pos CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps) {
 	Force net(0,0,0);
 	vec v;
 	vec a;
-	vec p = body->pos;
+	Pos p = body->pos;
 	double fmagnitude;
 	double dt = sim->h / steps;
 	for (int kk = 0; kk < steps; kk ++) {
@@ -517,8 +520,8 @@ Pos CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps) {
 			if (sim->read[ii] != NULL) {
 				if (sim->read[ii] != body) {
 					printrln("\n"+in("BulirschStoer", "BSForce")+"    Target: ", body->Name(), 5); 
-					fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / pow(sim->read[ii]->distance(body->pos), 2);
-					net += body->pos.direction(sim->read[ii]->pos) * fmagnitude;
+					fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / pow(sim->read[ii]->distance(p), 2);
+					net += p.direction(sim->read[ii]->pos) * fmagnitude;
 
 					printrln(in("BulirschStoer", "BSForce")+"    Magnitude of force between "+body->Name()+" and "+
 						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);
@@ -529,6 +532,7 @@ Pos CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps) {
     	a = net / body->Mass() * dt;
     	v = wbody->accelerate(a);
     	p = p + v + a * (dt * 0.5);
+    	net.zero();
 	}
     return p;
 }

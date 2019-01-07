@@ -28,6 +28,7 @@ public:
 	double z;
 
 	std::string info(int precision = 5) const;
+	void zero();
 
 	bool operator != (vec r) const;
 	bool operator == (vec r) const;

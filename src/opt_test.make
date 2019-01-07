@@ -1,5 +1,5 @@
 #Name of program
-MAIN    = test.ghosts
+MAIN    = test
 
 ABS		= .
 BIN		= .
@@ -54,7 +54,7 @@ OBJS	= $(BUILD)/$(OPT)$(MAIN).o	\
 all:
 	@printf "[      $(YELLOW)Building $(OPT)$(MAIN)$(WHITE)       ]\n"
 	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make -f $(OPT)test.ghosts.make build
+	make -f $(OPT)test.make build
 	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 
