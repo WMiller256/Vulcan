@@ -5,10 +5,10 @@
 int main(int argn, char** argv) {
 	double t;
 	double h;
+	int nsamples = 10;
 	std::string extension;
 	threadmode thread = threadmode::single;
 
-	
 	if (argn > 1) {
 		if (strcmp(argv[1], "single") == 0) {
 			thread = threadmode::single;
@@ -84,30 +84,38 @@ int main(int argn, char** argv) {
 
 	std::cout << green << " Initialization complete. " << res << std::endl;
 
-	auto start = std::chrono::high_resolution_clock::now();	
-	tsim -> sim(thread);
-	std::cout << std::endl;
-	auto end = std::chrono::high_resolution_clock::now();	
-	long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+	double avg = 0;
+	unsigned long long sum = 0;
+	for (int ii = 0; ii < nsamples; ii ++) {
+		auto start = std::chrono::high_resolution_clock::now();	
+		tsim -> sim(thread);
+		std::cout << std::endl;
+		auto end = std::chrono::high_resolution_clock::now();	
+		long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+		sum += microseconds;
 #ifdef profiling
-	if (thread == threadmode::manual) {
-		cputime /= nthreads;
-		polltime /= nthreads;
-		std::cout << "Computation time per thread: " << bright+magenta << cputime << res << std::endl;
-	}
-	else {
-		std::cout << "Computation time:            " << bright+magenta << cputime << res << std::endl;
-	}
+		if (thread == threadmode::manual) {
+			cputime /= nthreads;
+			polltime /= nthreads;
+			std::cout << "Computation time per thread: " << bright+magenta << cputime << res << std::endl;
+		}
+		else {
+			std::cout << "Computation time:            " << bright+magenta << cputime << res << std::endl;
+		}
 #endif
-	std::cout << "Poll time:                   " << bright+magenta << polltime << res << std::endl;
-	std::cout << "Simulation total:            " << bright+magenta << simulationtime << res << std::endl;
-	std::cout << "Total time:                  " << bright+magenta << microseconds << res << std::endl;
-	tsim -> setDebug(2);
+		std::cout << "Poll time:                   " << bright+magenta << polltime << res << std::endl;
+		std::cout << "Simulation total:            " << bright+magenta << simulationtime << res << std::endl;
+		std::cout << "Total time:                  " << bright+magenta << microseconds << res << std::endl;
+	}
+	avg = float(sum) / float(nsamples);
+	std::cout << "\nAverage time:                    " << bright+magenta << avg << res << std::endl;
+/*	tsim -> setDebug(2);
+	
 	if (thread == threadmode::manual) {
 		tsim -> writeConfiguration("explicit-test."+extension+".txt");
 	}
 	else {
 		tsim -> writeConfiguration("single-test."+extension+".txt");
 	}
-	
+*/	
 }
