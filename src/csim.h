@@ -59,6 +59,7 @@ enum threadmode {
 enum simType {
 	basic,
 	bulirschStoer,
+	miller,
 	symplectic
 };
 
@@ -111,7 +112,19 @@ public:
 		void init();
 	};
 
+	class Miller {
+
+	public:
+		Miller(CSim* sim = NULL);
+		int step(CBody* body, CBody* wbody);
+		void force(CBody* body, CBody* wbody, double dt);
+
+	private:
+		CSim* sim;
+	};
+
 	BulirschStoer* BS = new BulirschStoer(this);
+	Miller* miller = new Miller(this);
 
 private:
 	simType type;		// The simulation type
