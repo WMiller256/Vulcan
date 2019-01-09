@@ -5,7 +5,7 @@
 int main(int argn, char** argv) {
 	double t;
 	double h;
-	int nsamples = 10;
+	int nsamples = 1;
 	std::string extension;
 	threadmode thread = threadmode::single;
 
@@ -109,13 +109,12 @@ int main(int argn, char** argv) {
 	}
 	avg = float(sum) / float(nsamples);
 	std::cout << "\nAverage time:                    " << bright+magenta << avg << res << std::endl;
-/*	tsim -> setDebug(2);
+	tsim -> setDebug(2);
 	
 	if (thread == threadmode::manual) {
 		tsim -> writeConfiguration("explicit-test."+extension+".txt");
 	}
 	else {
 		tsim -> writeConfiguration("single-test."+extension+".txt");
-	}
-*/	
+	}	
 }

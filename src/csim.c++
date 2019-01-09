@@ -502,13 +502,12 @@ int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
 	Pos* c = new Pos(0.0, 0.0, 0.0);
 	*c = body->pos;
 	BSForce(body, wbody, steps[0], p, v);
-	v->zero();
 	for (int ii = 1; ii < nsteps; ii ++) {
 		if (sim->h / steps[ii] > 0.0) {
 			if (abs(magnitude(*p - *c)) < threshold*magnitude(*p)) {
 				break;
 			}
-			v->zero();
+			*v = body->Velocity();
 			BSForce(body, wbody, steps[ii], c, v);
 			p = c;
 		}
@@ -518,7 +517,7 @@ int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
 			return 1;
 		}
 	}
-	wbody->Velocity(*v);
+	wbody->accelerate(*v);
 	wbody->Position(*p);
 }
 void CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps, Pos* p, vec* v) {
