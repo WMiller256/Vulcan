@@ -296,6 +296,9 @@ void CSim::sim(threadmode t) {
 			simTime = 0;
 			tocalc = 0;
 			joinable = 0;
+			if (nthreads < 1) {
+				nthreads = 1;
+			}
 			if (nthreads > std::thread::hardware_concurrency() - 1) {		// If the specified number of threads is greater than the maximum 
 				nthreads = std::thread::hardware_concurrency() - 1;			// of the current machine adjust accordingly.
 			}
@@ -310,10 +313,10 @@ void CSim::sim(threadmode t) {
 			}
 			sort();
 			nbodies = nadded;
-			std::cout << " Bodies -     "+bright+magenta+std::to_string(nbodies)+res+"\n";
-			std::cout << "     Real:    "+bright+magenta+std::to_string(NReal())+res+"\n";
-			std::cout << "     Virtual: "+bright+magenta+std::to_string(NVirtual())+res+"\n";
-			std::cout << " Threads -    "+bright+magenta+std::to_string(nthreads)+res+"\n\n";
+			//std::cout << " Bodies -     "+bright+magenta+std::to_string(nbodies)+res+"\n";
+			//std::cout << "     Real:    "+bright+magenta+std::to_string(NReal())+res+"\n";
+			//std::cout << "     Virtual: "+bright+magenta+std::to_string(NVirtual())+res+"\n";
+			//std::cout << " Threads -    "+bright+magenta+std::to_string(nthreads)+res+"\n\n";
 
 			int block = nbodies / nthreads;
 			std::thread threads[nthreads];
@@ -497,17 +500,17 @@ void CSim::BulirschStoer::init() {
 
 int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
 	double h;
-	Pos* p = new Pos(0.0, 0.0, 0.0);
-	vec* v = new vec(0.0, 0.0, 0.0);
-	Pos* c = new Pos(0.0, 0.0, 0.0);
-	*c = body->pos;
+	Pos p(0.0, 0.0, 0.0);
+	vec v(0.0, 0.0, 0.0);
+	Pos c(0.0, 0.0, 0.0);
+	c = body->pos;
 	BSForce(body, wbody, steps[0], p, v);
 	for (int ii = 1; ii < nsteps; ii ++) {
 		if (sim->h / steps[ii] > 0.0) {
-			if (abs(magnitude(*p - *c)) < threshold*magnitude(*p)) {
+			if (abs(magnitude(p - c)) < threshold*magnitude(p)) {
 				break;
 			}
-			*v = body->Velocity();
+			v = body->Velocity();
 			BSForce(body, wbody, steps[ii], c, v);
 			p = c;
 		}
@@ -517,13 +520,13 @@ int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
 			return 1;
 		}
 	}
-	wbody->accelerate(*v);
-	wbody->Position(*p);
+	wbody->accelerate(v);
+	wbody->Position(p);
 }
-void CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps, Pos* p, vec* v) {
+void CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps, Pos &p, vec &v) {
 	Force net(0,0,0);
 	vec a;
-	*p = body->pos;
+	p = body->pos;
 	double fmagnitude;
 	double dt = sim->h / steps;
 	for (int kk = 0; kk < steps; kk ++) {
@@ -532,7 +535,7 @@ void CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps, Pos* p, 
 				if (sim->read[ii] != body) {
 					printrln("\n"+in("BulirschStoer", "BSForce")+"    Target: ", body->Name(), 5); 
 					fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / pow(sim->read[ii]->distance(p), 2);
-					net += p->direction(sim->read[ii]->pos) * fmagnitude;
+					net += p.direction(sim->read[ii]->pos) * fmagnitude;
 
 					printrln(in("BulirschStoer", "BSForce")+"    Magnitude of force between "+body->Name()+" and "+
 						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);
@@ -541,8 +544,8 @@ void CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps, Pos* p, 
 			}
 		}
     	a = net / body->Mass() * dt;
-    	*v = *v + a;
-    	*p = *p + *v + a * (dt * 0.5);
+    	v += a;
+    	p += v + a * (dt * 0.5);
     	net.zero();
 	}
 }

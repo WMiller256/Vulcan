@@ -100,7 +100,7 @@ public:
 	public:
 		BulirschStoer(CSim* sim = NULL);
 		int step(CBody* body, CBody* wbody);
-		void BSForce(CBody* body, CBody* wbody, int steps, Pos* p, vec* v);
+		void BSForce(CBody* body, CBody* wbody, int steps, Pos &p, vec &v);
 
 	private:
 		CSim* sim;				// To access the owning (CSim) methods and members
