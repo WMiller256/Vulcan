@@ -318,17 +318,17 @@ void CSim::sim(threadmode t) {
 			//std::cout << " Threads -    "+bright+magenta+std::to_string(nthreads)+res+"\n\n";
 
 			int block = nbodies / nthreads;
-			cpu_set_t set;
-			CPU_ZERO(&set);
+//			cpu_set_t set;
+//			CPU_ZERO(&set);
 			std::thread threads[nthreads];
 			for (int ii = 0; ii < nthreads - 1; ii ++) {
 				threads[ii] = std::thread(&CSim::threadedFixedH, this, block * ii, block * (ii + 1));
-				CPU_SET(ii, &set);
-				pthread_setaffinity_np(threads[ii].native_handle(), sizeof(cpu_set_t), &set);
+//				CPU_SET(ii, &set);
+//				pthread_setaffinity_np(threads[ii].native_handle(), sizeof(cpu_set_t), &set);
 			}
 			threads[nthreads - 1] = std::thread(&CSim::threadedFixedH, this, block * (nthreads - 1), nbodies);
-			CPU_SET(nthreads - 1, &set);
-			pthread_setaffinity_np(threads[nthreads - 1].native_handle(), sizeof(cpu_set_t), &set);
+//			CPU_SET(nthreads - 1, &set);
+//			pthread_setaffinity_np(threads[nthreads - 1].native_handle(), sizeof(cpu_set_t), &set);
 #ifdef profiling
 			start = std::chrono::high_resolution_clock::now();
 #endif
