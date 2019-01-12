@@ -38,6 +38,7 @@
 #include <atomic>
 #include <limits>
 #include <omp.h>
+#include <pthread.h>
 
 #include "cghost.h"
 #include "externs.h"
