@@ -1,5 +1,8 @@
 #!/bin/bash
-for i in 2 3 4 5 6 7 8 9 1
+for j in {1..10};
 do
-	./opt_timeSampling.out explicit 86400e8 864000 $i 1e8-10
+	for i in {1..9};
+	do
+		./opt_timeSampling.exe explicit 86400e8 864000 $i 1e8-10.beast
+	done
 done
