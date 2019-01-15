@@ -1,5 +1,6 @@
-#Name of program
-MAIN    = test
+#Names of programs
+TEST    = test
+TIMING  = timing
 
 ABS		= .
 BIN		= .
@@ -8,13 +9,13 @@ OPT		= opt_
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
-LFLAGS	= -Wl,-rpath,/usr/bin/g++
+LFLAGS	= -Wl,-rpath,/usr/local/bin/g++
 LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -lstdc++fs
 LIBS	= -lboost_program_options -lncurses -lpthread
 
 INC		= -I /usr/lib/boost/
 CFLAGS	= -Wno-deprecated-declarations -fopenmp -std=c++17 -O3
-CC      = /usr/bin/g++ $(CFLAGS) $(INC) $(LIBS) 
+CC      = /usr/local/bin/g++ $(CFLAGS) $(INC) $(LIBS) 
 
 #Output coloring
 GREEN   = \033[1;32m
@@ -50,10 +51,16 @@ OBJS	= $(BUILD)/$(OPT)$(MAIN).o	\
 
 #Builds
 all:
-	@printf "[      $(YELLOW)Building $(OPT)$(MAIN)$(WHITE)       ]\n"
-	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make -f ws$(OPT)test.make build
-	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(MAIN)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
+	@printf "[      $(YELLOW)Building $(OPT)$(TEST)$(WHITE)       ]\n"
+	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(TEST)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
+	make -f ws.makefile test
+	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(TEST)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
+	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
+	
+	@printf "[      $(YELLOW)Building $(OPT)$(TIMING)$(WHITE)       ]\n"
+	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(TIMING)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
+	make -f ws.makefile timing
+	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(TIMING)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 
 $(BUILD)/%.o: %.c++
@@ -61,11 +68,15 @@ $(BUILD)/%.o: %.c++
 	cd $(ABS); $(CC) -c -o $@ $<
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$<$(WHITE) - $(MAGENTA)Object$(WHITE)\n"
 
-build: $(OBJS)
-	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN).out $(LIBS)
-	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+test: $(OBJS)
+	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(TEST).out $(LIBS)
+	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
+timing: $(OBJS)
+	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(TIMING).out $(LIBS)
+	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 clean:
 	$(RM) *.core $(BUILD)/*.o *.d *.stackdump
