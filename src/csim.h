@@ -38,6 +38,7 @@
 #include <atomic>
 #include <limits>
 #include <omp.h>
+#include <pthread.h>
 
 #include "cghost.h"
 #include "externs.h"
@@ -56,6 +57,12 @@ enum threadmode {
 	omp,
 	manual
 };
+enum simType {
+	basic,
+	bulirschStoer,
+	miller,
+	symplectic
+};
 
 class CSim
 {
@@ -66,6 +73,8 @@ public:
 	~CSim();
 
 	void setDebug(int Debug);
+	void Type(simType t);
+	simType Type();
 
 	void addBody(CBody* body);
 	void addPlanet(CBody* body);
@@ -87,7 +96,40 @@ public:
 	void threadedFixedH(int min, int max);
 	void unthreadedFixedH(unsigned long end);
 
+	class BulirschStoer {
+	
+	public:
+		BulirschStoer(CSim* sim = NULL);
+		int step(CBody* body, CBody* wbody);
+		void BSForce(CBody* body, CBody* wbody, int steps, Pos &p, vec &v);
+
+	private:
+		CSim* sim;				// To access the owning (CSim) methods and members
+		double threshold;
+		static int attempts;
+		static int nsteps;
+		static int steps[];
+
+		void init();
+	};
+
+	class Miller {
+
+	public:
+		Miller(CSim* sim = NULL);
+		int step(CBody* body, CBody* wbody);
+		void force(CBody* body, CBody* wbody, double dt);
+
+	private:
+		CSim* sim;
+	};
+
+	BulirschStoer* BS = new BulirschStoer(this);
+	Miller* miller = new Miller(this);
+
 private:
+	simType type;		// The simulation type
+
 	double tMax;		// The integration time
 	double tCurr;		// Current time
 	double h;			// The time step
@@ -106,25 +148,6 @@ private:
 	int ncalcs;
 
 	void init();
-};
-
-class BulirschStoer : public CSim
-{
-public:
-	BulirschStoer();
-	double step(double (*f)(double, double), double y0, double x0, double x, int nsteps);
-	int simulate(double (*f)(double, double), double y0, double* y1, double x, double h, double* h_new, 
-		double epsilon, double yscale, int rational_extrapolate);
-	static int rationalExtrapolation(double* fzero, double* tableau, double* x, double f, int n);
-	static int polynomialExtrapolation(double* fzero, double* tableau, double* x, double f, int n);
-
-	void setThreading(threadmode t);
-	threadmode getThreading();
-
-private:
-	static int attempts;
-	static int steps[];
-	threadmode threading;
 };
 
 #endif // HASH_H

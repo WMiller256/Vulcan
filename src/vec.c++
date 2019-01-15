@@ -31,9 +31,14 @@ vec::vec(vec* v) {
 
 std::string vec::info(int precision) const {
 	std::string s;
-	s = bright+magenta+scientific(x, precision)+res+" "+bright+magenta;
-	s += scientific(y, precision)+res+" "+bright+magenta+scientific(z, precision)+res;
+	s = bright+magenta+scientific(x, precision)+res+" "+bright+magenta;					// Exclude
+	s += scientific(y, precision)+res+" "+bright+magenta+scientific(z, precision)+res;	// Exclude
 	return s;
+}
+void vec::zero() {
+	x = 0;
+	y = 0;
+	z = 0;
 }
 
 bool vec::operator != (vec r) const {
@@ -63,6 +68,9 @@ vec vec::operator * (long scalar) {
 }
 vec vec::operator + (vec const &r) {
 	return vec(x + r.x, y + r.y, z + r.z);
+}
+vec vec::operator - (vec const &r) {
+	return vec(x - r.x, y - r.y, z - r.z);
 }
 void vec::operator += (vec const &r) {
 	x = x + r.x;
