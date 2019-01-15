@@ -18,8 +18,13 @@ src/opt_test
 src/opt_test.miller
 src/opt_test.2
 execute.sh
-*.c++
+functionPointers.c++
+ifstest.c++
+parallelRead.2.c++
+parallelRead.c++
+
 *.exe
+*.out
 
 #Ignore build objects
 build/*.o
