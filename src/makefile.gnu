@@ -4,7 +4,7 @@ TIMING  = timing
 
 ABS		= .
 BIN		= .
-BUILD	= $(ABS)/../wsbuild
+BUILD	= $(ABS)/../build
 OPT		= opt_
 RM      = /bin/rm -f
 MV		= /bin/mv -f
