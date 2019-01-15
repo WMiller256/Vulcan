@@ -4,7 +4,7 @@ TIMING  = timing
 
 ABS		= .
 BIN		= .
-BUILD	= $(ABS)/../build
+BUILD	= $(ABS)/../build-wsl
 OPT		= opt_
 RM      = /bin/rm -f
 MV		= /bin/mv -f
@@ -27,8 +27,7 @@ MAGENTA = \033[35m
 YELLOW  = \033[33m
 
 #Source files
-SRCS	= $(ABS)/$(OPT)$(MAIN).c++	\
-		  $(ABS)/$(OPT)csim.c++		\
+SRCS	= $(ABS)/$(OPT)csim.c++		\
 		  $(ABS)/$(OPT)cbody.c++	\
 		  $(ABS)/$(OPT)simio.c++	\
 		  $(ABS)/$(OPT)global.c++	\
@@ -37,8 +36,7 @@ SRCS	= $(ABS)/$(OPT)$(MAIN).c++	\
 		  $(ABS)/$(OPT)rpos.c++		\
 		  $(ABS)/$(OPT)force.c++	\
 		  $(ABS)/$(OPT)pos.c++
-OBJS	= $(BUILD)/$(OPT)$(MAIN).o	\
-		  $(BUILD)/$(OPT)csim.o		\
+OBJS	= $(BUILD)/$(OPT)csim.o		\
 		  $(BUILD)/$(OPT)cbody.o	\
 		  $(BUILD)/$(OPT)pos.o		\
 		  $(BUILD)/$(OPT)vel.o		\
@@ -68,14 +66,14 @@ $(BUILD)/%.o: %.c++
 	cd $(ABS); $(CC) -c -o $@ $<
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$<$(WHITE) - $(MAGENTA)Object$(WHITE)\n"
 
-test: $(OBJS)
+test: $(OBJS) $(BUILD)/$(OPT)$(TEST).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(TEST).out $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TEST).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TEST).out $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
-timing: $(OBJS)
+timing: $(OBJS) $(BUILD)/$(OPT)$(TIMING).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(LIBDIRS) -o $(BIN)/$(OPT)$(TIMING).out $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TIMING).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TIMING).out $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 clean:
