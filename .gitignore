@@ -23,7 +23,7 @@ execute.sh
 
 #Ignore build objects
 build/*.o
-wsbuild/*.o
+build-wsl/*.o
 
 #Ignore test outputs
 src/*.txt
