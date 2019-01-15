@@ -53,7 +53,9 @@ int main(int argn, char** argv) {
 
 	double avg = 0;
 	unsigned long long sum = 0;
-	for (int jj = 9; jj > 0; jj --) {
+	int n = 9 + nghosts;
+	if (n > 11) n = 11;
+	for (int jj = 11; jj > 0; jj --) {
 		CSim* tsim = new CSim(8, t, h);
 		tsim -> setDebug(2);
 		tsim->Type(simType::bulirschStoer);
