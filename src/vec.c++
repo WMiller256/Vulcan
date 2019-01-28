@@ -36,9 +36,9 @@ std::string vec::info(int precision) const {
 	return s;
 }
 void vec::zero() {
-	x = 0;
-	y = 0;
-	z = 0;
+	x = 0.0;
+	y = 0.0;
+	z = 0.0;
 }
 
 bool vec::operator != (vec r) const {
@@ -72,12 +72,14 @@ vec vec::operator + (vec const &r) {
 vec vec::operator - (vec const &r) {
 	return vec(x - r.x, y - r.y, z - r.z);
 }
-void vec::operator += (vec const &r) {
-	x = x + r.x;
-	y = y + r.y;
-	z = z + r.z;
+vec vec::operator += (vec const &r) {
+	return vec(x + r.x, y + r.y, z + r.z);
 }
-
+void vec::operator = (vec const &r) {
+	x = r.x;
+	y = r.y;
+	z = r.z;
+}
 void vec::init() {
 	x = 0.0;
 	y = 0.0;

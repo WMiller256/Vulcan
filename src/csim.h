@@ -21,7 +21,7 @@
 //#define profiling
 #define INT 1
 #define DOUBLE 2
-#define SIMTIME_TYPE INT
+#define SIMTIME_TYPE DOUBLE
 
 #include <iostream>
 #include <iomanip>
@@ -48,7 +48,6 @@
 #include "vel.h"
 #include "vec.h"
 #include "pos.h"
-#include "rpos.h"
 
 class CBody;
 
@@ -101,7 +100,9 @@ public:
 	public:
 		BulirschStoer(CSim* sim = NULL);
 		int step(CBody* body, CBody* wbody);
-		void BSForce(CBody* body, CBody* wbody, int steps, Pos &p, vec &v);
+		void force(CBody* body, CBody* wbody, int steps, Pos &p, vec &v);
+
+		int NSteps();
 
 	private:
 		CSim* sim;				// To access the owning (CSim) methods and members
@@ -124,8 +125,8 @@ public:
 		CSim* sim;
 	};
 
-	BulirschStoer* BS = new BulirschStoer(this);
-	Miller* miller = new Miller(this);
+	BulirschStoer* BS;
+	Miller* miller;
 
 private:
 	simType type;		// The simulation type

@@ -37,7 +37,8 @@ public:
 	vec operator * (long scalar);
 	vec operator + (vec const &r);
 	vec operator - (vec const &r);
-	void operator += (vec const &r);
+	vec operator += (vec const &r);
+	void operator = (vec const &r);
 
 private:
 	

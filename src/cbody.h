@@ -7,7 +7,6 @@
 #include "vel.h"
 #include "vec.h"
 #include "pos.h"
-#include "rpos.h"
 
 enum bodyType {
 	def,
@@ -53,6 +52,16 @@ public:
 	long h;
 	long fix;					// The fix time for this body's position in simulation time
 	unsigned long long ncalcs;
+	unsigned long long totSteps;
+	class BulirschStoer {
+	public:
+		BulirschStoer(CBody* sim = NULL);
+		std::vector<Pos> positions;	// Table for positions for Bulirsch Stoer extrapolation
+	private:
+		CBody* body;
+	};
+
+	BulirschStoer* BS;
 
 	bool operator != (CBody r) const;
 	bool operator == (CBody r) const;
@@ -61,6 +70,7 @@ private:
 	CBody* parent;				// Parent, i.e. the body that is being orbited
 	std::string name;			// The (optional) name of the body
 	bodyType type;
+
 
 	double radius;				// Radius of the body
 	double x;					// x pos

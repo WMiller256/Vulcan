@@ -17,7 +17,6 @@ std::atomic<double> simTime;
 std::atomic<int> tocalc;
 std::atomic<int> joinable;
 
-int CSim::BulirschStoer::attempts = 4;
 int CSim::BulirschStoer::nsteps = 12;
 int CSim::BulirschStoer::steps[] = { 2,4,6,8,12,16,24,32,48,64,96,128 };
 
@@ -252,11 +251,13 @@ void CSim::fixedHForce(CBody* body, CBody* wbody) {
 	vec v;
 	vec a;
 	double fmagnitude;
+	double dist;
 	for (int ii = 0; ii < nplanets; ii ++) {
 		if (read[ii] != NULL) {
 			if (read[ii] != body) {
 //				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body->Name(), 5); //				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body->Name(), 5); 
-				fmagnitude = (G * body->Mass() * read[ii]->Mass()) / pow(read[ii]->distance(body->pos), 2);
+				dist = read[ii]->distance(body->pos);
+				fmagnitude = (G * body->Mass() * read[ii]->Mass()) / (dist * dist);
 				net += body->pos.direction(read[ii]->pos) * fmagnitude;
 
 //				printrln(in("CSim", "fixedHForce")+"    Magnitude of force between "+body->Name()+" and "+//					read[ii]->Name()+" is ", scientific(fmagnitude), 4);//					read[ii]->Name()+" is ", scientific(fmagnitude), 4);
@@ -310,12 +311,10 @@ void CSim::sim(threadmode t) {
 					addBody(body);
 				}
 			}
+			if (type == simType::bulirschStoer) {
+			}
 			sort();
 			nbodies = nadded;
-			//std::cout << " Bodies -     "+bright+magenta+std::to_string(nbodies)+res+"\n";
-			//std::cout << "     Real:    "+bright+magenta+std::to_string(NReal())+res+"\n";
-			//std::cout << "     Virtual: "+bright+magenta+std::to_string(NVirtual())+res+"\n";
-			//std::cout << " Threads -    "+bright+magenta+std::to_string(nthreads)+res+"\n\n";
 
 			int block = nbodies / nthreads;
 //			cpu_set_t set;
@@ -495,51 +494,63 @@ void CSim::unthreadedFixedH(unsigned long end) {
 }
 
 CSim::BulirschStoer::BulirschStoer(CSim* sim) {
-	init();
 	this->sim = sim;
+	init();
 }
 
 void CSim::BulirschStoer::init() {
-	threshold = 0.0001;
+	threshold = 100000000;
+	for (int ii = 0; ii < sim->nadded; ii ++) {
+		sim->read[ii]->positions.reserve(nsteps);
+		sim->write[ii]->positions.reserve(nsteps);
+		for (int jj = 0; jj < nsteps; jj ++) {
+			Pos p;
+			sim->read[ii]->positions.push_back(p);
+			sim->write[ii]->positions.push_back(p);
+		}
+	}
 }
 
 int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
-	double h;
-	Pos p(0.0, 0.0, 0.0);
-	vec v(0.0, 0.0, 0.0);
-	Pos c(0.0, 0.0, 0.0);
-	c = body->pos;
-	BSForce(body, wbody, steps[0], p, v);
-	for (int ii = 1; ii < nsteps; ii ++) {
+	vec v = body->Velocity();
+	Pos c = body->pos;
+	Pos p = c;
+	int step;
+	for (int ii = 0; ii < nsteps; ii ++) {
 		if (sim->h / steps[ii] > 0.0) {
-			if (abs(magnitude(p - c)) < threshold*magnitude(p)) {
+			step = steps[ii];
+			v = body->Velocity();
+			c = body->pos;
+			BSForce(body, wbody, step, c, v);
+			body->positions[ii] = c;
+			if (fabs(magnitude(p - c)) < threshold) {
 				break;
 			}
-			v = body->Velocity();
-			BSForce(body, wbody, steps[ii], c, v);
 			p = c;
 		}
 		else {
-//			error("{h} / {steps["+std::to_string(ii)+"]} ("+std::to_string(sim->h)+" / "+std::to_string(steps[ii])+//			 	") not greater than 0.0, cannot simulate.", __LINE__, __FILE__);//			 	") not greater than 0.0, cannot simulate.", __LINE__, __FILE__);
+//			error("{sim->h} / {steps["+std::to_string(ii)+"]} ("+std::to_string(sim->h)+" / "+std::to_string(steps[ii])+//			 	") not greater than 0.0, cannot simulate.", __LINE__, __FILE__);//			 	") not greater than 0.0, cannot simulate.", __LINE__, __FILE__);
 			return 1;
 		}
 	}
-	wbody->accelerate(v);
-	wbody->Position(p);
+	wbody->totSteps += step;
+	wbody->Velocity(v);
+	wbody->Position(c);
 }
-void CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps, Pos &p, vec &v) {
-	Force net(0,0,0);
+void CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps, Pos &c, vec &v) {
+	vec net(0,0,0);
 	vec a;
-	p = body->pos;
 	double fmagnitude;
+	double dist;
 	double dt = sim->h / steps;
 	for (int kk = 0; kk < steps; kk ++) {
 		for (int ii = 0; ii < sim->nplanets; ii ++) {
 			if (sim->read[ii] != NULL) {
 				if (sim->read[ii] != body) {
 //					printrln("\n"+in("BulirschStoer", "BSForce")+"    Target: ", body->Name(), 5); //					printrln("\n"+in("BulirschStoer", "BSForce")+"    Target: ", body->Name(), 5); 
-					fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / pow(sim->read[ii]->distance(p), 2);
-					net += p.direction(sim->read[ii]->pos) * fmagnitude;
+					dist = sim->read[ii]->distance(c);
+					fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / (dist * dist);
+					net = net + c.direction(sim->read[ii]->pos) * fmagnitude;
 
 //					printrln(in("BulirschStoer", "BSForce")+"    Magnitude of force between "+body->Name()+" and "+//						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);//						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);
 //					printrln(in("BulirschStoer", "BSForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);//					printrln(in("BulirschStoer", "BSForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
@@ -547,10 +558,13 @@ void CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps, Pos &p, 
 			}
 		}
     	a = net / body->Mass() * dt;
-    	v += a;
-    	p += v + a * (dt * 0.5);
+    	v = v + a;
+    	c = c + v * dt + a * (dt * 0.5);
     	net.zero();
 	}
+}
+int CSim::BulirschStoer::NSteps() {
+	return nsteps;
 }
 
 CSim::Miller::Miller(CSim* sim) {
@@ -562,11 +576,13 @@ void CSim::Miller::force(CBody* body, CBody* wbody, double dt) {
 	vec v;
 	vec a;
 	double fmagnitude;
+	double dist;
 	for (int ii = 0; ii < sim->nplanets; ii ++) {
 		if (sim->read[ii] != NULL) {
 			if (sim->read[ii] != body) {
 //				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body->Name(), 5); //				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body->Name(), 5); 
-				fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / pow(sim->read[ii]->distance(body->pos), 2);
+				dist = sim->read[ii]->distance(body->pos);
+				fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / (dist * dist);
 				net += body->pos.direction(sim->read[ii]->pos) * fmagnitude;
 
 //				printrln(in("CSim", "fixedHForce")+"    Magnitude of force between "+body->Name()+" and "+//					sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);//					sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);
@@ -584,6 +600,9 @@ void CSim::Miller::force(CBody* body, CBody* wbody, double dt) {
 
 void CSim::init() {
 //	print("Initializing new "+cyan+bright+"CSim"+res+"...");//	print("Initializing new "+cyan+bright+"CSim"+res+"...");
+
+	BS = new BulirschStoer(this);
+	miller = new Miller(this);
 	
 	type = simType::basic;
 	forces = true;

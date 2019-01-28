@@ -41,6 +41,7 @@ int main(int argn, char** argv) {
 	else {
 		extension = "";
 	}
+	std::cout << t << " " << h << " " << nthreads << std::endl;
 
 	CSim* tsim = new CSim(8, t, h);
 	tsim -> setDebug(2);
@@ -90,7 +91,6 @@ int main(int argn, char** argv) {
 	for (int ii = 0; ii < nsamples; ii ++) {
 		auto start = std::chrono::high_resolution_clock::now();	
 		tsim -> sim(thread);
-		std::cout << std::endl;
 		auto end = std::chrono::high_resolution_clock::now();	
 		long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 		sum += microseconds;
@@ -110,6 +110,9 @@ int main(int argn, char** argv) {
 	}
 	avg = float(sum) / float(nsamples);
 	std::cout << "\nAverage time:                    " << bright+magenta << avg << res << std::endl;
+	for (int ii = 0; ii < tsim->count(); ii ++) {
+		std::cout << tsim->at(ii)->Name() << " - " << tsim->at(ii)->totSteps << std::endl; 
+	}
 /*
 	tsim -> setDebug(2);
 	if (thread == threadmode::manual) {

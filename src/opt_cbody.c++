@@ -156,12 +156,17 @@ double CBody::distance(Pos t) const {
 	return sqrt(pow(t.x - pos.x, 2) + pow(t.y - pos.y, 2) + pow(t.z - pos.z, 2));
 }
 
+CBody::BulirschStoer::BulirschStoer(CBody* body) {
+	this->body = body;
+}
+
 void CBody::init() {
 //	print("Initializing new "+cyan+bright+"CBody"+res+"...");//	print("Initializing new "+cyan+bright+"CBody"+res+"...");
 
 	parent = NULL;
 	name = "";
 	type = bodyType::def;
+	BS = new BulirschStoer(this);
 	
 	radius = 0;
 	x = 0;
@@ -179,6 +184,7 @@ void CBody::init() {
 	fix = 0;
 
 	ncalcs = 0;
+	totSteps = 0;
 	
 //	print(green+"done\n"+res);//	print(green+"done\n"+res);
 }

@@ -32,6 +32,7 @@ build-wsl/*.o
 
 #Ignore test outputs
 src/*.txt
+data/*.txt
 opt_test
 *.out*
 
