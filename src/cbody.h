@@ -71,7 +71,6 @@ private:
 	std::string name;			// The (optional) name of the body
 	bodyType type;
 
-
 	double radius;				// Radius of the body
 	double x;					// x pos
 	double y;					// y pos

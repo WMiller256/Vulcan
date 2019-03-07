@@ -501,12 +501,12 @@ CSim::BulirschStoer::BulirschStoer(CSim* sim) {
 void CSim::BulirschStoer::init() {
 	threshold = 100000000;
 	for (int ii = 0; ii < sim->nadded; ii ++) {
-		sim->read[ii]->positions.reserve(nsteps);
-		sim->write[ii]->positions.reserve(nsteps);
+		sim->read[ii]->BS->positions.reserve(nsteps);
+		sim->write[ii]->BS->positions.reserve(nsteps);
 		for (int jj = 0; jj < nsteps; jj ++) {
 			Pos p;
-			sim->read[ii]->positions.push_back(p);
-			sim->write[ii]->positions.push_back(p);
+			sim->read[ii]->BS->positions.push_back(p);
+			sim->write[ii]->BS->positions.push_back(p);
 		}
 	}
 }
@@ -521,8 +521,8 @@ int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
 			step = steps[ii];
 			v = body->Velocity();
 			c = body->pos;
-			BSForce(body, wbody, step, c, v);
-			body->positions[ii] = c;
+			force(body, wbody, step, c, v);
+//			body->positions[ii] = c;
 			if (fabs(magnitude(p - c)) < threshold) {
 				break;
 			}
@@ -537,7 +537,7 @@ int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
 	wbody->Velocity(v);
 	wbody->Position(c);
 }
-void CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps, Pos &c, vec &v) {
+void CSim::BulirschStoer::force(CBody* body, CBody* wbody, int steps, Pos &c, vec &v) {
 	vec net(0,0,0);
 	vec a;
 	double fmagnitude;
@@ -547,13 +547,13 @@ void CSim::BulirschStoer::BSForce(CBody* body, CBody* wbody, int steps, Pos &c, 
 		for (int ii = 0; ii < sim->nplanets; ii ++) {
 			if (sim->read[ii] != NULL) {
 				if (sim->read[ii] != body) {
-//					printrln("\n"+in("BulirschStoer", "BSForce")+"    Target: ", body->Name(), 5); //					printrln("\n"+in("BulirschStoer", "BSForce")+"    Target: ", body->Name(), 5); 
+//					printrln("\n"+in("BulirschStoer", "force")+"    Target: ", body->Name(), 5); //					printrln("\n"+in("BulirschStoer", "force")+"    Target: ", body->Name(), 5); 
 					dist = sim->read[ii]->distance(c);
 					fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / (dist * dist);
 					net = net + c.direction(sim->read[ii]->pos) * fmagnitude;
 
-//					printrln(in("BulirschStoer", "BSForce")+"    Magnitude of force between "+body->Name()+" and "+//						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);//						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);
-//					printrln(in("BulirschStoer", "BSForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);//					printrln(in("BulirschStoer", "BSForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
+//					printrln(in("BulirschStoer", "force")+"    Magnitude of force between "+body->Name()+" and "+//						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);//						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);
+//					printrln(in("BulirschStoer", "force")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);//					printrln(in("BulirschStoer", "force")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
 				}
 			}
 		}

@@ -502,12 +502,12 @@ CSim::BulirschStoer::BulirschStoer(CSim* sim) {
 void CSim::BulirschStoer::init() {
 	threshold = 100000000;
 	for (int ii = 0; ii < sim->nadded; ii ++) {
-		sim->read[ii]->positions.reserve(nsteps);
-		sim->write[ii]->positions.reserve(nsteps);
+		sim->read[ii]->BS->positions.reserve(nsteps);
+		sim->write[ii]->BS->positions.reserve(nsteps);
 		for (int jj = 0; jj < nsteps; jj ++) {
 			Pos p;
-			sim->read[ii]->positions.push_back(p);
-			sim->write[ii]->positions.push_back(p);
+			sim->read[ii]->BS->positions.push_back(p);
+			sim->write[ii]->BS->positions.push_back(p);
 		}
 	}
 }
