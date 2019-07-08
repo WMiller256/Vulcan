@@ -7,36 +7,28 @@ int main(int argn, char** argv) {
 	double h;
 	int nsamples = 1;
 	std::string extension;
-	threadmode thread = threadmode::single;
+	threadmode thread = threadmode::manual;
 
 	if (argn > 1) {
-		if (strcmp(argv[1], "single") == 0) {
-			thread = threadmode::single;
-		}
-		else if (strcmp(argv[1], "explicit") == 0) {
-			thread = threadmode::manual;
-		}
-	}
-	if (argn > 2) {
-		t = atof(argv[2]);
+		t = atof(argv[1]);
 	}
 	else {
 		t = 1000.0;
 	}
-	if (argn > 3) {
-		h = atof(argv[3]);
+	if (argn > 2) {
+		h = atof(argv[2]);
 	}
 	else {
 		h = 1.0;
 	}
-	if (argn > 4) {
-		nthreads = atoi(argv[4]);
+	if (argn > 3) {
+		nthreads = atoi(argv[3]);
 	}
 	else {
 		nthreads = 1;
 	}
-	if (argn > 5) {
-		extension = std::string(argv[5]);
+	if (argn > 4) {
+		extension = std::string(argv[4]);
 	}
 	else {
 		extension = "";
