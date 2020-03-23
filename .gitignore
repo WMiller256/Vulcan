@@ -47,3 +47,6 @@ bin/*.stackdump
 *.py
 src/plotting/.ipynb_checkpoints/*
 src/plotting/*.ipynb
+
+#Ignore outdated testing data/results
+data
