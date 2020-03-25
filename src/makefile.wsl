@@ -33,7 +33,6 @@ SRCS	= $(ABS)/$(OPT)csim.c++		\
 		  $(ABS)/$(OPT)global.c++	\
 		  $(ABS)/$(OPT)vel.c++		\
 		  $(ABS)/$(OPT)vec.c++		\
-		  $(ABS)/$(OPT)rpos.c++		\
 		  $(ABS)/$(OPT)force.c++	\
 		  $(ABS)/$(OPT)pos.c++
 OBJS	= $(BUILD)/$(OPT)csim.o		\
@@ -41,7 +40,6 @@ OBJS	= $(BUILD)/$(OPT)csim.o		\
 		  $(BUILD)/$(OPT)pos.o		\
 		  $(BUILD)/$(OPT)vel.o		\
 		  $(BUILD)/$(OPT)vec.o		\
-		  $(BUILD)/$(OPT)rpos.o		\
 		  $(BUILD)/$(OPT)force.o	\
 		  $(BUILD)/$(OPT)simio.o	\
 		  $(BUILD)/$(OPT)global.o

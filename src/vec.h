@@ -15,6 +15,7 @@
 #include <string>
 
 #include "colors.h"
+#include "simio.h"
 
 class vec
 {
@@ -39,6 +40,7 @@ public:
 	vec operator - (vec const &r);
 	vec operator += (vec const &r);
 	void operator = (vec const &r);
+	double operator [] (int idx);
 
 private:
 	
