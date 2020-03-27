@@ -7,6 +7,7 @@
 #include "vel.h"
 #include "vec.h"
 #include "pos.h"
+#include "cvector.h"
 
 enum bodyType {
 	def,
