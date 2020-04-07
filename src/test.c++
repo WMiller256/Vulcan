@@ -7,7 +7,6 @@ int main(int argn, char** argv) {
 	double h;
 	int nsamples = 1;
 	std::string extension;
-	threadmode thread = threadmode::manual;
 
 	if (argn > 1) {
 		t = atof(argv[1]);
@@ -36,8 +35,8 @@ int main(int argn, char** argv) {
 	std::cout << t << " " << h << " " << nthreads << std::endl;
 
 	CSim* tsim = new CSim(8, t, h);
-	tsim -> setDebug(2);
-	tsim->Type(simType::bulirschStoer);
+	tsim -> setDebug(5);
+	tsim->Type(simType::miller);
 	int day = int(h);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
 	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e4, 0.0, 6.98169e10, 0.0, day);
@@ -82,19 +81,14 @@ int main(int argn, char** argv) {
 	unsigned long long sum = 0;
 	for (int ii = 0; ii < nsamples; ii ++) {
 		auto start = std::chrono::high_resolution_clock::now();	
-		tsim -> sim(thread);
+		tsim -> sim();
 		auto end = std::chrono::high_resolution_clock::now();	
 		long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 		sum += microseconds;
 #ifdef profiling
-		if (thread == threadmode::manual) {
-			cputime /= nthreads;
-			polltime /= nthreads;
-			std::cout << "Computation time per thread: " << bright+magenta << cputime << res << std::endl;
-		}
-		else {
-			std::cout << "Computation time:            " << bright+magenta << cputime << res << std::endl;
-		}
+		cputime /= nthreads;
+		polltime /= nthreads;
+		std::cout << "Computation time per thread: " << bright+magenta << cputime << res << std::endl;
 #endif
 //		std::cout << "Poll time:                   " << bright+magenta << polltime << res << std::endl;
 //		std::cout << "Simulation total:            " << bright+magenta << simulationtime << res << std::endl;
@@ -105,13 +99,4 @@ int main(int argn, char** argv) {
 	for (int ii = 0; ii < tsim->count(); ii ++) {
 		std::cout << tsim->at(ii)->Name() << " - " << tsim->at(ii)->totSteps << std::endl; 
 	}
-/*
-	tsim -> setDebug(2);
-	if (thread == threadmode::manual) {
-		tsim -> writeConfiguration("explicit-test."+extension+".txt");
-	}
-	else {
-		tsim -> writeConfiguration("single-test."+extension+".txt");
-	}	
-*/
 }

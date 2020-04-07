@@ -10,7 +10,6 @@ int main(int argn, char** argv) {
 	int nsamples = 0;
 	int nghosts = 0;
 	std::string extension;
-	threadmode thread = threadmode::manual;
 
 	if (argn > 1) {
 		t = atof(argv[1]);
@@ -56,7 +55,7 @@ int main(int argn, char** argv) {
 	int n = 9 + nghosts;
 	CSim* tsim = new CSim(8, t, h);
 	tsim -> setDebug(2);
-	tsim->Type(simType::miller);
+	tsim->Type(simType::basic);
 	int day = int(h);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
 	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e4, 0.0, 6.98169e10, 0.0, day);
@@ -102,7 +101,7 @@ int main(int argn, char** argv) {
 		avg = 0;
 		for (int ii = 0; ii < nsamples; ii ++) {
 			auto start = std::chrono::high_resolution_clock::now();	
-			tsim -> sim(thread);
+			tsim -> sim();
 			auto end = std::chrono::high_resolution_clock::now();	
 			long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 			sum += microseconds;

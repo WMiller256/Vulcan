@@ -5,7 +5,7 @@ TIMING  = timing
 ABS		= .
 BIN		= .
 BUILD	= $(ABS)/../build-wsl
-OPT		= opt_
+OPT		= 
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
@@ -27,22 +27,25 @@ MAGENTA = \033[35m
 YELLOW  = \033[33m
 
 #Source files
-SRCS	= $(ABS)/$(OPT)csim.c++		\
-		  $(ABS)/$(OPT)cbody.c++	\
-		  $(ABS)/$(OPT)simio.c++	\
-		  $(ABS)/$(OPT)global.c++	\
-		  $(ABS)/$(OPT)vel.c++		\
-		  $(ABS)/$(OPT)vec.c++		\
-		  $(ABS)/$(OPT)force.c++	\
+SRCS	= $(ABS)/$(OPT)csim.c++			\
+		  $(ABS)/$(OPT)cbody.c++		\
+		  $(ABS)/$(OPT)simio.c++		\
+		  $(ABS)/$(OPT)global.c++		\
+		  $(ABS)/$(OPT)vel.c++			\
+		  $(ABS)/$(OPT)vec.c++			\
+		  $(ABS)/$(OPT)force.c++		\
 		  $(ABS)/$(OPT)pos.c++
-OBJS	= $(BUILD)/$(OPT)csim.o		\
-		  $(BUILD)/$(OPT)cbody.o	\
-		  $(BUILD)/$(OPT)pos.o		\
-		  $(BUILD)/$(OPT)vel.o		\
-		  $(BUILD)/$(OPT)vec.o		\
-		  $(BUILD)/$(OPT)force.o	\
-		  $(BUILD)/$(OPT)simio.o	\
-		  $(BUILD)/$(OPT)global.o
+OBJS	= $(BUILD)/$(OPT)csim.o			\
+		  $(BUILD)/$(OPT)cbody.o		\
+		  $(BUILD)/$(OPT)pos.o			\
+		  $(BUILD)/$(OPT)vel.o			\
+		  $(BUILD)/$(OPT)vec.o			\
+		  $(BUILD)/$(OPT)force.o		\
+		  $(BUILD)/$(OPT)simio.o		\
+		  $(BUILD)/$(OPT)global.o		\
+		  $(BUILD)/$(OPT)integrator.o	\
+		  $(BUILD)/$(OPT)miller.o		\
+		  $(BUILD)/$(OPT)bulirschStoer.o
 		  
 
 #Builds

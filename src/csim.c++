@@ -17,46 +17,36 @@ std::atomic<double> simTime;
 std::atomic<int> tocalc;
 std::atomic<int> joinable;
 
-int CSim::BulirschStoer::nsteps = 12;
-int CSim::BulirschStoer::steps[] = { 2,4,6,8,12,16,24,32,48,64,96,128 };
-
 CSim::CSim() {
 	init();	
-	read = one;
-	write = two;
+	integrator->read = integrator->one;
+	integrator->write = integrator->two;
 }
 CSim::CSim(int n) {
 	init();
 	nbodies = n;
-	read = one;
-	write = two;
+	integrator->read = integrator->one;
+	integrator->write = integrator->two;
 }
 CSim::CSim(int n, double max, double step) {
 	init();
 	nadded = 0;
 	nbodies = n;
-	h = step;
-	tMax = max;
+	integrator->h = step;
+	integrator->tMax = max;
 	maxTime = max;
-	read = one;
-	write = two;
+	integrator->read = integrator->one;
+	integrator->write = integrator->two;
 }
-CSim::~CSim() {
-}
+CSim::~CSim() {}
 
-void CSim::setDebug(int Debug) {
-	debug = Debug;
-}
-void CSim::Type(simType t) {
-	type = t;
-}
-simType CSim::Type() {
-	return type;
-}
+void CSim::setDebug(int Debug) { debug = Debug;} 
+void CSim::Type(simType t) { type = t; }
+simType CSim::Type() { return type; }
 
 void CSim::addBody(CBody* body) {
-	one.push_back(body);
-	two.push_back(body);
+	integrator->one.push_back(body);
+	integrator->two.push_back(body);
 	nadded++;
 }
 void CSim::addPlanet(CBody* body) {
@@ -65,35 +55,27 @@ void CSim::addPlanet(CBody* body) {
 }
 void CSim::addGhost(CGhost* ghost) {
 	ghost->Type(bodyType::ghost);
-	one.push_back(ghost);
-	two.push_back(ghost);
+	integrator->one.push_back(ghost);
+	integrator->two.push_back(ghost);
 	nadded++;
 }
-CBody* CSim::at(int ii) {
-	return read[ii];
-}
-CBody CSim::copy(int ii) {
-	return *read[ii];
-}
-double CSim::H() {
-	return h;
-}
-int CSim::count() {
-	return nadded;
-}
+CBody* CSim::at(int ii) { return integrator->read[ii]; }
+CBody CSim::copy(int ii) { return *integrator->read[ii]; }
+double CSim::H() { return integrator->h; }
+int CSim::count() { return nadded; }
 void CSim::sort() {
 	std::vector<CBody*> planets;
 	std::vector<CBody*> ghosts;
 	std::vector<CBody*> defs;
 	for (int ii = 0; ii < nadded; ii++) {
-		if (one[ii]->Type() == bodyType::planet) {
-			planets.push_back(one[ii]);
+		if (integrator->one[ii]->Type() == bodyType::planet) {
+			planets.push_back(integrator->one[ii]);
 		}
-		else if (one[ii]->Type() == bodyType::ghost) {
-			ghosts.push_back(one[ii]);
+		else if (integrator->one[ii]->Type() == bodyType::ghost) {
+			ghosts.push_back(integrator->one[ii]);
 		}
 		else {
-			defs.push_back(one[ii]);
+			defs.push_back(integrator->one[ii]);
 		}
 	}
 	std::vector<CBody*> bodies;
@@ -109,27 +91,26 @@ void CSim::sort() {
 	for (int ii = 0; ii < ndefs; ii ++) {
 		bodies.push_back(defs[ii]);
 	}
-	one = bodies;
-	two = bodies;
-	read = one;
-	write = two;
+	integrator->one = bodies;
+	integrator->two = bodies;
+	integrator->read = integrator->one;
+	integrator->write = integrator->two;
 }
-
 int CSim::NVirtual() {
-	int size = one.size();
+	int size = integrator->read.size();
 	int ret = 0;
 	for (int ii = 0; ii < size; ii ++) {
-		if (one[ii]->Type() == bodyType::def) {
+		if (integrator->read[ii]->Type() == bodyType::def) {
 			ret++;
 		}
 	}
 	return ret;
 }
 int CSim::NReal() {
-	const int size = one.size();
+	const int size = integrator->read.size();
 	int ret = 0;
 	for (int ii = 0; ii < size; ii ++) {
-		if (one[ii]->Type() != bodyType::def) {
+		if (integrator->read[ii]->Type() != bodyType::def) {
 			ret++;
 		}
 	}
@@ -153,7 +134,7 @@ int CSim::writeConfiguration(const std::string& filename, bool overwrite) {
 	CBody* current;
 	print_special("Writestream", 'c', 'k');		// Exclude
 	for (int ii = 0; ii < nadded; ii ++) {
-		current = read[ii];
+		current = integrator->read[ii];
 		if (current != NULL && current->Type() != bodyType::def) {
 			out << current->writeFormat();
 			std::cout << current->writeFormat();
@@ -244,152 +225,111 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 	return sim;
 }
 
-void CSim::fixedHForce(CBody* body, CBody* wbody) {
-	println(in("CSim", "fixedHForce")+"    Calculating net force", 4);
-	Force net(0,0,0);
-	vec v;
-	vec a;
-	double fmagnitude;
-	for (int ii = 0; ii < nreal; ii ++) {
-		if (read[ii] != NULL) {
-			if (read[ii] != body) {
-				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body->Name(), 5); 
-				fmagnitude = (G * body->Mass() * read[ii]->Mass()) / read[ii]->squareDistance(body->pos);
-				net += body->pos.direction(read[ii]->pos) * fmagnitude;
-
-				printrln(in("CSim", "fixedHForce")+"    Magnitude of force between "+body->Name()+" and "+
-					read[ii]->Name()+" is ", scientific(fmagnitude), 4);
-				printrln(in("CSim", "fixedHForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
-			}
-		}
-	}
-    a = net / body->Mass() * h;
-    v = wbody->accelerate(a);
-    wbody->Position(body->pos + v + a * h * 0.5);
-    wbody->fix = simTime;
-    wbody->ncalcs++;
-	println(in("CSim", "fixedHForce")+green+"    Done"+res+" net force", 5);	
-}
-
-void CSim::sim(threadmode t) {
+void CSim::sim() {
 	auto start = std::chrono::high_resolution_clock::now();
 	if (forces) {
 		if (type == simType::basic) {
-			calcs.push_back(&CSim::fixedHForce);
+			calcs.push_back(std::bind(&Integrator::force, integrator));
 		}
 		else if (type == simType::miller) {
-			calcs.push_back(&CSim::Miller::force);
+			calcs.push_back(std::bind(&Integrator::force, dynamic_cast<Integrator*>(miller)));
 		}
 	}
 	ncalcs = calcs.size();
 	sort();
-	switch(t) {
-		case single:
-#ifdef profiling
-			start = std::chrono::high_resolution_clock::now();
-#endif
-			unthreadedFixedH((unsigned long)tMax);
-#ifdef profiling
-			simulationtime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
-#endif
-			break;
-		case manual:
-			simTime = 0;
-			tocalc = 0;
-			joinable = 0;
-			if (nthreads < 1) {
-				nthreads = 1;
-			}
-			if (nthreads > std::thread::hardware_concurrency() - 1) {		// If the specified number of threads is greater than the maximum 
-				nthreads = std::thread::hardware_concurrency() - 1;			// of the current machine adjust accordingly.
-			}
-			if (nadded < nthreads) {
-				nthreads = nadded;
-			}
-			else {
-				while (nadded % nthreads != 0) {
-					CBody* body = new CBody(0, 0, 0, 0, 0, 0, 1);
-					addBody(body);
-				}
-			}
-			if (type == simType::bulirschStoer) {
-			}
-			sort();
-			nbodies = nadded;
+	simTime = 0;
+	tocalc = 0;
+	joinable = 0;
+	if (nthreads < 1) {
+		nthreads = 1;
+	}
+	if (nthreads > std::thread::hardware_concurrency() - 1) {		// If the specified number of threads is greater than the maximum 
+		nthreads = std::thread::hardware_concurrency() - 1;			// of the current machine adjust accordingly.
+	}
+	if (nadded < nthreads) {
+		nthreads = nadded;
+	}
+	else {
+		while (nadded % nthreads != 0) {
+			CBody* body = new CBody(0, 0, 0, 0, 0, 0, 1);
+			addBody(body);
+		}
+	}
+	sort();
+	nbodies = nadded;
 
-			int block = nbodies / nthreads;
+	int block = nbodies / nthreads;
 //			cpu_set_t set;
 //			CPU_ZERO(&set);
-			std::thread threads[nthreads];
-			for (int ii = 0; ii < nthreads - 1; ii ++) {
-				threads[ii] = std::thread(&CSim::threadedFixedH, this, block * ii, block * (ii + 1));
+	std::thread threads[nthreads];
+	for (int ii = 0; ii < nthreads - 1; ii ++) {
+		threads[ii] = std::thread(&CSim::integrate, this, block * ii, block * (ii + 1));
 //				CPU_SET(ii, &set);
 //				pthread_setaffinity_np(threads[ii].native_handle(), sizeof(cpu_set_t), &set);
-			}
-			threads[nthreads - 1] = std::thread(&CSim::threadedFixedH, this, block * (nthreads - 1), nbodies);
+	}
+	threads[nthreads - 1] = std::thread(&CSim::integrate, this, block * (nthreads - 1), nbodies);
 //			CPU_SET(nthreads - 1, &set);
 //			pthread_setaffinity_np(threads[nthreads - 1].native_handle(), sizeof(cpu_set_t), &set);
 #ifdef profiling
-			start = std::chrono::high_resolution_clock::now();
+	start = std::chrono::high_resolution_clock::now();
 #endif
-			if (int(h) > 0) {
-				vec a;
-				vec v;
-				unsigned long long percent;
-				int past = 0;
-				if (maxTime > 100 * h) {
-					percent = (maxTime - h) / 100;
-				}
-				else {
-					percent = h;
-				}
-				while (simTime < maxTime) {
-					tocalc = nthreads;
+	if (int(integrator->h) > 0) {
+		vec a;
+		vec v;
+		unsigned long long percent;
+		int past = 0;
+		if (maxTime > 100 * integrator->h) {
+			percent = (maxTime - integrator->h) / 100;
+		}
+		else {
+			percent = integrator->h;
+		}
+		while (simTime < maxTime) {
+			tocalc = nthreads;
 #if SIMTIME_TYPE == 1
-                    if (simTime / percent != past && simTime < maxTime) {
-                        std::cout << '\r' << " Progress: " << std::setw(3) << (simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)h) << std::flush;
-                        past = simTime / percent;
-                    }
-                    if (simTime >= maxTime - h) {
-                        std::cout << "\r Progress: 100\n";
-                    }
-                    simTime += h;
+            if (simTime / percent != past && simTime < maxTime) {
+                std::cout << '\r' << " Progress: " << std::setw(3) << (simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)(integrator->h)) << std::flush;
+                past = simTime / percent;
+            }
+            if (simTime >= maxTime - h) {
+                std::cout << "\r Progress: 100\n";
+            }
+            simTime += h;
 #elif SIMTIME_TYPE == 2
-                    if ((unsigned long long)simTime / percent != past) {
-                        std::cout << '\r' << " Progress: " << std::setw(3) << ((unsigned long long)simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)h) << std::flush;
-                        past = (unsigned long long)simTime / percent;
-                    }
-                    if ((unsigned long long)maxTime - (unsigned long long)simTime <= h) {
-                        std::cout << "\r Progress: 100\n";
-                    }
-                    fetch_add(&simTime, h);
+            if ((unsigned long long)simTime / percent != past) {
+                std::cout << '\r' << " Progress: " << std::setw(3) << ((unsigned long long)simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)(integrator->h)) << std::flush;
+                past = (unsigned long long)simTime / percent;
+            }
+            if ((unsigned long long)maxTime - (unsigned long long)simTime <= integrator->h) {
+                std::cout << "\r Progress: 100\n";
+            }
+            fetch_add(&simTime, integrator->h);
 #endif
-					println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);
-					while (tocalc > 0) {}					
-					if (read == one) {
-						read = two;
-						write = one;
-					}
-					else {
-						read = one;
-						write = two;
-					}
-				}
+			println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);
+			while (tocalc > 0) {}					
+			if (integrator->read == integrator->one) {
+				integrator->read = integrator->two;
+				integrator->write = integrator->one;
 			}
 			else {
-				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);
+				integrator->read = integrator->one;
+				integrator->write = integrator->two;
 			}
+		}
+	}
+	else {
+		error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);
+	}
 #ifdef profiling
-			simulationtime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
+	simulationtime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
 #endif
-			while (joinable < nthreads - 1) {}
-			for (int ii = 0; ii < nthreads; ii ++) {
-				threads[ii].join();
-			}
-			break;
+	while (joinable < nthreads - 1) {}
+	for (int ii = 0; ii < nthreads; ii ++) {
+		threads[ii].join();
 	}
 }
-void CSim::threadedFixedH(int min, int max) {
+
+void CSim::integrate(int min, int max) {
 	int tot = 0;
 	double prev = 0;
 	double elapsed = 0;
@@ -411,27 +351,12 @@ void CSim::threadedFixedH(int min, int max) {
 				break;
 			}
 			prev = simTime;
-			if (type == simType::basic) {
-				for (int ii = min; ii < max; ii ++) {
-					for (int jj = 0; jj < ncalcs; jj ++) {
-						calcs[jj](read[ii], write[ii]);
-					}
-
-					print(in("CSim", "threadedFixedH")+"       Velocity of {"+cyan+wbody->Name()+res+"} is "+wbody->Velocity().info(3)+"\n", 1);
-					print(in("CSim", "threadedFixedH")+"       New posiiton for {"+cyan+wbody->Name()+res+"} is "+wbody->pos.info(3)+"\n", 1);
+			for (int ii = min; ii < max; ii ++) {
+				for (int jj = 0; jj < ncalcs; jj ++) {
+					(calcs[jj])(integrator->read[ii], integrator->write[ii]);
 				}
-			}
-			else if (type == simType::bulirschStoer) {
-				for (int ii = min; ii < max; ii ++) {
-					BS->step();
-				}
-			}
-			else if (type == simType::miller) {
-				for (int ii = min; ii < max; ii ++) {
-					for (int jj = 0; jj < ncalcs; jj ++) {
-						calcs[jj](read[ii], write[ii]);
-					}
-				}
+				print(in("CSim", "integrate")+"       Velocity of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->Velocity().info(3)+"\n", 1);
+				print(in("CSim", "integrate")+"       New posiiton for {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->pos.info(3)+"\n", 1);
 			}
 			tocalc--;
 #ifdef profiling
@@ -441,165 +366,18 @@ void CSim::threadedFixedH(int min, int max) {
 	}
 	joinable++;
 }
-void CSim::unthreadedFixedH(unsigned long end) {
-	printrln(in("", "unthreadedFixedH(CSim*, double)"), "Simulating", 5);
-	unsigned long t = 0.0;
-	double h = H();
-	nbodies = count();
-	int past = 0;
-	CBody* body;
-	vec a[nbodies];
-	vec v[nbodies];
-	if (h > 0.0) {
-		unsigned long percent;
-		if (end > 100 * h) {
-			percent = (end - 1) / 100;
-		}
-		else {
-			percent = h;
-		}
-		while (t < end) {
-			if ((unsigned long)t / percent != past) {
-				std::cout << '\r' << " Progress: " << std::setw(3) << ((unsigned long)t * 100) / (unsigned long)(end - h) << std::flush;
-				past = (unsigned long)t / percent;
-			}
-#ifdef profiling
-				auto start = std::chrono::high_resolution_clock::now();
-#endif
-			for (int ii = 0; ii < nbodies; ii ++) {
-				fixedHForce(read[ii], write[ii]);
-				printrln(in("", "unthreadedFixedH")+"       Velocity of {"+cyan+body->Name()+res+"} is ", body->Velocity().info(3), 1);
-			}
-			if (read == one) {
-				read = two;
-				write = one;
-			}
-			else {
-				read = one;
-				write = two;
-			}
-#ifdef profiling
-			cputime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
-#endif
-			t += h;
-		}
-		std::cout << "\r Progress: 100\n";
-	}
-	else {
-		error("{h} was less than or equal to zero. Cannot simulate",__LINE__,__FILE__);
-		return;
-	}
-	printrln(in("", "unthreadedFixedH(CSim*, double)"), green+"Complete"+res, 5);
-}
-
-CSim::BulirschStoer::BulirschStoer(CSim* sim) {
-	this->sim = sim;
-	init();
-}
-
-void CSim::BulirschStoer::init() {
-	threshold = 100000000;
-	for (int ii = 0; ii < sim->nadded; ii ++) {
-		sim->read[ii]->BS->positions.reserve(nsteps);
-		sim->write[ii]->BS->positions.reserve(nsteps);
-		for (int jj = 0; jj < nsteps; jj ++) {
-			Pos p;
-			sim->read[ii]->BS->positions.push_back(p);
-			sim->write[ii]->BS->positions.push_back(p);
-		}
-	}
-}
-
-int CSim::BulirschStoer::step() {
-	Vel v;
-	Pos c;
-	vec f;
-	Pos p = c;
-	int hdid;
-	for (auto step: steps) {
-		for (auto body : sim->read) {
-			if (sim->h / step > 0.0) {
-				force(body);
-			}
-			else {
-				error("{sim->h} / {steps["+std::to_string(ii)+"]} ("+std::to_string(sim->h)+" / "+std::to_string(steps[ii])+
-				 	") not greater than 0.0, cannot simulate.", __LINE__, __FILE__);
-				return 1;
-			}
-		}
-	}
-}
-vec CSim::BulirschStoer::force(CBody* body) {
-	Force net(0.0, 0.0, 0.0);
-	double fmagnitude;
-	double dist;
-	for (auto b : sim->read) {
-		if (b != NULL && b->Type() != bodyType::ghost) {
-			if (b != body) {
-				printrln("\n"+in("BulirschStoer", "force")+"    Target: ", body->Name(), 5); 
-				dist = b->distance(body);
-				fmagnitude = (G * body->Mass() * b->Mass()) / (dist * dist);
-				net += body->pos.direction(b->pos) * fmagnitude;
-
-				printrln(in("BulirschStoer", "force")+"    Magnitude of force between "+body->Name()+" and "+
-					b->Name()+" is ", scientific(fmagnitude), 4);
-				printrln(in("BulirschStoer", "force")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
-			}
-		}
-	}
-	return net;
-}
-int CSim::BulirschStoer::NSteps() {
-	return nsteps;
-}
-
-CSim::Miller::Miller(CSim* sim) {
-	this->sim = sim;
-}
-void CSim::Miller::force(CBody* body, CBody* wbody) {
-	if (simTime - body->fix >= body->h) {
-		println(in("CSim", "fixedHForce")+"    Calculating net force", 4);
-		Force net(0,0,0);
-		vec v;
-		vec a;
-		CBody b;
-		for (int ii = 0; ii < sim->nreal; ii ++) {
-			b = *sim->read[ii];
-			if (b != *body) {
-				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body->Name(), 5); 
-				net += body->pos.direction(b.pos) * (G * body->Mass() * b.Mass()) / b.squareDistance(body->pos);
-
-				printrln(in("CSim", "fixedHForce")+"    Magnitude of force between "+body->Name()+" and "+
-					b.Name()+" is ", scientific((G * body->Mass() * b.Mass()) / (b.squareDistance(body->pos))), 4);
-				printrln(in("CSim", "fixedHForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
-			}
-		}
-	    a = net / body->Mass() * body->h;
-	    v = wbody->accelerate(a);
-	    wbody->Position(body->pos + v + a * body->h * 0.5);
-	    wbody->fix = simTime;
-	    wbody->ncalcs++;
-		println(in("CSim", "fixedHForce")+green+"    Done"+res+" net force", 5);
-	}
-}
 
 void CSim::init() {
 	print("Initializing new "+cyan+bright+"CSim"+res+"...");
 
-	BS = new BulirschStoer(this);
-	miller = new Miller(this);
-	
 	type = simType::basic;
 	forces = true;
 	ncalcs = 0;
+
+	integrator = new Integrator();
+	bulirschStoer = new BulirschStoer();
+	miller = new Miller();
 	
-	tMax = 0.0;
-	tCurr = 0.0;
-	h = -1.0;
-	nadded = 0;
-	ndefs = 0;
-	nghosts = 0;
-	nreal = 0;
 	print(green+" done\n"+res);
 }
 
