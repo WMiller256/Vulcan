@@ -537,22 +537,21 @@ int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
 	wbody->Velocity(v);
 	wbody->Position(c);
 }
-void CSim::BulirschStoer::force(CBody* body, CBody* wbody) {
+vec CSim::BulirschStoer::force(CBody* body, CBody* wbody) {
 	vec net(0,0,0);
 	vec a;
 	double fmagnitude;
 	double dist;
-	double dt = sim->h / steps;
-	for (auto b : bodies) {
-		if (sim->b != NULL) {
-			if (sim->b != body) {
+	for (auto b : sim->read) {
+		if (b != NULL) {
+			if (b != body) {
 				printrln("\n"+in("BulirschStoer", "force")+"    Target: ", body->Name(), 5); 
-				dist = sim->b->distance(c);
-				fmagnitude = (G * body->Mass() * sim->b->Mass()) / (dist * dist);
-				net = net + c.direction(sim->b->pos) * fmagnitude;
+				dist = b->distance(body);
+				fmagnitude = (G * body->Mass() * b->Mass()) / (dist * dist);
+				net = net + body->pos.direction(b->pos) * fmagnitude;
 
 				printrln(in("BulirschStoer", "force")+"    Magnitude of force between "+body->Name()+" and "+
-					sim->b->Name()+" is ", scientific(fmagnitude), 4);
+					b->Name()+" is ", scientific(fmagnitude), 4);
 				printrln(in("BulirschStoer", "force")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
 			}
 		}

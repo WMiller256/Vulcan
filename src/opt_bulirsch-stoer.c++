@@ -1,3 +1,13 @@
+/* bulitsch-stoer.c++
+ *
+ * William Miller
+ * Nov 19, 2018
+ *
+ * Testing code for evaluating the efficiency of different 
+ * parallelization schemes for Bulirsch-Stoer integration
+ *
+ */
+
 #include <iostream>
 #include <fstream>
 #include <iomanip>

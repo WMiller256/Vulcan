@@ -38,7 +38,6 @@ std::string stripcolors(const std::string& str) {
 		}
 		else {
 			std::cout << s << std::endl;
-			warning("Escape character with no color terminator, output formatting may fail", __LINE__, __FILE__);
 			exit(1);
 			break;
 		}
@@ -128,7 +127,6 @@ void printr(const std::string& l, const std::string r, int depth) {
 		int termwidth = winwidth();
 		std::string vl = l;
 		if (termwidth < left + right) {
-			println(l+" "+r, depth);
 		}
 		else {
 			int middle = termwidth - (left + right)-1;
@@ -141,7 +139,6 @@ void printr(const std::string& l, const std::string r, int depth) {
 }
 void printrln(const std::string& l, const std::string r, int depth) {
 	if (debug >= depth && depth != -1) {
-		printr(l, r+"\n", depth);
 	}
 }
 

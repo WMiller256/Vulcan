@@ -15,9 +15,9 @@
 
 template<typename T> class CVector : public std::vector<T> {
 public:
-	bool singular;
+	static bool singular;
 	T operator [] (const int idx) {
-		static singular = this->size() == 1 ? true : false;
+		singular = this->size() == 1 ? true : false;
 		if (singular) return this->at(0);
 		else return this->at(idx);
 	}

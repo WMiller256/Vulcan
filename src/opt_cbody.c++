@@ -11,7 +11,6 @@ CBody::CBody(double Mass, double Radius, double Speed) {
 	radius = Radius;
 	speed = Speed;
 	xv = Speed;
-//	print(info(), 2);//	print(info(), 2);
 }
 CBody::CBody(double Mass, double Radius, double Speed, double X, double Y, double Z, int H) {
 	init();
@@ -24,7 +23,6 @@ CBody::CBody(double Mass, double Radius, double Speed, double X, double Y, doubl
 	radius = Radius;
 	speed = Speed;
 	xv = Speed;
-//	print(info(), 2);//	print(info(), 2);
 }
 CBody::CBody(double Mass, double Radius, double Speed, Pos p) {
 	init();
@@ -36,7 +34,6 @@ CBody::CBody(double Mass, double Radius, double Speed, Pos p) {
 	radius = Radius;
 	speed = Speed;
 	xv = Speed;
-//	print(info(), 2);//	print(info(), 2);
 }
 CBody::~CBody() {
 	// Destructor
@@ -94,12 +91,10 @@ void CBody::Position(vec v) {
 
 double CBody::originDist() {
 	double dist = pos.originDist();
-//	printrln(in("CBody", "originDist")+pos.info(), scientific(dist), 4);//	printrln(in("CBody", "originDist")+pos.info(), scientific(dist), 4);
 	return dist;
 }
 Pos CBody::COM(CBody* target) {
 	if (this == target) {
-//		error("{target} and {this} are the same, center of mass will be {this -> pos}.", __LINE__, __FILE__);//		error("{target} and {this} are the same, center of mass will be {this -> pos}.", __LINE__, __FILE__);
 	}
 	double m1 = Mass();
 	double m2 = target -> Mass();
@@ -108,17 +103,14 @@ Pos CBody::COM(CBody* target) {
 		return Pos((target -> pos * m1 + pos * m2) / M);		// Surprisingly, returning a (Pos) object instead of a pointer is
 	}															// 1000x faster in this case, due to the cost of pointer construction
 	else if (M == 0.0) {
-//		warning("Sum of masses is zero - {"+green+"m1"+res+"}: "+scientific(m1)+" {"+green+"m2"+res+"}. Returning (0,0,0).", __LINE__, __FILE__);//		warning("Sum of masses is zero - {"+green+"m1"+res+"}: "+scientific(m1)+" {"+green+"m2"+res+"}. Returning (0,0,0).", __LINE__, __FILE__);
 		return Pos();
 	}
 	else {
-//		error("Sum of masses is negative - {"+green+"m1"+res+"}: "+scientific(m1)+" {"+green+"m2"+res+"}. Returning (0,0,0).", __LINE__, __FILE__);//		error("Sum of masses is negative - {"+green+"m1"+res+"}: "+scientific(m1)+" {"+green+"m2"+res+"}. Returning (0,0,0).", __LINE__, __FILE__);
 		return Pos();
 	}
 }
 Pos CBody::COM(CBody target) {
 	if (*this == target) {
-//		error("{target} and {this} are the same, center of mass will be {this -> pos}.", __LINE__, __FILE__);//		error("{target} and {this} are the same, center of mass will be {this -> pos}.", __LINE__, __FILE__);
 	}
 	double m1 = Mass();
 	double m2 = target.Mass();
@@ -127,29 +119,24 @@ Pos CBody::COM(CBody target) {
 		return Pos((target.pos * m1 + pos * m2) / M);			// Surprisingly, returning a (Pos) object instead of a pointer is
 	}															// 1000x faster in this case, due to the cost of pointer construction
 	else if (M == 0.0) {
-//		warning("Sum of masses is zero - {"+green+"m1"+res+"}: "+scientific(m1)+" {"+green+"m2"+res+"}. Returning (0,0,0).", __LINE__, __FILE__);//		warning("Sum of masses is zero - {"+green+"m1"+res+"}: "+scientific(m1)+" {"+green+"m2"+res+"}. Returning (0,0,0).", __LINE__, __FILE__);
 		return Pos();
 	}
 	else {
-//		error("Sum of masses is negative - {"+green+"m1"+res+"}: "+scientific(m1)+" {"+green+"m2"+res+"}. Returning (0,0,0).", __LINE__, __FILE__);//		error("Sum of masses is negative - {"+green+"m1"+res+"}: "+scientific(m1)+" {"+green+"m2"+res+"}. Returning (0,0,0).", __LINE__, __FILE__);
 		return Pos();
 	}
 }
 double CBody::distance(CBody* target) {
 	Pos t = target -> pos;
 	double dist = sqrt(pow(t.x - pos.x,2) + pow(t.y - pos.y, 2) + pow(t.z - pos.z, 2));
-//	printrln(in("CBody", "distance")+"Distance from "+pos.info(2)+" to "+t.info(2)+" is ", scientific(dist, 3)+res, 4);//	printrln(in("CBody", "distance")+"Distance from "+pos.info(2)+" to "+t.info(2)+" is ", scientific(dist, 3)+res, 4);
 	return dist;
 }
 double CBody::distance(CBody target) const {
 	Pos t = target.pos;
 	double dist = sqrt(pow(t.x - pos.x,2) + pow(t.y - pos.y, 2) + pow(t.z - pos.z, 2));
-//	printrln(in("CBody", "distance")+"Distance from "+pos.info(2)+" to "+t.info(2)+" is ", scientific(dist, 3)+res, 4);//	printrln(in("CBody", "distance")+"Distance from "+pos.info(2)+" to "+t.info(2)+" is ", scientific(dist, 3)+res, 4);
 	return dist;	
 }
 double CBody::distance(Pos* t) {
 	double dist = sqrt(pow(t -> x - pos.x,2) + pow(t -> y - pos.y, 2) + pow(t -> z - pos.z, 2));
-//	printrln(in("CBody", "distance")+"Distance from "+pos.info()+" to "+t -> info()+" is ", scientific(dist)+res, 4);//	printrln(in("CBody", "distance")+"Distance from "+pos.info()+" to "+t -> info()+" is ", scientific(dist)+res, 4);
 	return dist;
 }
 double CBody::distance(Pos t) const {
@@ -161,7 +148,6 @@ CBody::BulirschStoer::BulirschStoer(CBody* body) {
 }
 
 void CBody::init() {
-//	print("Initializing new "+cyan+bright+"CBody"+res+"...");//	print("Initializing new "+cyan+bright+"CBody"+res+"...");
 
 	parent = NULL;
 	name = "";
@@ -186,15 +172,12 @@ void CBody::init() {
 	ncalcs = 0;
 	totSteps = 0;
 	
-//	print(green+"done\n"+res);//	print(green+"done\n"+res);
 }
 
 std::string CBody::info() {
 	std::string s = "";
 	s.append("Body "+name+"\n");
 	s.append("\t Position "+pos.info()+"\n");
-//	s.append("\t Radius   "+scientific(radius, 5)+"\n");//	s.append("\t Radius   "+scientific(radius, 5)+"\n");
-//	s.append("\t Mass     "+scientific(mass, 5)+"\n");//	s.append("\t Mass     "+scientific(mass, 5)+"\n");
 	return s;
 }
 

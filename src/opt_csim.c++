@@ -140,14 +140,11 @@ int CSim::writeConfiguration(const std::string& filename, bool overwrite) {
 	std::ofstream out;
 	if (exists(filename) && overwrite == false) {
 		if (!prompt("File "+yellow+filename+res+" exists, overwrite? (y|n) ")) {
-//			println("File will not be overwritten, exiting "+cyan+"CSim"+yellow+"::"+bright+white+"writeConfiguration"+res);//			println("File will not be overwritten, exiting "+cyan+"CSim"+yellow+"::"+bright+white+"writeConfiguration"+res);
 			return 0;
 		}
 		else {
-//			println("Overwriting "+yellow+filename+res);//			println("Overwriting "+yellow+filename+res);
 		}
 	}
-//	print("Writing file "+yellow+filename+res+"... ");//	print("Writing file "+yellow+filename+res+"... ");
 	out.open(filename);
 	out << nadded - ndefs - 1 << "\n";
 	CBody* current;
@@ -159,10 +156,8 @@ int CSim::writeConfiguration(const std::string& filename, bool overwrite) {
 			std::cout << current->writeFormat();
 		}
 		else {
-//			error("Body "+std::to_string(ii)+" was "+bright+red+"NULL"+res+" - skipping.", __LINE__, __FILE__);//			error("Body "+std::to_string(ii)+" was "+bright+red+"NULL"+res+" - skipping.", __LINE__, __FILE__);
 		}
 	}
-//	println(green+"done"+res);//	println(green+"done"+res);
 	return 0;
 }
 
@@ -170,11 +165,8 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 	bool check;
 	if (!exists(filename)) {
 		std::cout << check << std::endl;
-//		error("File "+yellow+filename+res+" does not exist.",__LINE__,__FILE__);//		error("File "+yellow+filename+res+" does not exist.",__LINE__,__FILE__);
 		return NULL;
 	}
-//	print("Reading file "+yellow+filename+res+"... ");//	print("Reading file "+yellow+filename+res+"... ");
-//	print("\n", 2);//	print("\n", 2);
 	int gdebug = debug;
 	if (debug < 3) {
 		debug = 0;
@@ -189,7 +181,6 @@ CSim* CSim::readConfiguration(const std::string& filename) {
  	int nbodies = stof(line);
 	CSim* sim = new CSim(nbodies);
 
-//	println("Number of bodies: "+bright+red+std::to_string(nbodies)+res, 3);//	println("Number of bodies: "+bright+red+std::to_string(nbodies)+res, 3);
 	while (std::getline(file, line)) {
 		n++;
 		if (line.substr(0, 4) == "Body") {
@@ -209,7 +200,6 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 			}
 			
 			std::getline(file, line); 
-//			println(line, 3);//			println(line, 3);
 			n++;
 			std::size_t start = line.find(" ");
 			if (start != std::string::npos) {
@@ -221,32 +211,26 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 				line = line.substr(0, line.find_last_of(" "));
 			}
 			else {
-//				error(" Read error", __LINE__, __FILE__);//				error(" Read error", __LINE__, __FILE__);
 				return NULL;
 			}
 			std::getline(file, line); 
-//			println(line, 3);//			println(line, 3);
 			n++;
 			radius = stof(line.substr(line.find_last_of(" ")+1));
 			std::getline(file, line); 
-//			println(line, 3);//			println(line, 3);
 			n++;
 			mass = stof(line.substr(line.find_last_of(" ")+1));
 
 			CBody* body = new CBody(mass, radius, speed, x, y, z);
 			body->Name(name);
 			
-//			print(body->info(), 2);//			print(body->info(), 2);
 		}
 	}
 	debug = gdebug;
-//	println(green+"done"+res);//	println(green+"done"+res);
 	return sim;
 }
 
 void CSim::fixedHForce(CBody* body, CBody* wbody) {
 	double dt = h;
-//	println(in("CSim", "fixedHForce")+"    Calculating net force", 4);//	println(in("CSim", "fixedHForce")+"    Calculating net force", 4);
 	Force net(0,0,0);
 	vec v;
 	vec a;
@@ -255,13 +239,10 @@ void CSim::fixedHForce(CBody* body, CBody* wbody) {
 	for (int ii = 0; ii < nplanets; ii ++) {
 		if (read[ii] != NULL) {
 			if (read[ii] != body) {
-//				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body->Name(), 5); //				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body->Name(), 5); 
 				dist = read[ii]->distance(body->pos);
 				fmagnitude = (G * body->Mass() * read[ii]->Mass()) / (dist * dist);
 				net += body->pos.direction(read[ii]->pos) * fmagnitude;
 
-//				printrln(in("CSim", "fixedHForce")+"    Magnitude of force between "+body->Name()+" and "+//					read[ii]->Name()+" is ", scientific(fmagnitude), 4);//					read[ii]->Name()+" is ", scientific(fmagnitude), 4);
-//				printrln(in("CSim", "fixedHForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);//				printrln(in("CSim", "fixedHForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
 			}
 		}
 	}
@@ -270,7 +251,6 @@ void CSim::fixedHForce(CBody* body, CBody* wbody) {
     wbody->Position(body->pos + v + a * (dt * 0.5));
     wbody->fix = simTime;
     wbody->ncalcs++;
-//	println(in("CSim", "fixedHForce")+green+"    Done"+res+" net force", 5);	//	println(in("CSim", "fixedHForce")+green+"    Done"+res+" net force", 5);	
 }
 
 void CSim::sim(threadmode t) {
@@ -363,7 +343,6 @@ void CSim::sim(threadmode t) {
                     }
                     fetch_add(&simTime, h);
 #endif
-//					println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);//					println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);
 					while (tocalc > 0) {}					
 					if (read == one) {
 						read = two;
@@ -376,7 +355,6 @@ void CSim::sim(threadmode t) {
 				}
 			}
 			else {
-//				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);//				error("{h} is less than or equal to 0.0, cannot simulate.", __LINE__, __FILE__);
 			}
 #ifdef profiling
 			simulationtime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();
@@ -418,8 +396,6 @@ void CSim::threadedFixedH(int min, int max) {
 						(this->*(calcs[jj]))(read[ii], write[ii]);
 					}
 
-//					print(in("CSim", "threadedFixedH")+"       Velocity of {"+cyan+wbody->Name()+res+"} is "+wbody->Velocity().info(3)+"\n", 1);//					print(in("CSim", "threadedFixedH")+"       Velocity of {"+cyan+wbody->Name()+res+"} is "+wbody->Velocity().info(3)+"\n", 1);
-//					print(in("CSim", "threadedFixedH")+"       New posiiton for {"+cyan+wbody->Name()+res+"} is "+wbody->pos.info(3)+"\n", 1);//					print(in("CSim", "threadedFixedH")+"       New posiiton for {"+cyan+wbody->Name()+res+"} is "+wbody->pos.info(3)+"\n", 1);
 				}
 			}
 			else if (type == simType::bulirschStoer) {
@@ -443,7 +419,6 @@ void CSim::threadedFixedH(int min, int max) {
 	joinable++;
 }
 void CSim::unthreadedFixedH(unsigned long end) {
-//	printrln(in("", "unthreadedFixedH(CSim*, double)"), "Simulating", 5);//	printrln(in("", "unthreadedFixedH(CSim*, double)"), "Simulating", 5);
 	unsigned long t = 0.0;
 	double h = H();
 	nbodies = count();
@@ -469,7 +444,6 @@ void CSim::unthreadedFixedH(unsigned long end) {
 #endif
 			for (int ii = 0; ii < nbodies; ii ++) {
 				fixedHForce(read[ii], write[ii]);
-//				printrln(in("", "unthreadedFixedH")+"       Velocity of {"+cyan+body->Name()+res+"} is ", body->Velocity().info(3), 1);//				printrln(in("", "unthreadedFixedH")+"       Velocity of {"+cyan+body->Name()+res+"} is ", body->Velocity().info(3), 1);
 			}
 			if (read == one) {
 				read = two;
@@ -487,10 +461,8 @@ void CSim::unthreadedFixedH(unsigned long end) {
 		std::cout << "\r Progress: 100\n";
 	}
 	else {
-//		error("{h} was less than or equal to zero. Cannot simulate",__LINE__,__FILE__);//		error("{h} was less than or equal to zero. Cannot simulate",__LINE__,__FILE__);
 		return;
 	}
-//	printrln(in("", "unthreadedFixedH(CSim*, double)"), green+"Complete"+res, 5);//	printrln(in("", "unthreadedFixedH(CSim*, double)"), green+"Complete"+res, 5);
 }
 
 CSim::BulirschStoer::BulirschStoer(CSim* sim) {
@@ -512,56 +484,44 @@ void CSim::BulirschStoer::init() {
 }
 
 int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
-	vec v = body->Velocity();
+	Vel v = body->Velocity();
 	Pos c = body->pos;
+	vec f;
 	Pos p = c;
-	int step;
-	for (int ii = 0; ii < nsteps; ii ++) {
-		if (sim->h / steps[ii] > 0.0) {
-			step = steps[ii];
-			v = body->Velocity();
-			c = body->pos;
-			force(body, wbody, step, c, v);
-//			body->positions[ii] = c;
+	int hdid;
+	for (auto step: steps) {
+		if (sim->h / step > 0.0) {
+			f = force(body, wbody);
+			
 			if (fabs(magnitude(p - c)) < threshold) {
 				break;
 			}
 			p = c;
 		}
 		else {
-//			error("{sim->h} / {steps["+std::to_string(ii)+"]} ("+std::to_string(sim->h)+" / "+std::to_string(steps[ii])+//			 	") not greater than 0.0, cannot simulate.", __LINE__, __FILE__);//			 	") not greater than 0.0, cannot simulate.", __LINE__, __FILE__);
 			return 1;
 		}
 	}
-	wbody->totSteps += step;
+	wbody->totSteps += hdid;
 	wbody->Velocity(v);
 	wbody->Position(c);
 }
-void CSim::BulirschStoer::force(CBody* body, CBody* wbody, int steps, Pos &c, vec &v) {
+vec CSim::BulirschStoer::force(CBody* body, CBody* wbody) {
 	vec net(0,0,0);
 	vec a;
 	double fmagnitude;
 	double dist;
-	double dt = sim->h / steps;
-	for (int kk = 0; kk < steps; kk ++) {
-		for (int ii = 0; ii < sim->nplanets; ii ++) {
-			if (sim->read[ii] != NULL) {
-				if (sim->read[ii] != body) {
-//					printrln("\n"+in("BulirschStoer", "force")+"    Target: ", body->Name(), 5); //					printrln("\n"+in("BulirschStoer", "force")+"    Target: ", body->Name(), 5); 
-					dist = sim->read[ii]->distance(c);
-					fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / (dist * dist);
-					net = net + c.direction(sim->read[ii]->pos) * fmagnitude;
+	for (auto b : sim->read) {
+		if (b != NULL) {
+			if (b != body) {
+				dist = b->distance(body);
+				fmagnitude = (G * body->Mass() * b->Mass()) / (dist * dist);
+				net = net + body->pos.direction(b->pos) * fmagnitude;
 
-//					printrln(in("BulirschStoer", "force")+"    Magnitude of force between "+body->Name()+" and "+//						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);//						sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);
-//					printrln(in("BulirschStoer", "force")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);//					printrln(in("BulirschStoer", "force")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
-				}
 			}
 		}
-    	a = net / body->Mass() * dt;
-    	v = v + a;
-    	c = c + v * dt + a * (dt * 0.5);
-    	net.zero();
 	}
+	return net;
 }
 int CSim::BulirschStoer::NSteps() {
 	return nsteps;
@@ -571,7 +531,6 @@ CSim::Miller::Miller(CSim* sim) {
 	this->sim = sim;
 }
 void CSim::Miller::force(CBody* body, CBody* wbody, double dt) {
-//	println(in("CSim", "fixedHForce")+"    Calculating net force", 4);//	println(in("CSim", "fixedHForce")+"    Calculating net force", 4);
 	Force net(0,0,0);
 	vec v;
 	vec a;
@@ -580,13 +539,10 @@ void CSim::Miller::force(CBody* body, CBody* wbody, double dt) {
 	for (int ii = 0; ii < sim->nplanets; ii ++) {
 		if (sim->read[ii] != NULL) {
 			if (sim->read[ii] != body) {
-//				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body->Name(), 5); //				printrln("\n"+in("CSim", "fixedHForce")+"    Target: ", body->Name(), 5); 
 				dist = sim->read[ii]->distance(body->pos);
 				fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / (dist * dist);
 				net += body->pos.direction(sim->read[ii]->pos) * fmagnitude;
 
-//				printrln(in("CSim", "fixedHForce")+"    Magnitude of force between "+body->Name()+" and "+//					sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);//					sim->read[ii]->Name()+" is ", scientific(fmagnitude), 4);
-//				printrln(in("CSim", "fixedHForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);//				printrln(in("CSim", "fixedHForce")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
 			}
 		}
 	}
@@ -595,11 +551,9 @@ void CSim::Miller::force(CBody* body, CBody* wbody, double dt) {
     wbody->Position(body->pos + v + a * (dt * 0.5));
     wbody->fix = simTime;
     wbody->ncalcs++;
-//	println(in("CSim", "fixedHForce")+green+"    Done"+res+" net force", 5);//	println(in("CSim", "fixedHForce")+green+"    Done"+res+" net force", 5);
 }
 
 void CSim::init() {
-//	print("Initializing new "+cyan+bright+"CSim"+res+"...");//	print("Initializing new "+cyan+bright+"CSim"+res+"...");
 
 	BS = new BulirschStoer(this);
 	miller = new Miller(this);
@@ -615,6 +569,5 @@ void CSim::init() {
 	ndefs = 0;
 	nghosts = 0;
 	nplanets = 0;
-//	print(green+" done\n"+res);//	print(green+" done\n"+res);
 }
 

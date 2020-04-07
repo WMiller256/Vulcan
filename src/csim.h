@@ -100,7 +100,7 @@ public:
 	public:
 		BulirschStoer(CSim* sim = NULL);
 		int step(CBody* body, CBody* wbody);
-		void force(CBody* body, CBody* wbody, int steps, Pos &p, vec &v);
+		vec force(CBody* body, CBody* wbody);
 
 		int NSteps();
 

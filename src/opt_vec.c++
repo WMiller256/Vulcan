@@ -85,3 +85,13 @@ void vec::init() {
 	y = 0.0;
 	z = 0.0;
 }
+double vec::operator [] (int idx) {
+	if (idx > 2) {
+		exit(2);
+	}
+	switch (idx) {
+		case 0:	return x;
+		case 1:	return y;
+		case 2:	return z;
+	}
+}

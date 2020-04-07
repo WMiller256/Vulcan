@@ -40,7 +40,6 @@ int main(int argn, char** argv) {
 		print_special("Generated file "+yellow+"data/solarSystem.sim"+green+" successfully "+res, 'w', 'k');
 	}
 	else {
-//		error("Failed to create "+yellow+"data/solarsystem.sim "+res+" - "+bright+red+"NULL"+res+" returned from "+in("CSim","writeConfiguration"), __LINE__, __FILE__);		//		error("Failed to create "+yellow+"data/solarsystem.sim "+res+" - "+bright+red+"NULL"+res+" returned from "+in("CSim","writeConfiguration"), __LINE__, __FILE__);		
 	}
 
 	return 0;
