@@ -45,6 +45,10 @@ public:
 	double distance(CBody target) const;
 	double distance(Pos* pos);				// Calculate the distance to the target (Pos*)
 	double distance(Pos v) const;			// Calculate the distance to the target (Pos)
+	double squareDistance(CBody* t);		// Calculate the squared distance to the target 
+	double squareDistance(CBody t) const;	// Calculate the squared distance to the target
+	double squareDistance(Pos* t);			// Calculate the squared distance to the target
+	double squareDistance(Pos t) const;		// Calculate the squared distance to the target
 
 	std::string writeFormat(format f = text); 		// Defined in simio.c++
 	std::string info();

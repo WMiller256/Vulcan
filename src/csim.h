@@ -26,11 +26,11 @@
 #include <iostream>
 #include <iomanip>
 #include <experimental/filesystem>
-#include "colors.h"
 #include <math.h>
 #include <string.h>
 #include <sstream>
 #include <vector>
+#include <functional>
 #include <thread>
 #include <mutex>
 #include <chrono>
@@ -40,6 +40,7 @@
 #include <omp.h>
 #include <pthread.h>
 
+#include "colors.h"
 #include "cghost.h"
 #include "externs.h"
 #include "format.h"
@@ -95,39 +96,6 @@ public:
 	void threadedFixedH(int min, int max);
 	void unthreadedFixedH(unsigned long end);
 
-	class BulirschStoer {
-	
-	public:
-		BulirschStoer(CSim* sim = NULL);
-		int step(CBody* body, CBody* wbody);
-		vec force(CBody* body, CBody* wbody);
-
-		int NSteps();
-
-	private:
-		CSim* sim;				// To access the owning (CSim) methods and members
-		double threshold;
-		static int attempts;
-		static int nsteps;
-		static int steps[];
-
-		void init();
-	};
-
-	class Miller {
-
-	public:
-		Miller(CSim* sim = NULL);
-		int step(CBody* body, CBody* wbody);
-		void force(CBody* body, CBody* wbody, double dt);
-
-	private:
-		CSim* sim;
-	};
-
-	BulirschStoer* BS;
-	Miller* miller;
-
 private:
 	simType type;		// The simulation type
 
@@ -140,15 +108,47 @@ private:
 	std::vector<CBody*> write;
 	int nadded;
 	int ndefs;
-	int nplanets;
+	int nreal;
 	int nghosts;
 
 	bool forces;
 
-	std::vector<void (CSim::*)(CBody*, CBody*)> calcs;
+	std::vector<std::function<void(CBody*, CBody*)>> calcs;
 	int ncalcs;
 
 	void init();
 };
+
+class BulirschStoer : public CSim {
+
+public:
+	BulirschStoer(CSim* sim = NULL);
+	int step();
+	vec force(CBody* body);
+
+	int NSteps();
+
+private:
+	CSim* sim;				// To access the owning (CSim) methods and members
+	double threshold;
+	static int attempts;
+	static int nsteps;
+	static int steps[];
+
+	void init();
+};
+
+
+class Miller : public CSim {
+
+public:
+	Miller(CSim* sim = NULL);
+	int step(CBody* body, CBody* wbody);
+	void force(CBody* body, CBody* wbody);
+
+private:
+	CSim* sim;
+};
+
 
 #endif // HASH_H

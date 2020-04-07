@@ -37,7 +37,7 @@ int main(int argn, char** argv) {
 		nghosts = 0;
 	}
 	if (argn > 5) {
-		extension = std::string(argv[5]);
+		extension = std::string(argv[5])+".";
 	}
 	else {
 		extension = "";
@@ -48,7 +48,7 @@ int main(int argn, char** argv) {
 	std::ofstream outfile;
 	std::ostringstream name;
 	name.precision(3);
-	name << "../data/timing." << double(t) << "-" << std::scientific << double(h) << "." << nghosts << "." << extension << ".txt";
+	name << "../data/timing." << double(t) << "-" << std::scientific << double(h) << "." << nghosts << "." << extension << "txt";
 	outfile.open(name.str(), std::ios_base::app);
 
 	double avg = 0;
@@ -56,7 +56,7 @@ int main(int argn, char** argv) {
 	int n = 9 + nghosts;
 	CSim* tsim = new CSim(8, t, h);
 	tsim -> setDebug(2);
-	tsim->Type(simType::bulirschStoer);
+	tsim->Type(simType::miller);
 	int day = int(h);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
 	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e4, 0.0, 6.98169e10, 0.0, day);

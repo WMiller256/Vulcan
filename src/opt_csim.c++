@@ -97,10 +97,10 @@ void CSim::sort() {
 		}
 	}
 	std::vector<CBody*> bodies;
-	nplanets = planets.size();
+	nreal = planets.size();
 	nghosts = ghosts.size();
 	ndefs = defs.size();
-	for (int ii = 0; ii < nplanets; ii ++) {
+	for (int ii = 0; ii < nreal; ii ++) {
 		bodies.push_back(planets[ii]);
 	}
 	for (int ii = 0; ii < nghosts; ii ++) {
@@ -230,35 +230,37 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 }
 
 void CSim::fixedHForce(CBody* body, CBody* wbody) {
-	double dt = h;
 	Force net(0,0,0);
 	vec v;
 	vec a;
 	double fmagnitude;
-	double dist;
-	for (int ii = 0; ii < nplanets; ii ++) {
+	for (int ii = 0; ii < nreal; ii ++) {
 		if (read[ii] != NULL) {
 			if (read[ii] != body) {
-				dist = read[ii]->distance(body->pos);
-				fmagnitude = (G * body->Mass() * read[ii]->Mass()) / (dist * dist);
+				fmagnitude = (G * body->Mass() * read[ii]->Mass()) / read[ii]->squareDistance(body->pos);
 				net += body->pos.direction(read[ii]->pos) * fmagnitude;
 
 			}
 		}
 	}
-    a = net / body->Mass() * dt;
+    a = net / body->Mass() * h;
     v = wbody->accelerate(a);
-    wbody->Position(body->pos + v + a * (dt * 0.5));
+    wbody->Position(body->pos + v + a * h * 0.5);
     wbody->fix = simTime;
     wbody->ncalcs++;
 }
 
 void CSim::sim(threadmode t) {
 	auto start = std::chrono::high_resolution_clock::now();
-	void (CSim::*f)(CBody*, CBody*);
+	CBody* b;
+	CBody* w;
 	if (forces) {
-		f = &CSim::fixedHForce;
-		calcs.push_back(f);
+		if (type == simType::basic) {
+			calcs.push_back(&CSim::fixedHForce);
+		}
+		else if (type == simType::miller) {
+			calcs.push_back(&CSim::Miller::force);
+		}
 	}
 	ncalcs = calcs.size();
 	sort();
@@ -371,8 +373,6 @@ void CSim::threadedFixedH(int min, int max) {
 	double prev = 0;
 	double elapsed = 0;
 	int ii = 0;
-	CBody* body = NULL;
-	CBody* wbody = NULL;
 	if (max > NReal()) max = NReal();	// Neglect the virtual bodies (they exist only to create an optimal block width)
 	while (simTime == 0) {}				// Wait for the simulation to start
 	while (true) {
@@ -393,20 +393,20 @@ void CSim::threadedFixedH(int min, int max) {
 			if (type == simType::basic) {
 				for (int ii = min; ii < max; ii ++) {
 					for (int jj = 0; jj < ncalcs; jj ++) {
-						(this->*(calcs[jj]))(read[ii], write[ii]);
+						calcs[jj](read[ii], write[ii]);
 					}
 
 				}
 			}
 			else if (type == simType::bulirschStoer) {
 				for (int ii = min; ii < max; ii ++) {
-					BS->step(read[ii], write[ii]);
+					BS->step();
 				}
 			}
 			else if (type == simType::miller) {
 				for (int ii = min; ii < max; ii ++) {
-					if (elapsed - read[ii]->fix >= read[ii]->h) {
-						miller->force(read[ii], write[ii], elapsed);
+					for (int jj = 0; jj < ncalcs; jj ++) {
+						calcs[jj](read[ii], write[ii]);
 					}
 				}
 			}
@@ -483,40 +483,33 @@ void CSim::BulirschStoer::init() {
 	}
 }
 
-int CSim::BulirschStoer::step(CBody* body, CBody* wbody) {
-	Vel v = body->Velocity();
-	Pos c = body->pos;
+int CSim::BulirschStoer::step() {
+	Vel v;
+	Pos c;
 	vec f;
 	Pos p = c;
 	int hdid;
 	for (auto step: steps) {
-		if (sim->h / step > 0.0) {
-			f = force(body, wbody);
-			
-			if (fabs(magnitude(p - c)) < threshold) {
-				break;
+		for (auto body : sim->read) {
+			if (sim->h / step > 0.0) {
+				force(body);
 			}
-			p = c;
-		}
-		else {
-			return 1;
+			else {
+				return 1;
+			}
 		}
 	}
-	wbody->totSteps += hdid;
-	wbody->Velocity(v);
-	wbody->Position(c);
 }
-vec CSim::BulirschStoer::force(CBody* body, CBody* wbody) {
-	vec net(0,0,0);
-	vec a;
+vec CSim::BulirschStoer::force(CBody* body) {
+	Force net(0.0, 0.0, 0.0);
 	double fmagnitude;
 	double dist;
 	for (auto b : sim->read) {
-		if (b != NULL) {
+		if (b != NULL && b->Type() != bodyType::ghost) {
 			if (b != body) {
 				dist = b->distance(body);
 				fmagnitude = (G * body->Mass() * b->Mass()) / (dist * dist);
-				net = net + body->pos.direction(b->pos) * fmagnitude;
+				net += body->pos.direction(b->pos) * fmagnitude;
 
 			}
 		}
@@ -530,27 +523,25 @@ int CSim::BulirschStoer::NSteps() {
 CSim::Miller::Miller(CSim* sim) {
 	this->sim = sim;
 }
-void CSim::Miller::force(CBody* body, CBody* wbody, double dt) {
-	Force net(0,0,0);
-	vec v;
-	vec a;
-	double fmagnitude;
-	double dist;
-	for (int ii = 0; ii < sim->nplanets; ii ++) {
-		if (sim->read[ii] != NULL) {
-			if (sim->read[ii] != body) {
-				dist = sim->read[ii]->distance(body->pos);
-				fmagnitude = (G * body->Mass() * sim->read[ii]->Mass()) / (dist * dist);
-				net += body->pos.direction(sim->read[ii]->pos) * fmagnitude;
+void CSim::Miller::force(CBody* body, CBody* wbody) {
+	if (simTime - body->fix >= body->h) {
+		Force net(0,0,0);
+		vec v;
+		vec a;
+		CBody b;
+		for (int ii = 0; ii < sim->nreal; ii ++) {
+			b = *sim->read[ii];
+			if (b != *body) {
+				net += body->pos.direction(b.pos) * (G * body->Mass() * b.Mass()) / b.squareDistance(body->pos);
 
 			}
 		}
+	    a = net / body->Mass() * body->h;
+	    v = wbody->accelerate(a);
+	    wbody->Position(body->pos + v + a * body->h * 0.5);
+	    wbody->fix = simTime;
+	    wbody->ncalcs++;
 	}
-    a = net / body->Mass() * dt;
-    v = wbody->accelerate(a);
-    wbody->Position(body->pos + v + a * (dt * 0.5));
-    wbody->fix = simTime;
-    wbody->ncalcs++;
 }
 
 void CSim::init() {
@@ -568,6 +559,6 @@ void CSim::init() {
 	nadded = 0;
 	ndefs = 0;
 	nghosts = 0;
-	nplanets = 0;
+	nreal = 0;
 }
 

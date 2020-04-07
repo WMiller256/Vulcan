@@ -135,30 +135,17 @@ Pos CBody::COM(CBody target) {
 		return Pos();
 	}
 }
-double CBody::distance(CBody* target) {
-	Pos t = target -> pos;
-	double dist = sqrt(pow(t.x - pos.x,2) + pow(t.y - pos.y, 2) + pow(t.z - pos.z, 2));
-	printrln(in("CBody", "distance")+"Distance from "+pos.info(2)+" to "+t.info(2)+" is ", scientific(dist, 3)+res, 4);
-	return dist;
-}
-double CBody::distance(CBody target) const {
-	Pos t = target.pos;
-	double dist = sqrt(pow(t.x - pos.x,2) + pow(t.y - pos.y, 2) + pow(t.z - pos.z, 2));
-	printrln(in("CBody", "distance")+"Distance from "+pos.info(2)+" to "+t.info(2)+" is ", scientific(dist, 3)+res, 4);
-	return dist;	
-}
-double CBody::distance(Pos* t) {
-	double dist = sqrt(pow(t -> x - pos.x,2) + pow(t -> y - pos.y, 2) + pow(t -> z - pos.z, 2));
-	printrln(in("CBody", "distance")+"Distance from "+pos.info()+" to "+t -> info()+" is ", scientific(dist)+res, 4);
-	return dist;
-}
-double CBody::distance(Pos t) const {
-	return sqrt(pow(t.x - pos.x, 2) + pow(t.y - pos.y, 2) + pow(t.z - pos.z, 2));
-}
+double CBody::distance(CBody* t)      { return sqrt(pow(t->pos.x - pos.x,2) + pow(t->pos.y - pos.y, 2) + pow(t->pos.z - pos.z, 2)); }
+double CBody::distance(CBody t) const { return sqrt(pow(t.pos.x - pos.x,2) + pow(t.pos.y - pos.y, 2) + pow(t.pos.z - pos.z, 2)); }
+double CBody::distance(Pos* t)        { return sqrt(pow(t -> x - pos.x,2) + pow(t -> y - pos.y, 2) + pow(t -> z - pos.z, 2)); }
+double CBody::distance(Pos t) const   { return sqrt(pow(t.x - pos.x, 2) + pow(t.y - pos.y, 2) + pow(t.z - pos.z, 2)); }
 
-CBody::BulirschStoer::BulirschStoer(CBody* body) {
-	this->body = body;
-}
+double CBody::squareDistance(CBody* t)      { return pow(t->pos.x - pos.x,2) + pow(t->pos.y - pos.y, 2) + pow(t->pos.z - pos.z, 2); }
+double CBody::squareDistance(CBody t) const { return pow(t.pos.x - pos.x,2) + pow(t.pos.y - pos.y, 2) + pow(t.pos.z - pos.z, 2); }
+double CBody::squareDistance(Pos* t)        { return pow(t->x - pos.x, 2) + pow(t->y - pos.y, 2) + pow(t->z - pos.z, 2); }
+double CBody::squareDistance(Pos t) const   { return pow(t.x - pos.x, 2) + pow(t.y - pos.y, 2) + pow(t.z - pos.z, 2); }
+
+CBody::BulirschStoer::BulirschStoer(CBody* body) {}
 
 void CBody::init() {
 	print("Initializing new "+cyan+bright+"CBody"+res+"...");
