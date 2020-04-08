@@ -13,7 +13,7 @@ Miller::Miller() {
 }
 
 void Miller::force() {
-	println(in("Miller", "force")+"    Calculating net force", 4);
+	println(in("Miller", "force")+"    Calculating net forces", 4);
 	CBody* body;
 	CBody* wbody;
 	Force net(0,0,0);

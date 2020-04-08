@@ -3,7 +3,6 @@
 #include "global.h"
 
 CBody::CBody() {
-	init();
 }
 CBody::CBody(double Mass, double Radius, double Speed) {
 	init();

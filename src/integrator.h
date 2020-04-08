@@ -18,13 +18,11 @@ class CBody;
 class Integrator {
 public:
 	Integrator();
-	void force();
+	virtual void force();
 
 protected:
 	friend class CSim;
 
-	static double tMax;			// The integration time
-	static double tCurr;		// Current time
 	static double h;			// The time step
 	static int nadded;
 	static int ndefs;

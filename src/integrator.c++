@@ -13,8 +13,6 @@ std::vector<CBody*> Integrator::one;
 std::vector<CBody*> Integrator::two;
 std::vector<CBody*> Integrator::read;
 std::vector<CBody*> Integrator::write;
-double Integrator::tMax;
-double Integrator::tCurr;
 double Integrator::h;
 int Integrator::nadded;
 int Integrator::ndefs;
@@ -22,8 +20,6 @@ int Integrator::nghosts;
 int Integrator::nreal;
 
 Integrator::Integrator() {
-	tMax = 0.0;
-	tCurr = 0.0;
 	h = -1.0;
 	nadded = 0;
 	ndefs = 0;
@@ -32,7 +28,7 @@ Integrator::Integrator() {
 }
 
 void Integrator::force() {
-	println(in("Integrator", "force")+"    Calculating net force", 4);
+	println(in("Integrator", "force")+"    Calculating net forces", 4);
 	Force net(0,0,0);
 	CBody* body;
 	CBody* wbody;

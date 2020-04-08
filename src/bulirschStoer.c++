@@ -30,7 +30,7 @@ int BulirschStoer::step() {
 	for (auto step: steps) {
 		for (auto body : read) {
 			if (h / step > 0.0) {
-				force(body);
+				force();
 			}
 			else {
 				error("{h} / {step} ("+std::to_string(h)+" / "+std::to_string(step)+
@@ -40,7 +40,9 @@ int BulirschStoer::step() {
 		}
 	}
 }
-vec BulirschStoer::force(CBody* body) {
+void BulirschStoer::force() {
+	return;
+	CBody* body = read[0];
 	Force net(0.0, 0.0, 0.0);
 	double fmagnitude;
 	double dist;
@@ -58,7 +60,6 @@ vec BulirschStoer::force(CBody* body) {
 			}
 		}
 	}
-	return net;
 }
 int BulirschStoer::NSteps() {
 	return nsteps;

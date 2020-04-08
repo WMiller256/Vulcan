@@ -17,7 +17,7 @@ class BulirschStoer : public Integrator {
 public:
 	BulirschStoer();
 	int step();
-	vec force(CBody* body);
+	void force() override;
 
 	int NSteps();
 

@@ -112,7 +112,7 @@ protected:
 
 	bool forces;
 
-	std::vector<std::function<void(CBody*, CBody*)>> calcs;
+	std::vector<std::function<void()>> calcs;
 	int ncalcs;
 
 	void init();
