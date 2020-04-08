@@ -51,13 +51,13 @@ OBJS	= $(BUILD)/$(OPT)csim.o		\
 all:
 	@printf "[      $(YELLOW)Building $(OPT)$(TEST)$(WHITE)       ]\n"
 	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(TEST)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	gmake -f makefile.gnu test
+	gmake -f GMakefile test
 	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(TEST)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 	
 	@printf "[      $(YELLOW)Building $(OPT)$(TIMING)$(WHITE)       ]\n"
 	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(TIMING)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	gmake -f makefile.gnu timing
+	gmake -f GMakefile timing
 	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(TIMING)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 

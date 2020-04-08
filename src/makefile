@@ -4,18 +4,18 @@ TIMING  = timing
 
 ABS		= .
 BIN		= .
-BUILD	= $(ABS)/../build
+BUILD	= $(ABS)/../build-wsl
 OPT		= opt_
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
-LFLAGS	= -Wl,-rpath,/bin/g++.exe
+LFLAGS	= -Wl,-rpath,/usr/bin/g++
 LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -lstdc++fs
 LIBS	= -lboost_program_options -lncurses -lpthread
 
 INC		= -I /usr/lib/boost/
 CFLAGS	= -Wno-deprecated-declarations -fopenmp -std=c++17 -O3
-CC      = /bin/g++.exe $(CFLAGS) $(INC) $(LIBS) 
+CC      = /usr/bin/g++ $(CFLAGS) $(INC) $(LIBS) 
 
 #Output coloring
 GREEN   = \033[1;32m
@@ -27,37 +27,38 @@ MAGENTA = \033[35m
 YELLOW  = \033[33m
 
 #Source files
-SRCS	= $(ABS)/$(OPT)csim.c++		\
-		  $(ABS)/$(OPT)cbody.c++	\
-		  $(ABS)/$(OPT)simio.c++	\
-		  $(ABS)/$(OPT)global.c++	\
-		  $(ABS)/$(OPT)vel.c++		\
-		  $(ABS)/$(OPT)vec.c++		\
-		  $(ABS)/$(OPT)rpos.c++		\
-		  $(ABS)/$(OPT)force.c++	\
+SRCS	= $(ABS)/$(OPT)csim.c++			\
+		  $(ABS)/$(OPT)cbody.c++		\
+		  $(ABS)/$(OPT)simio.c++		\
+		  $(ABS)/$(OPT)global.c++		\
+		  $(ABS)/$(OPT)vel.c++			\
+		  $(ABS)/$(OPT)vec.c++			\
+		  $(ABS)/$(OPT)force.c++		\
 		  $(ABS)/$(OPT)pos.c++
-OBJS	= $(BUILD)/$(OPT)csim.o		\
-		  $(BUILD)/$(OPT)cbody.o	\
-		  $(BUILD)/$(OPT)pos.o		\
-		  $(BUILD)/$(OPT)vel.o		\
-		  $(BUILD)/$(OPT)vec.o		\
-		  $(BUILD)/$(OPT)rpos.o		\
-		  $(BUILD)/$(OPT)force.o	\
-		  $(BUILD)/$(OPT)simio.o	\
-		  $(BUILD)/$(OPT)global.o
+OBJS	= $(BUILD)/$(OPT)csim.o			\
+		  $(BUILD)/$(OPT)cbody.o		\
+		  $(BUILD)/$(OPT)pos.o			\
+		  $(BUILD)/$(OPT)vel.o			\
+		  $(BUILD)/$(OPT)vec.o			\
+		  $(BUILD)/$(OPT)force.o		\
+		  $(BUILD)/$(OPT)simio.o		\
+		  $(BUILD)/$(OPT)global.o		\
+		  $(BUILD)/$(OPT)integrator.o	\
+		  $(BUILD)/$(OPT)miller.o		\
+		  $(BUILD)/$(OPT)bulirschStoer.o
 		  
 
 #Builds
 all:
 	@printf "[      $(YELLOW)Building $(OPT)$(TEST)$(WHITE)       ]\n"
 	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(TEST)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make -f makefile.cygwin test
+	make -f makefile test
 	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(TEST)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 	
 	@printf "[      $(YELLOW)Building $(OPT)$(TIMING)$(WHITE)       ]\n"
 	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(TIMING)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make -f makefile.cygwin timing
+	make -f makefile timing
 	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(TIMING)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
 	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
 
@@ -68,12 +69,12 @@ $(BUILD)/%.o: %.c++
 
 test: $(OBJS) $(BUILD)/$(OPT)$(TEST).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TEST).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TEST).exe $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TEST).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TEST) $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 timing: $(OBJS) $(BUILD)/$(OPT)$(TIMING).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TIMING).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TIMING).exe $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TIMING).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TIMING) $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 clean:
