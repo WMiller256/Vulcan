@@ -10,6 +10,8 @@ threads.exe
 SIMscaling.exe
 opt_SIMscaling.*
 src/opt_test.exe
+src/opt_test
+src/opt_timing
 src/test.exe
 test.txt
 src/test

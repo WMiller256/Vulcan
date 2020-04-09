@@ -10,8 +10,7 @@
 
 #include "vel.h"
 
-Vel::Vel() : vec() {
-}
-Vel::Vel(double X, double Y, double Z) : vec(X, Y, Z) {
-}
+Vel::Vel() : vec() {}
+Vel::Vel(vec v) : vec(v) {}
+Vel::Vel(double X, double Y, double Z) : vec(X, Y, Z) {}
 

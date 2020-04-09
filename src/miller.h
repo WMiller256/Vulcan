@@ -16,7 +16,7 @@ class Miller : public Integrator {
 
 public:
 	Miller();
-	void main() override;		// Main integration function
+	void main(CBody*, CBody*) override;		// Main integration function
 };
 
 #endif // MILLER_H

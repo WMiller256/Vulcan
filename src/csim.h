@@ -20,22 +20,23 @@
 #define DOUBLE 2
 #define SIMTIME_TYPE DOUBLE
 
-#include <iostream>
-#include <iomanip>
-#include <experimental/filesystem>
-#include <math.h>
-#include <string.h>
-#include <sstream>
-#include <vector>
-#include <functional>
-#include <thread>
-#include <mutex>
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
-#include <atomic>
+#include <experimental/filesystem>
+#include <functional>
+#include <iostream>
+#include <iomanip>
 #include <limits>
+#include <math.h>
+#include <mutex>
 #include <omp.h>
 #include <pthread.h>
+#include <string.h>
+#include <sstream>
+#include <thread>
+#include <valarray>
+#include <vector>
 
 #include "colors.h"
 #include "cghost.h"
@@ -43,12 +44,16 @@
 #include "format.h"
 #include "force.h"
 #include "global.h"
+#include "matrix.h"
+#include "pos.h"
 #include "vel.h"
 #include "vec.h"
-#include "pos.h"
+
+// Include order matters for Integrator and derived class headers
 #include "integrator.h"
-#include "miller.h"
 #include "bulirschStoer.h"
+#include "miller.h"
+
 
 #if SIMTIME_TYPE == INT
 extern std::atomic<unsigned long long> simTime;
@@ -114,7 +119,7 @@ protected:
 
 	bool do_main;
 
-	std::vector<std::function<void()>> calcs;
+	std::vector<std::function<void(CBody*, CBody*)>> calcs;
 	int ncalcs;
 
 	void init();

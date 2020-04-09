@@ -33,12 +33,10 @@ public:
 	double squared() const;
 	double to(int n) const;
 	double norm() const;
+	vec unit();
 
 	bool operator != (vec r) const;
 	bool operator == (vec r) const;
-	vec operator / (double scalar);
-	vec operator * (double scalar);
-	vec operator * (long scalar);
 	double operator * (vec const &r);
 	vec operator + (vec const &r);
 	vec operator - (vec const &r);
@@ -51,5 +49,12 @@ private:
 	void init();
 
 };
+
+vec operator / (double s, vec const &v);
+vec operator * (double s, vec const &v);
+vec operator * (long s, vec const &v);
+vec operator / (vec const &v, double s);
+vec operator * (vec const &v, double s);
+vec operator * (vec const &v, long s);
 
 #endif // VEC_H

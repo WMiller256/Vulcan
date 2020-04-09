@@ -21,6 +21,7 @@ class Vel : public vec
 {
 public:
 	Vel();
+	Vel(vec);
 	Vel(double X, double Y, double Z);
 
 private:

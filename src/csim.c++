@@ -90,6 +90,9 @@ void CSim::sort() {
 	for (int ii = 0; ii < ndefs; ii ++) {
 		bodies.push_back(defs[ii]);
 	}
+	for (int ii = 0; ii < bodies.size(); ii ++) {
+		bodies[ii]->idx = ii;
+	}
 	integrator->one = bodies;
 	integrator->two = bodies;
 	integrator->read = integrator->one;
@@ -226,15 +229,20 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 
 void CSim::sim() {
 	auto start = std::chrono::high_resolution_clock::now();
+	integrator = new Integrator();
+	integrator->set(nadded, nghosts);
+	bulirschStoer = new BulirschStoer();
+	miller = new Miller();
+
 	if (do_main) {
 		if (type == simType::basic) {
-			calcs.push_back(std::bind(&Integrator::main, this->integrator));
+			calcs.push_back(std::bind(&Integrator::main, this->integrator, std::placeholders::_1, std::placeholders::_2));
 		}
 		else if (type == simType::miller) {
-			calcs.push_back(std::bind(&Integrator::main, this->miller));
+			calcs.push_back(std::bind(&Integrator::main, this->miller, std::placeholders::_1, std::placeholders::_2));
 		}
 		else if (type == simType::bulirschStoer) {
-			calcs.push_back(std::bind(&Integrator::main, this->bulirschStoer));
+			calcs.push_back(std::bind(&Integrator::main, this->bulirschStoer, std::placeholders::_1, std::placeholders::_2));
 		}
 	}
 	ncalcs = calcs.size();
@@ -272,6 +280,7 @@ void CSim::sim() {
 	threads[nthreads - 1] = std::thread(&CSim::integrate, this, block * (nthreads - 1), nbodies);
 //			CPU_SET(nthreads - 1, &set);
 //			pthread_setaffinity_np(threads[nthreads - 1].native_handle(), sizeof(cpu_set_t), &set);
+	integrator->nbodies = nbodies;
 #ifdef profiling
 	start = std::chrono::high_resolution_clock::now();
 #endif
@@ -355,7 +364,7 @@ void CSim::integrate(int min, int max) {
 			prev = simTime;
 			for (int ii = min; ii < max; ii ++) {
 				for (int jj = 0; jj < ncalcs; jj ++) {
-					(calcs[jj])();
+					calcs[jj](integrator->read[ii], integrator->write[ii]);
 				}
 				print(in("CSim", "integrate")+"       Velocity of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->Velocity().info(3)+"\n", 1);
 				print(in("CSim", "integrate")+"       New posiiton for {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->pos.info(3)+"\n", 1);
@@ -375,9 +384,6 @@ void CSim::init() {
 	type = simType::basic;
 	do_main = true;
 	ncalcs = 0;
-	integrator = new Integrator();
-	bulirschStoer = new BulirschStoer();
-	miller = new Miller();
 	
 	print(green+" done\n"+res);
 }

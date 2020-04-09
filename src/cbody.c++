@@ -116,6 +116,7 @@ void CBody::init() {
 	v = Vel(0,0,0);
 	h = 1;
 	fix = 0;
+	idx = 0;
 
 	ncalcs = 0;
 	totSteps = 0;

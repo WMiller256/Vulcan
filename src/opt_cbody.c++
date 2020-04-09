@@ -2,8 +2,7 @@
 #include "simio.h"
 #include "global.h"
 
-CBody::CBody() {
-}
+CBody::CBody() {}
 CBody::CBody(double Mass, double Radius, double Speed) {
 	init();
 	mass = Mass;
@@ -29,40 +28,20 @@ CBody::~CBody() {
 	// Destructor
 }
 
-std::string CBody::Name() {
-	return name;
-}
-void CBody::Name(std::string newName) {
-	name = newName;
-}
-void CBody::setParent(CBody* Parent) {
-	parent = Parent;
-}
-CBody* CBody::getParent() {
-	return parent;
-}
-void CBody::Type(bodyType t) {
-	type = t;
-}
-bodyType CBody::Type() {
-	return type;
-}
+void CBody::Name(std::string newName) { name = newName; }
+void CBody::Type(bodyType t) { type = t; }
+void CBody::Parent(CBody* Parent) { parent = Parent;}
 
-double CBody::Mass() {
-	return mass;
-}
-double CBody::Radius() {
-	return radius;
-}
-double CBody::Speed() {
-	return v.norm();
-}
+std::string CBody::Name() {	return name; }
+bodyType CBody::Type() { return type; }
+CBody* CBody::Parent() { return parent; }
+double CBody::Mass()   { return mass; }
+double CBody::Radius() { return radius; }
+double CBody::Speed()  { return v.norm(); }
+
 vec CBody::accelerate(vec dv) {		// Accelerate the body by the given vector
 	v += dv;
 	return v;
-}
-void CBody::Position(vec v) {
-	r = v;
 }
 
 double CBody::originDist() {
@@ -101,6 +80,7 @@ Pos CBody::COM(CBody target) {
 		return Pos();
 	}
 }
+
 double CBody::distance(CBody* t)      { return (t->r - r).norm(); }
 double CBody::distance(CBody t) const { return (t.r - r).norm(); }
 double CBody::distance(Pos* t)        { return (*t - r).norm(); }
@@ -125,6 +105,7 @@ void CBody::init() {
 	v = Vel(0,0,0);
 	h = 1;
 	fix = 0;
+	idx = 0;
 
 	ncalcs = 0;
 	totSteps = 0;
@@ -152,19 +133,5 @@ std::string CBody::writeFormat(format f) {
 	return formatted;
 }
 
-bool CBody::operator != (CBody rbody) const {
-	if (rbody == *this) {
-		return false;
-	}
-	else {
-		return true;
-	}
-}
-bool CBody::operator == (CBody rbody) const {
-	if (rbody.r == r && rbody.Mass() == mass) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
+bool CBody::operator != (CBody rbody) const { return (rbody == *this); }
+bool CBody::operator == (CBody rbody) const { return (rbody.r == r && rbody.Mass() == mass); }

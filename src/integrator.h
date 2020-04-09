@@ -12,21 +12,25 @@
 
 #include <vector>
 
+// TODO Consider refactoring derived classes to have integration methods within each
+// derived class to allow different integration schemes. (i.e. Miller::BulirschStoer()
+// can be different from (Mercury::BulirschStoer())
+
 class CSim;
 class CBody;
 
 class Integrator {
 public:
 	Integrator();
-	virtual void main();		// Main integration function
+	virtual void main(CBody* body, CBody* wbody);		// Main integration function
+	void set(int b, int g);
 
 protected:
 	friend class CSim;
 
 	static double h;			// The time step
-	static int nadded;
-	static int ndefs;
 	static int nghosts;
+	static int nbodies;
 	static int nreal;
 	
 	static std::vector<CBody*> one;

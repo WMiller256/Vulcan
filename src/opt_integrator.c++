@@ -13,42 +13,30 @@ std::vector<CBody*> Integrator::one;
 std::vector<CBody*> Integrator::two;
 std::vector<CBody*> Integrator::read;
 std::vector<CBody*> Integrator::write;
-double Integrator::h;
-int Integrator::nadded;
-int Integrator::ndefs;
-int Integrator::nghosts;
-int Integrator::nreal;
+double Integrator::h = -1.0;
+int Integrator::nghosts = 0;
+int Integrator::nbodies = 0;
+int Integrator::nreal = 0;
 
-Integrator::Integrator() {
-	h = -1.0;
-	nadded = 0;
-	ndefs = 0;
-	nghosts = 0;
-	nreal = 0;
-}
+Integrator::Integrator() {}
 
-void Integrator::main() {
-	Force net(0,0,0);
-	CBody* body;
-	CBody* wbody;
-	vec v;
-	vec a;
-	double fmagnitude;
-	for (int ii = 0; ii < nreal; ii ++) {
-		body = read[ii];
-		wbody = write[ii];
-		for (int jj = 0; jj < nreal; jj ++) {
-			if (read[ii] != body) {
+void Integrator::main(CBody* body, CBody* wbody) {
+	for (int ii = 0; ii < nbodies; ii ++) {
+		if (read[ii] != body) {
 
-				net += body->r.direction(read[ii]->r) * (G * body->Mass() * read[ii]->Mass()) / read[ii]->squareDistance(body->r);
+			body->net += body->r.direction(read[ii]->r) * (G * body->Mass() * read[ii]->Mass()) / read[ii]->squareDistance(body->r);
 
-			}
 		}
-	    a = net / body->Mass() * h;
-	    v = wbody->accelerate(a);
-	    wbody->r = body->r + v + a * h * 0.5;
-	    wbody->fix = simTime;
-	    wbody->ncalcs++;
 	}
+    body->a = body->net / body->Mass() * h;
+    body->v = static_cast<Vel>(wbody->accelerate(body->a));
+    wbody->r += (body->v + body->a * 0.5) * h;
+    wbody->fix = simTime;
+    wbody->ncalcs++;
 }
 
+void Integrator::set(int b, int g) {
+	nbodies = b;
+	nghosts = g;
+	nreal = b + g;
+}

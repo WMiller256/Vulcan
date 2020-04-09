@@ -54,10 +54,13 @@ public:
 	Force net;					// The net force acting on the body
 	Pos r;						// Current posision in 3D space (cartesian coordinates)
 	Vel v;						// Current velocity in 3D space (cartesian coordinates)
-	long h;						// The step size for this body (used for variable-step integrators, i.e. Miller)
+	vec a;						// Current acceleration in 3D space (cartesian coordinates)
+	double mass;				// Mass of the body
+	double h;					// The step size for this body (used for variable-step integrators, i.e. Miller)
 	double fix;					// The fix time for this body's position in simulation time
 	unsigned long long ncalcs;	// Tracks the number of calculations performed, to ensure synchronization was maintained
 	unsigned long long totSteps;
+	long idx;					// The index of this body in [read] and [write]
 
 	bool operator != (CBody r) const;
 	bool operator == (CBody r) const;
@@ -68,7 +71,6 @@ private:
 	bodyType type;
 
 	double radius;				// Radius of the body
-	double mass;				// Mass of the body
 	double period;				// Orbital period in seconds
 
 	void init();
