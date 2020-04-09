@@ -15,8 +15,7 @@ enum bodyType {
 	ghost
 };
 
-class CBody
-{
+class CBody {
 public:
 	CBody();
 	CBody(double Mass, double Radius, double Velocity);
@@ -24,23 +23,23 @@ public:
 	CBody(double Mass, double Radius, double Velocity, Pos pos);
 	~CBody();
 
-	std::string Name();
 	void Name(std::string newName);
-	void setParent(CBody* Parent);
-	CBody* getParent();
+	void Parent(CBody* Parent);
 	void Type(bodyType t);
-	bodyType Type();
 
+	std::string Name();
+	bodyType Type();
+	CBody* Parent();
 	double Mass();
 	double Radius();
 	double Speed();
 	vec Velocity(vec v);
-	Vel Velocity();
 	vec accelerate(vec a);					// Update the velocity to reflect a given acceleration over given time
-	void Position(vec v);
 	double originDist();
+
 	Pos COM(CBody* target);
 	Pos COM(CBody target);
+
 	double distance(CBody* target);			// Calculate the distance to the target (CBody)
 	double distance(CBody target) const;
 	double distance(Pos* pos);				// Calculate the distance to the target (Pos*)
@@ -53,20 +52,12 @@ public:
 	std::string writeFormat(format f = text); 		// Defined in simio.c++
 	std::string info();
 	Force net;					// The net force acting on the body
-	Pos pos;
-	long h;
-	long fix;					// The fix time for this body's position in simulation time
-	unsigned long long ncalcs;
+	Pos r;						// Current posision in 3D space (cartesian coordinates)
+	Vel v;						// Current velocity in 3D space (cartesian coordinates)
+	long h;						// The step size for this body (used for variable-step integrators, i.e. Miller)
+	double fix;					// The fix time for this body's position in simulation time
+	unsigned long long ncalcs;	// Tracks the number of calculations performed, to ensure synchronization was maintained
 	unsigned long long totSteps;
-	class BulirschStoer {
-	public:
-		BulirschStoer(CBody* sim = NULL);
-		std::vector<Pos> positions;	// Table for positions for Bulirsch Stoer extrapolation
-	private:
-		CBody* body;
-	};
-
-	BulirschStoer* BS;
 
 	bool operator != (CBody r) const;
 	bool operator == (CBody r) const;
@@ -77,14 +68,7 @@ private:
 	bodyType type;
 
 	double radius;				// Radius of the body
-	double x;					// x pos
-	double y;					// y pos
-	double z;					// z pos
-	double xv;					// velocity in x direction
-	double yv;					// velocity in y direction
-	double zv;					// velocity in z direction
 	double mass;				// Mass of the body
-	double speed;				// Magnitude of linear velocity
 	double period;				// Orbital period in seconds
 
 	void init();

@@ -19,6 +19,7 @@ BulirschStoer::BulirschStoer(){
 
 void BulirschStoer::init() {
 	threshold = 100000000;
+	rscale = std::vector<double>(nreal, 0.0);
 }
 
 int BulirschStoer::step() {
@@ -30,7 +31,7 @@ int BulirschStoer::step() {
 	for (auto step: steps) {
 		for (auto body : read) {
 			if (h / step > 0.0) {
-				force();
+				main();
 			}
 			else {
 				error("{h} / {step} ("+std::to_string(h)+" / "+std::to_string(step)+
@@ -40,25 +41,28 @@ int BulirschStoer::step() {
 		}
 	}
 }
-void BulirschStoer::force() {
-	return;
-	CBody* body = read[0];
-	Force net(0.0, 0.0, 0.0);
-	double fmagnitude;
-	double dist;
-	for (auto b : read) {
-		if (b != NULL && b->Type() != bodyType::ghost) {
-			if (b != body) {
-				printrln("\n"+in("BulirschStoer", "force")+"    Target: ", body->Name(), 5); 
-				dist = b->distance(body);
-				fmagnitude = (G * body->Mass() * b->Mass()) / (dist * dist);
-				net += body->pos.direction(b->pos) * fmagnitude;
+std::vector<Force> BulirschStoer::gravity() {
+	println(in("BulirschStoer", "gravity")+"    Calculating gravitational forces", 4);
+	CBody* body;
+	std::vector<Force> forces(nreal, Force(0.0, 0.0, 0.0));
+	for (int ii = 0; ii < nreal; ii ++) {
+		body = read[ii];
+		if (read[ii] != body) {
+			printrln("\n"+in("BulirschStoer", "gravity")+"    Target: ", body->Name(), 5); 
 
-				printrln(in("BulirschStoer", "force")+"    Magnitude of force between "+body->Name()+" and "+
-					b->Name()+" is ", scientific(fmagnitude), 4);
-				printrln(in("BulirschStoer", "force")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
-			}
+			forces[ii] += body->r.direction(read[ii]->r) * (G * body->Mass() * read[ii]->Mass()) / (read[ii]->squareDistance(body));
+
+			printrln(in("BulirschStoer", "gravity")+"    Magnitude of force between "+body->Name()+" and "+
+				read[ii]->Name()+" is ", scientific(G * body->Mass() * read[ii]->Mass()) / (read[ii]->squareDistance(body)), 5);
+			printrln(in("BulirschStoer", "gravity")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 5);
 		}
+	}
+	return forces;
+}
+void BulirschStoer::main() {
+	for (int ii = 0; ii < nreal; ii ++) {
+		rscale[ii] = 1.0 / (read[ii]->r.squared());
+		vscale[ii] = 1.0 / (read[ii]->v.squared());
 	}
 }
 int BulirschStoer::NSteps() {

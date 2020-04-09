@@ -211,12 +211,15 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 
 void CSim::sim() {
 	auto start = std::chrono::high_resolution_clock::now();
-	if (forces) {
+	if (do_main) {
 		if (type == simType::basic) {
-			calcs.push_back(std::bind(&Integrator::force, this->integrator));
+			calcs.push_back(std::bind(&Integrator::main, this->integrator));
 		}
 		else if (type == simType::miller) {
-			calcs.push_back(std::bind(&Integrator::force, this->miller));
+			calcs.push_back(std::bind(&Integrator::main, this->miller));
+		}
+		else if (type == simType::bulirschStoer) {
+			calcs.push_back(std::bind(&Integrator::main, this->bulirschStoer));
 		}
 	}
 	ncalcs = calcs.size();
@@ -350,28 +353,8 @@ void CSim::integrate(int min, int max) {
 void CSim::init() {
 
 	type = simType::basic;
-	forces = true;
+	do_main = true;
 	ncalcs = 0;
-/*	std::vector<std::function<void()>> v;
-	Integrator* i = new Integrator();
-	BulirschStoer* b = new BulirschStoer();
-	Miller* m = new Miller();
-
-	std::cout << "Check" << std::endl;
-
-	v.push_back(std::bind(&Integrator::force, i));
-	v.push_back(std::bind(&Integrator::force, m));
-	v.push_back(std::bind(&Integrator::force, b));
-
-	std::cout << "Check" << std::endl;
-	v[0]();
-	std::cout << "Check" << std::endl;
-	v[1]();
-	std::cout << "Check" << std::endl;
-	v[2]();
-*/
-//	exit(0);
-
 	integrator = new Integrator();
 	bulirschStoer = new BulirschStoer();
 	miller = new Miller();

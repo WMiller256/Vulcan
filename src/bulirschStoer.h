@@ -17,7 +17,8 @@ class BulirschStoer : public Integrator {
 public:
 	BulirschStoer();
 	int step();
-	void force() override;
+	void main() override;			// Main integration function
+	std::vector<Force> gravity();	// Calculates gravitational forces without updating
 
 	int NSteps();
 
@@ -26,6 +27,9 @@ private:
 	static int attempts;
 	static int nsteps;
 	static int steps[];
+
+	std::vector<double> rscale;
+	std::vector<double> vscale;
 
 	void init();
 };

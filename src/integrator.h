@@ -18,7 +18,7 @@ class CBody;
 class Integrator {
 public:
 	Integrator();
-	virtual void force();
+	virtual void main();		// Main integration function
 
 protected:
 	friend class CSim;

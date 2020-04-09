@@ -60,6 +60,8 @@ class CBody;
 class Miller;
 class BulirschStoer;
 
+// TODO Refactor - enumerations should be all-caps 
+
 enum simType {
 	basic,
 	bulirschStoer,
@@ -110,7 +112,7 @@ protected:
 	int nreal;
 	int nghosts;
 
-	bool forces;
+	bool do_main;
 
 	std::vector<std::function<void()>> calcs;
 	int ncalcs;

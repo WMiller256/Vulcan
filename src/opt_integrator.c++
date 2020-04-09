@@ -27,7 +27,7 @@ Integrator::Integrator() {
 	nreal = 0;
 }
 
-void Integrator::force() {
+void Integrator::main() {
 	Force net(0,0,0);
 	CBody* body;
 	CBody* wbody;
@@ -40,13 +40,13 @@ void Integrator::force() {
 		for (int jj = 0; jj < nreal; jj ++) {
 			if (read[ii] != body) {
 
-				net += body->pos.direction(read[ii]->pos) * (G * body->Mass() * read[ii]->Mass()) / read[ii]->squareDistance(body->pos);
+				net += body->r.direction(read[ii]->r) * (G * body->Mass() * read[ii]->Mass()) / read[ii]->squareDistance(body->r);
 
 			}
 		}
 	    a = net / body->Mass() * h;
 	    v = wbody->accelerate(a);
-	    wbody->Position(body->pos + v + a * h * 0.5);
+	    wbody->r = body->r + v + a * h * 0.5;
 	    wbody->fix = simTime;
 	    wbody->ncalcs++;
 	}

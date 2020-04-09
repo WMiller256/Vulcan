@@ -30,12 +30,16 @@ public:
 
 	std::string info(int precision = 5) const;
 	void zero();
+	double squared() const;
+	double to(int n) const;
+	double norm() const;
 
 	bool operator != (vec r) const;
 	bool operator == (vec r) const;
 	vec operator / (double scalar);
 	vec operator * (double scalar);
 	vec operator * (long scalar);
+	double operator * (vec const &r);
 	vec operator + (vec const &r);
 	vec operator - (vec const &r);
 	vec operator += (vec const &r);

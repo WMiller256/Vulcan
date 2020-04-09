@@ -6,6 +6,7 @@ ABS		= .
 BIN		= .
 BUILD	= $(ABS)/../build-wsl
 OPT		= opt_
+TMP     = $(OPT)
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 

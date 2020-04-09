@@ -12,28 +12,30 @@
 Miller::Miller() {
 }
 
-void Miller::force() {
-	CBody* body;
-	CBody* wbody;
-	Force net(0,0,0);
+void Miller::main() {
+	CBody body;
+	CBody wbody;
 	vec v;
 	vec a;
 	CBody b;
+	double dt;
 	for (int ii = 0; ii < nreal; ii ++) {
-		body = read[ii];
-		wbody = write[ii];
-		if (simTime - body->fix >= body->h) {
+		body = *read[ii];
+		wbody = *write[ii];
+		dt = simTime - body.fix;
+		if (dt >= body.h) {
+			wbody.net.zero();
 			for (int jj = 0; jj < nreal; jj ++) {
-				if (read[jj] != body) {
-					net += body->pos.direction(read[jj]->pos) * (G * body->Mass() * read[jj]->Mass()) / read[jj]->squareDistance(body->pos);
+				if (*read[jj] != body) {
+					wbody.net += body.r.direction(read[jj]->r) * (G * body.Mass() * read[jj]->Mass()) / read[jj]->squareDistance(body.r);
 
 				}
 			}
-		    a = net / body->Mass() * body->h;
-		    v = wbody->accelerate(a);
-		    wbody->Position(body->pos + v + a * body->h * 0.5);
-		    wbody->fix = simTime;
-		    wbody->ncalcs++;
+		    a = wbody.net / body.Mass() * dt;
+		    v = wbody.accelerate(a);
+		    wbody.r = body.r + (v + a * 0.5) * dt;
+		    wbody.fix = simTime;
+		    wbody.ncalcs++;
 		}
 	}
 }

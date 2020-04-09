@@ -21,7 +21,6 @@ vec::vec(double X, double Y, double Z) {
 	x = X;
 	y = Y;
 	z = Z;
-	
 }
 vec::vec(vec* v) {
 	x = v -> x;
@@ -41,49 +40,23 @@ void vec::zero() {
 	z = 0.0;
 }
 
-bool vec::operator != (vec r) const {
-	if (r == *this) {
-		return false;
-	}
-	else {
-		return true;
-	}
-}
-bool vec::operator == (vec r) const {
-	if (x == r.x && y == r.y && z == r.z) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-vec vec::operator / (double scalar) {
-	return vec(x / scalar, y / scalar, z / scalar);
-}
-vec vec::operator * (double scalar) {
-	return vec(x * scalar, y * scalar, z * scalar);
-}
-vec vec::operator * (long scalar) {
-	return vec(x * scalar, y * scalar, z * scalar);
-}
-vec vec::operator + (vec const &r) {
-	return vec(x + r.x, y + r.y, z + r.z);
-}
-vec vec::operator - (vec const &r) {
-	return vec(x - r.x, y - r.y, z - r.z);
-}
-vec vec::operator += (vec const &r) {
-	return vec(x + r.x, y + r.y, z + r.z);
-}
-void vec::operator = (vec const &r) {
+double vec::squared() const  { return this->to(2); }
+double vec::to(int n) const { return (pow(x, n) + pow(y, n) + pow(z, n)); }
+double vec::norm() const     { return sqrt(this->to(2)); }
+
+bool vec::operator != (vec r) const   { return (r == *this); }
+bool vec::operator == (vec r) const   { return (x == r.x && y == r.y && z == r.z); }
+vec vec::operator / (double scalar)   { return vec(x / scalar, y / scalar, z / scalar); }
+vec vec::operator * (double scalar)   { return vec(x * scalar, y * scalar, z * scalar); }
+vec vec::operator * (long scalar)     { return vec(x * scalar, y * scalar, z * scalar); }
+double vec::operator * (vec const &r) { return x * r.x + y * r.y + z * r.z; }
+vec vec::operator + (vec const &r)    { return vec(x + r.x, y + r.y, z + r.z); }
+vec vec::operator - (vec const &r)    { return vec(x - r.x, y - r.y, z - r.z); }
+vec vec::operator += (vec const &r)   { return vec(x + r.x, y + r.y, z + r.z); }
+void vec::operator = (vec const &r) { 
 	x = r.x;
 	y = r.y;
 	z = r.z;
-}
-void vec::init() {
-	x = 0.0;
-	y = 0.0;
-	z = 0.0;
 }
 double vec::operator [] (int idx) {
 	if (idx > 2) {
@@ -94,4 +67,8 @@ double vec::operator [] (int idx) {
 		case 1:	return y;
 		case 2:	return z;
 	}
+}
+
+void vec::init() {
+	this->zero();
 }
