@@ -30,10 +30,10 @@ std::string stripcolors(const std::string& str) {
 	std::string s = str;
 	int found = s.find('\033');
 	while (found != std::string::npos) {
-		if (iscolor(s.substr(found + 1, 3))) {
+		if (iscolor(s.substr(found+1, 3))) {
 			s.erase(found, 4);
 		}
-		else if (iscolor(s.substr(found + 1, 4))) {
+		else if (iscolor(s.substr(found+1, 4))) {
 			s.erase(found, 5);
 		}
 		else {
@@ -49,7 +49,7 @@ std::string stripcolors(const std::string& str) {
 bool iscolor(std::string str) {
 	if (str[0] == '[' && str.back() == 'm') {
 		str.erase(0,1);
-		str.erase(str.end()-1, str.end());
+		str.erase(str.end(), str.end());
 		int code = stof(str);
 		if (code == 0 || code == 1 || code == 4 || code == 7 || code == 21 || code == 24 || code == 27) {
 			return true;
@@ -61,6 +61,7 @@ bool iscolor(std::string str) {
 			return true;
 		}
 	}
+	return false;
 }
 
 bool exists(const std::string& filename) {
@@ -123,18 +124,20 @@ void println(const int& i, int depth) {
 
 void printr(const std::string& l, const std::string r, int depth) {
 	if (debug >= depth && depth != -1) {
-		int left = nchar(l);
-		int right = nchar(r);
+		int left = stripcolors(l).size();
+		int right = stripcolors(r).size();
 		int termwidth = winwidth();
 		std::string vl = l;
 		if (termwidth < left + right) {
 			println(l+" "+r, depth);
 		}
 		else {
-			int middle = termwidth - (left + right)-1;
-			for (int ii = 0; ii < middle; ii ++) {
-				vl = vl+" ";
+			while (left % 4) { 
+				vl += " ";
+				left ++;
 			}
+			int middle = termwidth - (left + right);
+			for (int ii = 0; ii < middle/4; ii ++) { vl += "  - "; }
 			std::cout << vl+r;
 		}		
 	}	

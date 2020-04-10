@@ -55,7 +55,7 @@ public:
 	Pos r;						// Current posision in 3D space (cartesian coordinates)
 	Vel v;						// Current velocity in 3D space (cartesian coordinates)
 	vec a;						// Current acceleration in 3D space (cartesian coordinates)
-	double mass;				// Mass of the body
+	double m;					// Mass of the body
 	double h;					// The step size for this body (used for variable-step integrators, i.e. Miller)
 	double fix;					// The fix time for this body's position in simulation time
 	unsigned long long ncalcs;	// Tracks the number of calculations performed, to ensure synchronization was maintained

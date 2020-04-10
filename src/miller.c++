@@ -13,7 +13,7 @@ Miller::Miller() {
 }
 
 void Miller::main(CBody* body, CBody* wbody) {
-	println(in("Miller", "main")+"    Calculating net forces", 4);
+	println(in("Miller", "main")+"          Calculating net force on "+bright+red+body->Name()+res, 4);
 	vec v;
 	vec a;
 	double dt;
@@ -22,12 +22,10 @@ void Miller::main(CBody* body, CBody* wbody) {
 		wbody->net.zero();
 		for (int jj = 0; jj < nreal; jj ++) {
 			if (read[jj] != body) {
-				printrln("\n"+in("Miller", "main")+"    Target: ", body->Name(), 5); 
-				wbody->net += body->r.direction(read[jj]->r) * (G * body->Mass() * read[jj]->Mass()) / read[jj]->squareDistance(body->r);
+				wbody->net += body->r.direction(read[jj]->r) * (G * body->Mass() * read[jj]->m) / read[jj]->squareDistance(body->r);
 
-				printrln(in("Miller", "main")+"    Magnitude of force between "+body->Name()+" and "+
-					read[jj]->Name()+" is ", scientific(G * body->Mass() * read[jj]->Mass() / read[jj]->squareDistance(body->r)), 5);
-				printrln(in("Miller", "main")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 5);
+				printrln(in("Miller", "main")+"              Magnitude of force between "+body->Name()+" and "+
+					read[jj]->Name()+" is ", scientific(G * body->Mass() * read[jj]->m / read[jj]->squareDistance(body->r)), 5);
 			}
 		}
 	    a = wbody->net / body->Mass() * dt;
@@ -35,6 +33,7 @@ void Miller::main(CBody* body, CBody* wbody) {
 	    wbody->r = body->r + (v + a * 0.5) * dt;
 	    wbody->fix = simTime;
 	    wbody->ncalcs++;
-		println(in("Miller", "main")+green+"    Done"+res, 5);
+		printrln(in("Miller", "main")+"          Net force vector on "+bright+red+body->Name()+res+" is ", wbody->net.info(), 5);
+		println(in("Miller", "main")+green+"          Done"+res, 4);
 	}
 }

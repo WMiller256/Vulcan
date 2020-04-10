@@ -299,24 +299,24 @@ void CSim::sim() {
 			tocalc = nthreads;
 #if SIMTIME_TYPE == 1
             if (simTime / percent != past && simTime < maxTime) {
-                std::cout << '\r' << " Progress: " << std::setw(3) << (simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)(integrator->h)) << std::flush;
+                if (!debug) std::cout << '\r' << " Progress: " << std::setw(3) << (simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)(integrator->h)) << std::flush;
                 past = simTime / percent;
             }
             if (simTime >= maxTime - h) {
-                std::cout << "\r Progress: 100\n";
+                if (!debug) std::cout << "\r Progress: 100\n";
             }
             simTime += h;
 #elif SIMTIME_TYPE == 2
             if ((unsigned long long)simTime / percent != past) {
-                std::cout << '\r' << " Progress: " << std::setw(3) << ((unsigned long long)simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)(integrator->h)) << std::flush;
+                if (!debug) std::cout << '\r' << " Progress: " << std::setw(3) << ((unsigned long long)simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)(integrator->h)) << std::flush;
                 past = (unsigned long long)simTime / percent;
             }
             if ((unsigned long long)maxTime - (unsigned long long)simTime <= integrator->h) {
-                std::cout << "\r Progress: 100\n";
+                if (!debug) std::cout << "\r Progress: 100\n";
             }
             fetch_add(&simTime, integrator->h);
 #endif
-			println(in("CSim","sim")+"                Sim time - "+std::to_string(simTime),1);
+			println(in("CSim","sim")+"         Sim time - "+std::to_string(simTime),1);
 			while (tocalc > 0) {}					
 			if (integrator->read == integrator->one) {
 				integrator->read = integrator->two;
@@ -366,8 +366,8 @@ void CSim::integrate(int min, int max) {
 				for (int jj = 0; jj < ncalcs; jj ++) {
 					calcs[jj](integrator->read[ii], integrator->write[ii]);
 				}
-				print(in("CSim", "integrate")+"       Velocity of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->Velocity().info(3)+"\n", 1);
-				print(in("CSim", "integrate")+"       New posiiton for {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->pos.info(3)+"\n", 1);
+				print(in("CSim", "integrate")+"       Velocity of      {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->v.info(3)+"\n", 1);
+				print(in("CSim", "integrate")+"       New posiiton for {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->r.info(3)+"\n", 1);
 			}
 			tocalc--;
 #ifdef profiling

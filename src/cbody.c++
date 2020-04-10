@@ -49,7 +49,7 @@ vec CBody::accelerate(vec dv) {		// Accelerate the body by the given vector
 
 double CBody::originDist() {
 	double dist = r.norm();
-	printrln(in("CBody", "originDist")+e.info(), scientific(dist), 4);
+	printrln(in("CBody", "originDist")+r.info(), scientific(dist), 4);
 	return dist;
 }
 Pos CBody::COM(CBody* target) {

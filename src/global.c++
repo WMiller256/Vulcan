@@ -10,7 +10,7 @@
 
 double magnitude(vec v) {
 	double ret = sqrt(pow(v.x, 2) + pow(v.y, 2) + pow(v.z, 2));
-	printrln(in("","magnitude")+"      Vector "+v.info()+" magnitude is ", scientific(ret), 4);
+	printrln(in("","magnitude")+"                 Vector "+v.info(2)+" magnitude is ", scientific(ret), 6);
 	return ret;
 }
 
