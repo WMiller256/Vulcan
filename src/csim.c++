@@ -114,8 +114,6 @@ void CSim::sort() {
 	}
 	integrator->read = integrator->one;
 	integrator->write = integrator->two;
-	std::cout << "bodies[0][0] " << bodies[0][0]->Name() << std::endl;
-	std::cout << "bodies[1][0] " << bodies[1][0]->Name() << std::endl;
 }
 int CSim::NVirtual() {
 	int size = integrator->read.size();
