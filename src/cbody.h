@@ -73,7 +73,7 @@ private:
 	double radius;				// Radius of the body
 	double period;				// Orbital period in seconds
 
-	void init();
+	void init(bool quiet = false);
 };
 
 #endif

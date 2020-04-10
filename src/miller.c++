@@ -22,13 +22,13 @@ void Miller::main(CBody* body, CBody* wbody) {
 		wbody->net.zero();
 		for (int jj = 0; jj < nreal; jj ++) {
 			if (read[jj] != body) {
-				wbody->net += body->r.direction(read[jj]->r) * (G * body->Mass() * read[jj]->m) / read[jj]->squareDistance(body->r);
+				wbody->net += body->r.direction(read[jj]->r) * (G * read[jj]->m) / read[jj]->squareDistance(body->r);
 
 				printrln(in("Miller", "main")+"              Magnitude of force between "+body->Name()+" and "+
-					read[jj]->Name()+" is ", scientific(G * body->Mass() * read[jj]->m / read[jj]->squareDistance(body->r)), 5);
+					read[jj]->Name()+" is ", scientific(G * body->m * read[jj]->m / read[jj]->squareDistance(body->r)), 5);
 			}
 		}
-	    a = wbody->net / body->Mass() * dt;
+	    a = wbody->net * dt;
 	    v = wbody->accelerate(a);
 	    wbody->r = body->r + (v + a * 0.5) * dt;
 	    wbody->fix = simTime;

@@ -45,7 +45,12 @@ simType CSim::Type() { return type; }
 
 void CSim::addBody(CBody* body) {
 	integrator->one.push_back(body);
-	integrator->two.push_back(body);
+	// Force copy construction to create separate copy of 
+	// body at different memory location - one set of bodies
+	// is for reading from, the other is for writing to 
+	// and they toggle every step
+	CBody* wbody = new CBody(*body);
+	integrator->two.push_back(wbody);
 	nadded++;
 }
 void CSim::addPlanet(CBody* body) {
@@ -55,7 +60,10 @@ void CSim::addPlanet(CBody* body) {
 void CSim::addGhost(CGhost* ghost) {
 	ghost->Type(bodyType::ghost);
 	integrator->one.push_back(ghost);
-	integrator->two.push_back(ghost);
+	// Force copy construction, see comment in CSim::addBody
+	// for details.
+	CGhost* wghost = new CGhost(*ghost);
+	integrator->two.push_back(wghost);
 	nadded++;
 }
 CBody* CSim::at(int ii) { return integrator->read[ii]; }
@@ -63,40 +71,51 @@ CBody CSim::copy(int ii) { return *integrator->read[ii]; }
 double CSim::H() { return integrator->h; }
 int CSim::count() { return nadded; }
 void CSim::sort() {
-	std::vector<CBody*> planets;
-	std::vector<CBody*> ghosts;
-	std::vector<CBody*> defs;
+	std::array<std::vector<CBody*>, 2> planets;
+	std::array<std::vector<CBody*>, 2> ghosts;
+	std::array<std::vector<CBody*>, 2> defs;
 	for (int ii = 0; ii < nadded; ii++) {
 		if (integrator->one[ii]->Type() == bodyType::planet) {
-			planets.push_back(integrator->one[ii]);
+			planets[0].push_back(integrator->one[ii]);
+			planets[1].push_back(integrator->two[ii]);
 		}
 		else if (integrator->one[ii]->Type() == bodyType::ghost) {
-			ghosts.push_back(integrator->one[ii]);
+			ghosts[0].push_back(integrator->one[ii]);
+			ghosts[1].push_back(integrator->two[ii]);
 		}
 		else {
-			defs.push_back(integrator->one[ii]);
+			defs[0].push_back(integrator->one[ii]);
+			defs[1].push_back(integrator->two[ii]);
 		}
 	}
-	std::vector<CBody*> bodies;
-	nreal = planets.size();
-	nghosts = ghosts.size();
-	ndefs = defs.size();
+	nreal = planets[0].size();
+	nghosts = ghosts[0].size();
+	ndefs = defs[0].size();
+	std::array<std::valarray<CBody*>, 2> bodies;
+	bodies[0].resize(nreal + nghosts + ndefs);
+	bodies[1].resize(nreal + nghosts + ndefs);
 	for (int ii = 0; ii < nreal; ii ++) {
-		bodies.push_back(planets[ii]);
+		bodies[0][ii] = planets[0][ii];
+		bodies[1][ii] = planets[1][ii];
 	}
-	for (int ii = 0; ii < nghosts; ii ++) {
-		bodies.push_back(ghosts[ii]);
+	for (int ii = nreal; ii < nghosts + nreal; ii ++) {
+		bodies[0][ii] = ghosts[0][ii];
+		bodies[1][ii] = ghosts[1][ii];
 	}
-	for (int ii = 0; ii < ndefs; ii ++) {
-		bodies.push_back(defs[ii]);
+	for (int ii = nreal + nghosts; ii < nghosts + nreal + ndefs; ii ++) {
+		bodies[0][ii] = defs[0][ii];
+		bodies[1][ii] = defs[1][ii];
 	}
-	for (int ii = 0; ii < bodies.size(); ii ++) {
-		bodies[ii]->idx = ii;
+	for (int ii = 0; ii < bodies[0].size(); ii ++) {
+		bodies[0][ii]->idx = ii;
+		bodies[1][ii]->idx = ii;
+		integrator->one[ii] = bodies[0][ii];
+		integrator->two[ii] = bodies[1][ii];
 	}
-	integrator->one = bodies;
-	integrator->two = bodies;
 	integrator->read = integrator->one;
 	integrator->write = integrator->two;
+	std::cout << "bodies[0][0] " << bodies[0][0]->Name() << std::endl;
+	std::cout << "bodies[1][0] " << bodies[1][0]->Name() << std::endl;
 }
 int CSim::NVirtual() {
 	int size = integrator->read.size();
@@ -366,8 +385,10 @@ void CSim::integrate(int min, int max) {
 				for (int jj = 0; jj < ncalcs; jj ++) {
 					calcs[jj](integrator->read[ii], integrator->write[ii]);
 				}
-				print(in("CSim", "integrate")+"       Velocity of      {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->v.info(3)+"\n", 1);
-				print(in("CSim", "integrate")+"       New posiiton for {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->r.info(3)+"\n", 1);
+				print(in("CSim", "integrate")+"       Old Velocity of {"+cyan+integrator->read[ii]->Name()+res+"} is "+integrator->read[ii]->v.info(3)+"\n", 1);
+				print(in("CSim", "integrate")+"       New Velocity of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->v.info(3)+"\n", 1);
+				print(in("CSim", "integrate")+"       Old posiiton of {"+cyan+integrator->read[ii]->Name()+res+"} is "+integrator->read[ii]->r.info(3)+"\n", 1);
+				print(in("CSim", "integrate")+"       New posiiton of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->r.info(3)+"\n", 1);
 			}
 			tocalc--;
 #ifdef profiling
