@@ -5,7 +5,7 @@
 CBody::CBody() {}
 CBody::CBody(double Mass, double Radius, double Speed) {
 	init();
-	mass = Mass;
+	m = Mass;
 	radius = Radius;
 	v.x = Speed;
 }
@@ -13,14 +13,14 @@ CBody::CBody(double Mass, double Radius, double Speed, double X, double Y, doubl
 	init();
 	h = H;
 	r = Pos(X, Y, Z);
-	mass = Mass;
+	m = Mass;
 	radius = Radius;
 	v.x = Speed;
 }
 CBody::CBody(double Mass, double Radius, double Speed, Pos p) {
 	init();
 	r = p;
-	mass = Mass;
+	m = Mass;
 	radius = Radius;
 	v.x = Speed;
 }
@@ -35,7 +35,7 @@ void CBody::Parent(CBody* Parent) { parent = Parent;}
 std::string CBody::Name() {	return name; }
 bodyType CBody::Type() { return type; }
 CBody* CBody::Parent() { return parent; }
-double CBody::Mass()   { return mass; }
+double CBody::Mass()   { return m; }
 double CBody::Radius() { return radius; }
 double CBody::Speed()  { return v.norm(); }
 
@@ -91,14 +91,14 @@ double CBody::squareDistance(CBody t) const { return (t.r - r).squared(); }
 double CBody::squareDistance(Pos* t)        { return (*t - r).squared(); }
 double CBody::squareDistance(Pos t) const   { return (t - r).squared(); }
 
-void CBody::init() {
+void CBody::init(bool quiet) {
 
 	parent = NULL;
 	name = "";
 	type = bodyType::def;
 	
 	radius = 0;
-	mass = 0;
+	m = 0;
 
 	net = Force(0,0,0);
 	r = Pos(0,0,0);
@@ -126,7 +126,7 @@ std::string CBody::writeFormat(format f) {
 			formatted.append("Body - "+Name()+"\n");															 	// Exclude
 			formatted.append("   Position "+scientific(r.x,5)+" "+scientific(r.y,5)+" "+scientific(r.z,5)+"\n"); 	// Exclude
 			formatted.append("   Radius   "+scientific(radius)+"\n");											 	// Exclude
-			formatted.append("   Mass     "+scientific(mass)+"\n");												 	// Exclude
+			formatted.append("   Mass     "+scientific(m)+"\n");												 	// Exclude
 			formatted.append("   Velocity "+scientific(v.x,5)+" "+scientific(v.y,5)+" "+scientific(v.z,5)+"\n\n");	// Exclude
 			break;
 	}
@@ -134,4 +134,4 @@ std::string CBody::writeFormat(format f) {
 }
 
 bool CBody::operator != (CBody rbody) const { return (rbody == *this); }
-bool CBody::operator == (CBody rbody) const { return (rbody.r == r && rbody.Mass() == mass); }
+bool CBody::operator == (CBody rbody) const { return (rbody.r == r && rbody.Mass() == m); }

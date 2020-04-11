@@ -67,6 +67,9 @@ class BulirschStoer;
 
 // TODO Refactor - enumerations should be all-caps 
 
+// TODO Issue - Reusing {CSim} instance causes segmentation fault because cleanup and 
+// re-instantiation of the integrators is not properly managed
+
 enum simType {
 	basic,
 	bulirschStoer,

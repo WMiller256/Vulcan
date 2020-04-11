@@ -56,7 +56,12 @@ vec operator * (vec const &v, long s)   { return vec(v.x * s, v.y * s, v.z * s);
 double vec::operator * (vec const &r) { return x * r.x + y * r.y + z * r.z; }
 vec vec::operator + (vec const &r)    { return vec(x + r.x, y + r.y, z + r.z); }
 vec vec::operator - (vec const &r)    { return vec(x - r.x, y - r.y, z - r.z); }
-vec vec::operator += (vec const &r)   { return vec(x + r.x, y + r.y, z + r.z); }
+vec& vec::operator += (vec const &r)   { 
+	x += r.x;
+	y += r.y; 
+	z += r.z; 
+	return *this;
+}
 void vec::operator = (vec const &r) { 
 	x = r.x;
 	y = r.y;

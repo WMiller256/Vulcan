@@ -21,10 +21,10 @@ BulirschStoer::BulirschStoer() {
 }
 
 void BulirschStoer::init() {
-	tolerance = 1e4;
-	error = std::valarray<double>(nreal);
-	rscale = std::valarray<double>(nreal);
-	vscale = std::valarray<double>(nreal);
+	tolerance = 1.0;
+	error = std::valarray<double>(0.0, nreal);
+	rscale = std::valarray<double>(0.0, nreal);
+	vscale = std::valarray<double>(0.0, nreal);
 	hc = std::valarray<double>(nreal);
 	hs = Matrix<double>(nreal, nsteps);
 	h2 = std::valarray<double>(nreal);
@@ -76,8 +76,8 @@ vec BulirschStoer::acceleration(Pos r, int idx) {
 }
 void BulirschStoer::main(CBody* b, CBody* w) {
 	int ii = b->idx;
-	rscale[ii] = b->r.squared() > 0 ? 1.0 / b->r.squared() : 1;
-	vscale[ii] = b->v.squared() > 0 ? 1.0 / b->v.squared() : 1;
+	rscale[ii] = b->r.squared() > 1e3 ? 1.0 / b->r.squared() : 0.0;
+	vscale[ii] = b->v.squared() > 1e3 ? 1.0 / b->v.squared() : 0.0;
 	// For each value in {steps}, perform modified midpoint integration with {steps[n]} substeps
 mmid:
 	vec a = acceleration(b->r, ii);
@@ -93,19 +93,19 @@ mmid:
 		a = acceleration(r[ii], ii);
 		rn[ii] = r[ii] + h2[ii] * v[ii];
 		vn[ii] = v[ii] + h2[ii] * a;
-		for (int j = 0; j < n; j ++) {
+		for (int j = 1; j < n; j ++) {
 			a = acceleration(rn[ii], ii);
-			r[ii] = rn[ii] + h2[ii] * vn[ii];
-			v[ii] = vn[ii] + h2[ii] * a;
+			r[ii] = r[ii] + h2[ii] * vn[ii];
+			v[ii] = v[ii] + h2[ii] * a;
 			a = acceleration(r[ii], ii);
-			rn[ii] = r[ii] + h2[ii] * v[ii];
-			vn[ii] = v[ii] + h2[ii] * a;			
+			rn[ii] = rn[ii] + h2[ii] * v[ii];
+			vn[ii] = vn[ii] + h2[ii] * a;
 		}
 		a = acceleration(rn[ii], ii);
-		
-		// Update the d vectors (used for polynomial extrapolation)
+
+		// Update the delta matricies (used for polynomial extrapolation)
 		dr(ii, n) = 0.5 * (rn[ii] + r[ii] + hc[ii]*vn[ii]);
-		dv(ii, n) = 0.5 * (rn[ii] + r[ii] + hc[ii]*vn[ii]);
+		dv(ii, n) = 0.5 * (vn[ii] + v[ii] + hc[ii]*a);
 
 		// Perform polynomial extrapolation
 		for (int jj = n - 2; jj >= 0; jj --) {
@@ -113,11 +113,14 @@ mmid:
 			dv(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n))) * hs(ii, jj+1) * dv(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dv(ii, jj);
 		}
 		
-		// After several integrations, check the relative error for extrapolated values
-		if (n > 3) {
-			error[ii] = std::max(dr(ii, 0)*rscale[ii], dv(ii, 0)*vscale[ii], vecComp).norm();
-			println(in("BulirschStoer", "main")+"                            {"+in("std", "max")+"} returned "+
-				    std::max(dr(ii, 0)*rscale[ii], dv(ii, 0)*vscale[ii], vecComp).info(3), 5);
+		// After several integrations, check the relative error for
+		// satisfaction of completion condition
+		if (n > 4) {			
+			error[ii] = 0.0;
+			for (int jj = 0; jj < 3; jj ++) {
+				error[ii] = std::max({dr(ii, 0)[jj]*dr(ii, 0)[jj]*rscale[ii], dv(ii, 0)[jj]*dv(ii, 0)[jj]*vscale[ii], error[ii]});
+			}
+			std::cout << std::endl;
 			println(in("BulirschStoer", "main")+"                            Error is "+scientific(error[ii], 5), 5);
 			// If error is sufficiently small, update the body position
 			if (error[ii] <= tolerance) {
@@ -125,7 +128,7 @@ mmid:
 				w->v = dv(ii, 0);
 				for (int jj = 0; jj < n; jj ++) {
 					w->r += dr(ii, jj);
-					w->v += dr(ii, jj);
+					w->v += dv(ii, jj);
 				}
 				// Change h-value depending on the number of steps needed to reach tolerance
 				if (n == nsteps) {

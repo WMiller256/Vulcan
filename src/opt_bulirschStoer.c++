@@ -64,20 +64,19 @@ vec BulirschStoer::acceleration(Pos r, int idx) {
 	for (int ii = 0; ii < nbodies; ii ++) {
 		if (ii != idx) {
 			// G M / r^2 r-hat
-			a += (r - read[ii]->r).unit() * (G * read[ii]->mass) / (read[ii]->r - r).squared();
+			a += (r - read[ii]->r).unit() * (G * read[ii]->m) / (read[ii]->r - r).squared();
 		}
 	}
 	return a;
 }
 void BulirschStoer::main(CBody* b, CBody* w) {
 	int ii = b->idx;
-	rscale[ii] = 1.0 / b->r.squared();
-	vscale[ii] = 1.0 / b->v.squared();
-	vec a = acceleration(b->r, ii);
+	rscale[ii] = b->r.squared() > 0 ? 1.0 / b->r.squared() : 1;
+	vscale[ii] = b->v.squared() > 0 ? 1.0 / b->v.squared() : 1;
 	// For each value in {steps}, perform modified midpoint integration with {steps[n]} substeps
 mmid:
-	for (int n = 0; n < nsteps; n++) {
-		int s = steps[n];
+	vec a = acceleration(b->r, ii);
+	for (int n = 1; n < nsteps; n++) {
 		hc[ii] = b->h / (2.0 * float(n));
 		hs(ii, n) = 0.25 / (n*n);
 		h2[ii] = hc[ii] * 2.0;
@@ -103,9 +102,9 @@ mmid:
 		dv(ii, n) = 0.5 * (rn[ii] + r[ii] + hc[ii]*vn[ii]);
 
 		// Perform polynomial extrapolation
-		for (int jj = n - 2; jj > 0; jj --) {
-			dr(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) * dr(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dr(ii, jj);
-			dv(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) * dv(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dv(ii, jj);
+		for (int jj = n - 2; jj >= 0; jj --) {
+			dr(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n))) * hs(ii, jj+1) * dr(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dr(ii, jj);
+			dv(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n))) * hs(ii, jj+1) * dv(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dv(ii, jj);
 		}
 		
 		// After several integrations, check the relative error for extrapolated values

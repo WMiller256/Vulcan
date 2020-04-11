@@ -9,11 +9,11 @@ Pos::Pos(vec v) : vec(v) {}
 double Pos::originDist() { return norm(); }
 vec Pos::direction(Pos* target) {
 	vec v(target->x - x, target->y - y, target->z - z);
-	v = v / magnitude(v);
+	v = v / v.norm();
 	return v;
 }
 vec Pos::direction(Pos target) {
 	vec v(target.x - x, target.y - y, target.z - z);
-	v = v / magnitude(v);
+	v = v / v.norm();
 	return v;
 }
