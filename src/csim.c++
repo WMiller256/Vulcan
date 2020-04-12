@@ -143,6 +143,8 @@ void CSim::outputInterval(const double& interval) { write_interval = interval; }
 void CSim::binarywrite() {
 	binaryout.open(binaryofile, std::ios::binary | std::ios::app);
 	binaryout.write((char*)&nbodies, 8);
+	PyList_Append(x, Py_BuildValue("d", integrator->write[0]->r[0]));
+	PyList_Append(y, Py_BuildValue("d", integrator->write[0]->r[1]));
 	for (auto b : integrator->write) {
 		for (int ii = 0; ii < 3; ii ++) {
 			binaryout.write((char*)&(b->r[ii]), 8);
@@ -379,6 +381,9 @@ void CSim::sim() {
 	for (int ii = 0; ii < nthreads; ii ++) {
 		threads[ii].join();
 	}
+	PyObject_CallFunction(pltPlot, "(OO)", x, y);
+	PyObject_CallFunction(pltShow, "()");
+	Py_Finalize();
 }
 
 void CSim::integrate(int min, int max) {
@@ -424,6 +429,13 @@ void CSim::integrate(int min, int max) {
 void CSim::init() {
 	print("Initializing new "+cyan+bright+"CSim"+res+"...");
 
+	Py_Initialize();
+	plt = PyImport_ImportModule("matplotlib.pyplot");
+	pltScatter = PyObject_GetAttrString(plt, (char*)("scatter"));
+	pltPlot = PyObject_GetAttrString(plt, (char*)("plot"));
+	pltShow = PyObject_GetAttrString(plt, (char*)("show"));
+	x = PyList_New(0);
+	y = PyList_New(0);
 	type = simType::basic;
 	do_main = true;
 	ncalcs = 0;

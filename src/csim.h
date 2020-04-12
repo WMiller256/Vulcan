@@ -32,6 +32,7 @@
 #include <mutex>
 #include <omp.h>
 #include <pthread.h>
+#include <Python.h>
 #include <string.h>
 #include <sstream>
 #include <thread>
@@ -134,6 +135,13 @@ protected:
 
 	std::vector<std::function<void(CBody*, CBody*)>> calcs;
 	int ncalcs;
+
+	PyObject* plt;
+	PyObject* pltScatter;
+	PyObject* pltPlot;
+	PyObject* pltShow;
+	PyObject* x;
+	PyObject* y;
 
 	void init();
 };

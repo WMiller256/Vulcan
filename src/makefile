@@ -12,9 +12,9 @@ MV		= /bin/mv -f
 
 LFLAGS	= -Wl,-rpath,/usr/bin/g++
 LIBDIRS	= $(LFLAGS) -L/usr/local/lib/ -L/usr/lib/boost/stage/lib/ -lstdc++fs
-LIBS	= -lboost_program_options -lncurses -lpthread
+LIBS	= -lboost_program_options -lncurses -lpthread -lpython3.8
 
-INC		= -I /usr/lib/boost/
+INC		= -I /usr/lib/boost/ -I /usr/include/python3.8/
 CFLAGS	= -Wno-deprecated-declarations -fopenmp -std=c++17 -O3 -g
 CC      = /usr/bin/g++ $(CFLAGS) $(INC) $(LIBS) 
 
