@@ -75,6 +75,8 @@ vec BulirschStoer::acceleration(Pos r, int idx) {
 	return a;
 }
 void BulirschStoer::main(CBody* b, CBody* w) {
+	if (simTime - b->fix < b->h) return;
+	w->totSteps++;
 	int ii = b->idx;
 	rscale[ii] = b->r.norm() > 1e3 ? 1.0 / b->r.norm() : 0.0;
 	vscale[ii] = b->v.norm() > 1e3 ? 1.0 / b->v.norm() : 0.0;
@@ -131,7 +133,7 @@ mmid:
 					w->h *= shrink;
 					b->h = w->h;
 				}
-				if (n < nsteps && b->h < 1e5) {
+				if (n < nsteps && b->h < 1e6) {
 					w->h *= grow;
 					b->h = w->h;
 				}

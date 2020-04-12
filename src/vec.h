@@ -42,7 +42,7 @@ public:
 	vec operator - (vec const &r);
 	vec& operator += (vec const &r);
 	void operator = (vec const &r);
-	double operator [] (const int idx);
+	double& operator [] (const int idx);
 
 private:
 	

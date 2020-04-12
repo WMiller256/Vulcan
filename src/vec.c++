@@ -67,7 +67,7 @@ void vec::operator = (vec const &r) {
 	y = r.y;
 	z = r.z;
 }
-double vec::operator [] (int idx) {
+double& vec::operator [] (int idx) {
 	if (idx > 2) {
 		error("Index "+std::to_string(idx)+" is out of bounds for 3-component vector.", __LINE__, __FILE__);
 		exit(2);

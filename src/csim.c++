@@ -138,6 +138,23 @@ int CSim::NReal() {
 	return ret;
 }
 
+void CSim::ofile(const std::string& filename)     { binaryofile = filename; }
+void CSim::outputInterval(const double& interval) { write_interval = interval; }
+void CSim::binarywrite() {
+	binaryout.open(binaryofile, std::ios::binary | std::ios::app);
+	binaryout.write((char*)&nbodies, 8);
+	for (auto b : integrator->write) {
+		for (int ii = 0; ii < 3; ii ++) {
+			binaryout.write((char*)&(b->r[ii]), 8);
+		}
+		for (int ii = 0; ii < 3; ii ++) {
+			binaryout.write((char*)&(b->v[ii]), 8);
+		}
+	}
+	binaryout.close();
+	write_fix = simTime;
+}
+
 int CSim::writeConfiguration(const std::string& filename, bool overwrite) {
 	std::ofstream out;
 	if (exists(filename) && overwrite == false) {
@@ -248,6 +265,8 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 
 void CSim::sim() {
 	auto start = std::chrono::high_resolution_clock::now();
+	binaryout = std::fstream(binaryofile, std::ios::out | std::ios::binary);
+
 	integrator = new Integrator();
 	integrator->set(nadded, nghosts);
 	bulirschStoer = new BulirschStoer();
@@ -315,6 +334,9 @@ void CSim::sim() {
 			percent = integrator->h;
 		}
 		while (simTime < maxTime) {
+			if (simTime - write_fix >= write_interval) {
+				binarywrite();
+			}
 			tocalc = nthreads;
 #if SIMTIME_TYPE == 1
             if (simTime / percent != past && simTime < maxTime) {

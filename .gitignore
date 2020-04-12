@@ -50,5 +50,8 @@ bin/*.stackdump
 src/plotting/.ipynb_checkpoints/*
 src/plotting/*.ipynb
 
+#Ignore output files
+src/*.vln
+
 #Ignore outdated testing data/results
 data

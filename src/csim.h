@@ -104,6 +104,9 @@ public:
 	int NReal();
 
 	void printForces();
+	void ofile(const std::string& filename);
+	void outputInterval(const double& interval);
+	void binarywrite();
 	int writeConfiguration(const std::string& filename, bool overwrite = false);
 	CSim* readConfiguration(const std::string& filename);
 
@@ -114,6 +117,11 @@ protected:
 	Integrator* integrator;
 	Miller* miller;
 	BulirschStoer* bulirschStoer;
+
+	std::string binaryofile = "out.vln";
+	std::fstream binaryout;
+	double write_interval = 8.64e4;
+	double write_fix = 0.0;
 
 	simType type;		// The simulation type
 
