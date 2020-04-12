@@ -21,16 +21,16 @@ int Integrator::nreal = 0;
 Integrator::Integrator() {}
 
 void Integrator::main(CBody* body, CBody* wbody) {
-	for (int ii = 0; ii < nbodies; ii ++) {
+	wbody->a.zero();
+	for (int ii = 0; ii < nreal; ii ++) {
 		if (read[ii] != body) {
 
-			body->net += body->r.direction(read[ii]->r) * (G * body->Mass() * read[ii]->Mass()) / read[ii]->squareDistance(body->r);
+			wbody->a += body->r.direction(read[ii]->r) * (G * read[ii]->Mass()) / read[ii]->squareDistance(body->r);
 
 		}
 	}
-    body->a = body->net / body->Mass() * h;
-    body->v = static_cast<Vel>(wbody->accelerate(body->a));
-    wbody->r += (body->v + body->a * 0.5) * h;
+    wbody->v = body->v + wbody->a * h;
+    wbody->r = body->r + (body->v + wbody->a * h) * h;
     wbody->fix = simTime;
     wbody->ncalcs++;
 }

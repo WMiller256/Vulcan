@@ -22,20 +22,20 @@ Integrator::Integrator() {}
 
 void Integrator::main(CBody* body, CBody* wbody) {
 	println(in("Integrator", "main")+"    Calculating net forces", 4);
-	for (int ii = 0; ii < nbodies; ii ++) {
+	wbody->a.zero();
+	for (int ii = 0; ii < nreal; ii ++) {
 		if (read[ii] != body) {
 			printrln("\n"+in("Integrator", "main")+"    Target: ", body->Name(), 5); 
 
-			body->net += body->r.direction(read[ii]->r) * (G * body->Mass() * read[ii]->Mass()) / read[ii]->squareDistance(body->r);
+			wbody->a += body->r.direction(read[ii]->r) * (G * read[ii]->Mass()) / read[ii]->squareDistance(body->r);
 
 			printrln(in("Integrator", "main")+"    Magnitude of force between "+body->Name()+" and "+
 				read[ii]->Name()+" is ", scientific(G * body->Mass() * read[ii]->Mass() / read[ii]->squareDistance(body->r)), 4);
 			printrln(in("Integrator", "main")+"    Net force vector on "+body->Name()+" is ", body->net.info(), 4);
 		}
 	}
-    body->a = body->net / body->Mass() * h;
-    body->v = static_cast<Vel>(wbody->accelerate(body->a));
-    wbody->r += (body->v + body->a * 0.5) * h;
+    wbody->v = body->v + wbody->a * h;
+    wbody->r = body->r + (body->v + wbody->a * h) * h;
     wbody->fix = simTime;
     wbody->ncalcs++;
 }

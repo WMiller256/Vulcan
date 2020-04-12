@@ -138,6 +138,25 @@ int CSim::NReal() {
 	return ret;
 }
 
+void CSim::ofile(const std::string& filename)     { binaryofile = filename; }
+void CSim::outputInterval(const double& interval) { write_interval = interval; }
+void CSim::binarywrite() {
+	binaryout.open(binaryofile, std::ios::binary | std::ios::app);
+	binaryout.write((char*)&nbodies, 8);
+	for (int jj = 0; jj < integrator->write.size(); jj ++) {
+		positions[jj][0].push_back(integrator->write[jj]->r[0]);
+		positions[jj][1].push_back(integrator->write[jj]->r[1]);
+		for (int ii = 0; ii < 3; ii ++) {
+			binaryout.write((char*)&(integrator->write[jj]->r[ii]), 8);
+		}
+		for (int ii = 0; ii < 3; ii ++) {
+			binaryout.write((char*)&(integrator->write[jj]->v[ii]), 8);
+		}
+	}
+	binaryout.close();
+	write_fix = simTime;
+}
+
 int CSim::writeConfiguration(const std::string& filename, bool overwrite) {
 	std::ofstream out;
 	if (exists(filename) && overwrite == false) {
@@ -233,6 +252,9 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 
 void CSim::sim() {
 	auto start = std::chrono::high_resolution_clock::now();
+	binaryout = std::fstream(binaryofile, std::ios::out | std::ios::binary);
+	positions.resize(nadded);
+
 	integrator = new Integrator();
 	integrator->set(nadded, nghosts);
 	bulirschStoer = new BulirschStoer();
@@ -300,6 +322,9 @@ void CSim::sim() {
 			percent = integrator->h;
 		}
 		while (simTime < maxTime) {
+			if (simTime - write_fix >= write_interval) {
+				binarywrite();
+			}
 			tocalc = nthreads;
 #if SIMTIME_TYPE == 1
             if (simTime / percent != past && simTime < maxTime) {
@@ -340,6 +365,20 @@ void CSim::sim() {
 	for (int ii = 0; ii < nthreads; ii ++) {
 		threads[ii].join();
 	}
+	for (auto p : positions) {
+		PyObject* x = PyList_New(0);
+		PyObject* y = PyList_New(0);
+		for (auto i : p[0]) {
+			PyList_Append(x, Py_BuildValue("d", i));
+		}
+		for (auto j : p[1]) {
+			PyList_Append(y, Py_BuildValue("d", j));
+		}
+		PyObject_CallFunction(pltPlot, "(OO)", x, y);
+		PyObject_CallFunction(pltScatter, "([d],[d])", p[0][0], p[1][0]);
+	}
+	PyObject_CallFunction(pltShow, "()"); 
+	Py_Finalize();
 }
 
 void CSim::integrate(int min, int max) {
@@ -380,6 +419,12 @@ void CSim::integrate(int min, int max) {
 
 void CSim::init() {
 
+	Py_Initialize();
+	plt = PyImport_ImportModule("matplotlib.pyplot");
+	pltScatter = PyObject_GetAttrString(plt, (char*)("scatter"));
+	pltPlot = PyObject_GetAttrString(plt, (char*)("plot"));
+	pltShow = PyObject_GetAttrString(plt, (char*)("show"));
+	
 	type = simType::basic;
 	do_main = true;
 	ncalcs = 0;

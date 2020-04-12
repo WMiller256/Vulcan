@@ -143,14 +143,14 @@ void CSim::outputInterval(const double& interval) { write_interval = interval; }
 void CSim::binarywrite() {
 	binaryout.open(binaryofile, std::ios::binary | std::ios::app);
 	binaryout.write((char*)&nbodies, 8);
-	PyList_Append(x, Py_BuildValue("d", integrator->write[0]->r[0]));
-	PyList_Append(y, Py_BuildValue("d", integrator->write[0]->r[1]));
-	for (auto b : integrator->write) {
+	for (int jj = 0; jj < integrator->write.size(); jj ++) {
+		positions[jj][0].push_back(integrator->write[jj]->r[0]);
+		positions[jj][1].push_back(integrator->write[jj]->r[1]);
 		for (int ii = 0; ii < 3; ii ++) {
-			binaryout.write((char*)&(b->r[ii]), 8);
+			binaryout.write((char*)&(integrator->write[jj]->r[ii]), 8);
 		}
 		for (int ii = 0; ii < 3; ii ++) {
-			binaryout.write((char*)&(b->v[ii]), 8);
+			binaryout.write((char*)&(integrator->write[jj]->v[ii]), 8);
 		}
 	}
 	binaryout.close();
@@ -268,6 +268,7 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 void CSim::sim() {
 	auto start = std::chrono::high_resolution_clock::now();
 	binaryout = std::fstream(binaryofile, std::ios::out | std::ios::binary);
+	positions.resize(nadded);
 
 	integrator = new Integrator();
 	integrator->set(nadded, nghosts);
@@ -381,8 +382,19 @@ void CSim::sim() {
 	for (int ii = 0; ii < nthreads; ii ++) {
 		threads[ii].join();
 	}
-	PyObject_CallFunction(pltPlot, "(OO)", x, y);
-	PyObject_CallFunction(pltShow, "()");
+	for (auto p : positions) {
+		PyObject* x = PyList_New(0);
+		PyObject* y = PyList_New(0);
+		for (auto i : p[0]) {
+			PyList_Append(x, Py_BuildValue("d", i));
+		}
+		for (auto j : p[1]) {
+			PyList_Append(y, Py_BuildValue("d", j));
+		}
+		PyObject_CallFunction(pltPlot, "(OO)", x, y);
+		PyObject_CallFunction(pltScatter, "([d],[d])", p[0][0], p[1][0]);
+	}
+	PyObject_CallFunction(pltSavfig, "(s)", (char*)("out.png")); 
 	Py_Finalize();
 }
 
@@ -433,9 +445,9 @@ void CSim::init() {
 	plt = PyImport_ImportModule("matplotlib.pyplot");
 	pltScatter = PyObject_GetAttrString(plt, (char*)("scatter"));
 	pltPlot = PyObject_GetAttrString(plt, (char*)("plot"));
+	pltSavefig = PyObject_GetAttrString(plt, (char*)("savefig"));
 	pltShow = PyObject_GetAttrString(plt, (char*)("show"));
-	x = PyList_New(0);
-	y = PyList_New(0);
+	
 	type = simType::basic;
 	do_main = true;
 	ncalcs = 0;

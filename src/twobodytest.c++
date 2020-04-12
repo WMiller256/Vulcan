@@ -34,17 +34,18 @@ int main(int argn, char** argv) {
 	}
 
 	CSim* tsim = new CSim(2, t, h);
-	tsim -> setDebug(5);
-	tsim->Type(simType::bulirschStoer);
+	tsim->setDebug(0);
+	tsim->Type(simType::basic);
 	int day = int(h);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
 	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e4, 0.0, 1.521e11, 0.0, day);
 
-	sun -> Name("Sun"); 
-	earth -> Name("Earth");
+	sun->Name("Sun"); 
+	earth->Name("Earth");
 
-	tsim -> addPlanet(sun);
-	tsim -> addPlanet(earth);
+	tsim->addPlanet(sun);
+	tsim->addPlanet(earth);
+	tsim->outputInterval(h);
 
 	std::cout << green << " Initialization complete. " << res << std::endl;
 
@@ -52,7 +53,7 @@ int main(int argn, char** argv) {
 	unsigned long long sum = 0;
 	for (int ii = 0; ii < nsamples; ii ++) {
 		auto start = std::chrono::high_resolution_clock::now();	
-		tsim -> sim();
+		tsim->sim();
 		auto end = std::chrono::high_resolution_clock::now();	
 		long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 		sum += microseconds;

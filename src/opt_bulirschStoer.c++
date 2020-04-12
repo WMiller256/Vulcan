@@ -70,9 +70,11 @@ vec BulirschStoer::acceleration(Pos r, int idx) {
 	return a;
 }
 void BulirschStoer::main(CBody* b, CBody* w) {
+	if (simTime - b->fix < b->h) return;
+	w->totSteps++;
 	int ii = b->idx;
-	rscale[ii] = b->r.squared() > 1e3 ? 1.0 / b->r.squared() : 0.0;
-	vscale[ii] = b->v.squared() > 1e3 ? 1.0 / b->v.squared() : 0.0;
+	rscale[ii] = b->r.norm() > 1e3 ? 1.0 / b->r.norm() : 0.0;
+	vscale[ii] = b->v.norm() > 1e3 ? 1.0 / b->v.norm() : 0.0;
 	// For each value in {steps}, perform modified midpoint integration with {steps[n]} substeps
 mmid:
 	vec a = acceleration(b->r, ii);
@@ -124,7 +126,7 @@ mmid:
 					w->h *= shrink;
 					b->h = w->h;
 				}
-				if (n < nsteps) {
+				if (n < nsteps && b->h < 1e6) {
 					w->h *= grow;
 					b->h = w->h;
 				}
@@ -143,10 +145,6 @@ mmid:
 	}
 	goto mmid;		// and then try again
 }
-int BulirschStoer::NSteps() {
-	return nsteps;
-}
+int BulirschStoer::NSteps() { return nsteps; }
 
 bool vecComp(vec const &l, vec const &r) { return l.norm() < r.norm(); }
-
-

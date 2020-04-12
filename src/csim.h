@@ -73,6 +73,11 @@ class BulirschStoer;
 // TODO Issue - Reusing {CSim} instance causes segmentation fault because cleanup and 
 // re-instantiation of the integrators is not properly managed
 
+// TODO Refactor - Need to add support for plotting multiple python lists - the positions 
+// of every body instead of only one - should use a std::vector<std::array<PyObject*, 2>>
+// object to store positions (where each PyObject* is a list). Adding positions to the 
+// plotting lists should not be done in [CSim::binarywrite], and should be optional.
+
 enum simType {
 	basic,
 	bulirschStoer,
@@ -140,8 +145,8 @@ protected:
 	PyObject* pltScatter;
 	PyObject* pltPlot;
 	PyObject* pltShow;
-	PyObject* x;
-	PyObject* y;
+	PyObject* pltSavfig;
+	std::valarray<std::array<std::vector<double>, 2>> positions;
 
 	void init();
 };

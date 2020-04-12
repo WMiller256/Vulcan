@@ -67,7 +67,7 @@ void vec::operator = (vec const &r) {
 	y = r.y;
 	z = r.z;
 }
-double vec::operator [] (int idx) {
+double& vec::operator [] (int idx) {
 	if (idx > 2) {
 		exit(2);
 	}

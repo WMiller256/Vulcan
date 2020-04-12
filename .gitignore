@@ -12,6 +12,12 @@ opt_SIMscaling.*
 src/opt_test.exe
 src/opt_test
 src/opt_timing
+src/opt_twobodytest
+src/opt_threebodytest
+src/test
+src/timing
+src/twobodytest
+src/threebodytest
 src/test.exe
 test.txt
 src/test

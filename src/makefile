@@ -1,12 +1,13 @@
 #Names of programs
-TEST    = test
-TIMING  = timing
-TWOBODY = twobodytest
+TEST     = test
+TIMING   = timing
+TWOBODY  = twobodytest
+THREEBODY= threebodytest
 
 ABS		= .
 BIN		= .
 BUILD	= $(ABS)/../build-wsl
-OPT		= 
+OPT		= opt_
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
@@ -77,6 +78,11 @@ twobodytest: $(OBJS) $(BUILD)/$(OPT)$(TWOBODY).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TWOBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TWOBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TWOBODY) $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TWOBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+
+threebodytest: $(OBJS) $(BUILD)/$(OPT)$(THREEBODY).o
+	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(THREEBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(THREEBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(THREEBODY) $(LIBS)
+	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(THREEBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 timing: $(OBJS) $(BUILD)/$(OPT)$(TIMING).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
