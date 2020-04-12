@@ -53,49 +53,51 @@ int main(int argn, char** argv) {
 	double avg = 0;
 	unsigned long long sum = 0;
 	int n = 9 + nghosts;
-	CSim* tsim = new CSim(8, t, h);
-	tsim -> setDebug(2);
-	tsim->Type(simType::bulirschStoer);
-	int day = int(h/36.5);
-	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day*88);
-	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e4, 0.0, 6.98169e10, 0.0, day*88);
-	CBody* venus = new CBody(4.8675e24, 6.0518e6, 3.502e4, 0.0, 1.08939e11, 0.0, day*225);
-	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e4, 0.0, 1.521e11, 0.0, day*365);
-	CBody* mars = new CBody(6.4171e23, 3.3895e6, 2.4007e4, 0.0, 2.492e11, 0.0, day*687);
-	CBody* jupiter = new CBody(1.8982e27, 6.991e7, 1.307e4, 0.0, 8.1662e11, 0.0, day*12*365);
-	CBody* saturn = new CBody(5.683e26, 5.8232e7, 9.68e3, 0.0, 1.5155e12, 0.0, day*29*365);
-	CBody* uranus = new CBody(8.681e25, 2.362e7, 6.8e3, 0.0, 3.008e12, 0.0, day*84*365);
-	CBody* neptune = new CBody(1.024e26, 2.431e7, 5.43e3, 0.0, 4.54e12, 0.0, day*165*365);
 
-	sun -> Name("Sun"); 
-	mercury -> Name("Mercury");
-	venus -> Name("Venus");
-	earth -> Name("Earth");
-	mars -> Name("Mars");
-	jupiter -> Name("Jupiter");
-	saturn -> Name("Saturn");
-	uranus -> Name("Uranus");
-	neptune -> Name("Neptune");
+	if (n > 12) n = 12;
+		for (int jj = n; jj > 0; jj --) {
 
-	tsim -> addPlanet(sun);
-	tsim -> addPlanet(mercury);
-	tsim -> addPlanet(venus);
-	tsim -> addPlanet(earth);
-	tsim -> addPlanet(mars);
-	tsim -> addPlanet(jupiter);
-	tsim -> addPlanet(saturn);
-	tsim -> addPlanet(uranus);
-	tsim -> addPlanet(neptune);
+		CSim* tsim = new CSim(8, t, h);
+		tsim -> setDebug(2);
+		tsim->Type(simType::bulirschStoer);
+		int day = int(h/36.5);
+		CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day*88);
+		CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e4, 0.0, 6.98169e10, 0.0, day*88);
+		CBody* venus = new CBody(4.8675e24, 6.0518e6, 3.502e4, 0.0, 1.08939e11, 0.0, day*225);
+		CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e4, 0.0, 1.521e11, 0.0, day*365);
+		CBody* mars = new CBody(6.4171e23, 3.3895e6, 2.4007e4, 0.0, 2.492e11, 0.0, day*687);
+		CBody* jupiter = new CBody(1.8982e27, 6.991e7, 1.307e4, 0.0, 8.1662e11, 0.0, day*12*365);
+		CBody* saturn = new CBody(5.683e26, 5.8232e7, 9.68e3, 0.0, 1.5155e12, 0.0, day*29*365);
+		CBody* uranus = new CBody(8.681e25, 2.362e7, 6.8e3, 0.0, 3.008e12, 0.0, day*84*365);
+		CBody* neptune = new CBody(1.024e26, 2.431e7, 5.43e3, 0.0, 4.54e12, 0.0, day*165*365);
 
-	for (int ii = 0; ii < nghosts; ii ++) {
-		// Kuiper belt test particles
-		CBody* ghost = new CBody(1e3, 1e4, 1e3, 1000*ii, 7.48e12, 0, day);
-		ghost -> Name(std::to_string(ii));
-		tsim -> addPlanet(ghost);
-	}
+		sun -> Name("Sun"); 
+		mercury -> Name("Mercury");
+		venus -> Name("Venus");
+		earth -> Name("Earth");
+		mars -> Name("Mars");
+		jupiter -> Name("Jupiter");
+		saturn -> Name("Saturn");
+		uranus -> Name("Uranus");
+		neptune -> Name("Neptune");
 
-	if (n > 11) n = 11;
-	for (int jj = n; jj > 0; jj --) {
+		tsim -> addPlanet(sun);
+		tsim -> addPlanet(mercury);
+		tsim -> addPlanet(venus);
+		tsim -> addPlanet(earth);
+		tsim -> addPlanet(mars);
+		tsim -> addPlanet(jupiter);
+		tsim -> addPlanet(saturn);
+		tsim -> addPlanet(uranus);
+		tsim -> addPlanet(neptune);
+
+		for (int ii = 0; ii < nghosts; ii ++) {
+			// Kuiper belt test particles
+			CBody* ghost = new CBody(1e3, 1e4, 1e3, 1000*ii, 7.48e12, 0, day);
+			ghost -> Name(std::to_string(ii));
+			tsim -> addPlanet(ghost);
+		}
+
 		nthreads = jj;
 		sum = 0;
 		avg = 0;
@@ -109,7 +111,7 @@ int main(int argn, char** argv) {
 		avg = float(sum) / float(nsamples);
 		std::cout << nthreads << " Average time:                    " << bright+magenta << avg << res << "\n" << std::endl;
 		outfile << nthreads << " " << avg << std::endl;
+		delete tsim;
 	}
-	delete tsim;
 	outfile.close();
 }

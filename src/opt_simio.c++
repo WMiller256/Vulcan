@@ -12,12 +12,15 @@ std::string in(std::string prefix, std::string function) {
 }
 
 void error(const std::string& s, const int line, const char* file) {
-	printf(std::string(red+white_back+" Error "+res+" [File "+yellow+"%s"+res+" line "+bright+red+"%d"+
+	printf(std::string("\r"+red+white_back+" Error "+res+" [File "+yellow+"%s"+res+" line "+bright+red+"%d"+
 		res+"] - "+s+"\n").c_str(), file, line);
 }
 void warning(const std::string& s, const int line, const char* file) {
-	printf(std::string(bright+blue+white_back+" Warning "+res+" [File "+yellow+"%s"+res+" line "+bright+red+"%d"
+	printf(std::string("\r"+bright+blue+white_back+" Warning "+res+" [File "+yellow+"%s"+res+" line "+bright+red+"%d"
 		+res+"] - "+s+"\n").c_str(), file, line);
+}
+void warning(const std::string& s) {
+	printf("%s", std::string("\r"+bright+blue+white_back+" Warning "+res+" - "+s+"\n").c_str());
 }
 
 std::string scientific(double d, int precision) {

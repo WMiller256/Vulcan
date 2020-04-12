@@ -19,6 +19,7 @@ std::string in(std::string prefix, std::string function);
 
 void error(const std::string& s, const int line, const char* file);
 void warning(const std::string& s, const int line, const char* file);
+void warning(const std::string& s);
 
 std::string scientific(double d, int precision = 5);
 std::string stripcolors(const std::string& str);

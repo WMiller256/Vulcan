@@ -1,6 +1,7 @@
 #Names of programs
 TEST    = test
 TIMING  = timing
+TWOBODY = twobodytest
 
 ABS		= .
 BIN		= .
@@ -71,6 +72,11 @@ test: $(OBJS) $(BUILD)/$(OPT)$(TEST).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TEST).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TEST) $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+
+twobodytest: $(OBJS) $(BUILD)/$(OPT)$(TWOBODY).o
+	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TWOBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TWOBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TWOBODY) $(LIBS)
+	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TWOBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 timing: $(OBJS) $(BUILD)/$(OPT)$(TIMING).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"

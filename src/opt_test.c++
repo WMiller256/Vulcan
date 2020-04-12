@@ -35,7 +35,7 @@ int main(int argn, char** argv) {
 	std::cout << t << " " << h << " " << nthreads << std::endl;
 
 	CSim* tsim = new CSim(8, t, h);
-	tsim -> setDebug(5);
+	tsim -> setDebug(0);
 	tsim->Type(simType::bulirschStoer);
 	int day = int(h);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);

@@ -17,6 +17,8 @@ std::atomic<double> simTime;
 std::atomic<int> tocalc;
 std::atomic<int> joinable;
 
+std::mutex mtx;
+
 CSim::CSim() {
 	init();	
 	integrator->read = integrator->one;

@@ -61,6 +61,8 @@ extern std::atomic<unsigned long long> simTime;
 extern std::atomic<double> simTime;
 #endif
 
+extern std::mutex mtx;
+
 class CBody;
 class Miller;
 class BulirschStoer;
