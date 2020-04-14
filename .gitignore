@@ -58,6 +58,7 @@ src/plotting/*.ipynb
 
 #Ignore output files
 src/*.vln
+src/*.png
 
 #Ignore outdated testing data/results
 data

@@ -342,12 +342,12 @@ void CSim::sim() {
 			percent = integrator->h;
 		}
 		while (simTime < maxTime) {
-			if (simTime - write_fix >= write_interval) {
+			if (write_interval > 0.0 && simTime - write_fix >= write_interval) {
 				std::valarray<std::pair<Pos, Vel>> line(nbodies);
 				for (int jj = 0; jj < nbodies; jj ++) {
 					line[jj] = std::make_pair(integrator->write[jj]->r, integrator->write[jj]->v);
-					positions[jj][0].push_back(integrator->write[jj]->r[0]);
-					positions[jj][1].push_back(integrator->write[jj]->r[1]);
+					positions[jj][0].push_back(integrator->write[jj]->r[0] - integrator->write[0]->r[0]);
+					positions[jj][1].push_back(integrator->write[jj]->r[1] - integrator->write[0]->r[1]);
 				}
 				output.push_back(line);
 				write_fix = simTime;
@@ -394,21 +394,23 @@ void CSim::sim() {
 	for (int ii = 0; ii < nthreads; ii ++) {
 		threads[ii].join();
 	}
-	binarywrite();
-	for (auto p : positions) {
-		PyObject* x = PyList_New(0);
-		PyObject* y = PyList_New(0);
-		for (auto i : p[0]) {
-			PyList_Append(x, Py_BuildValue("d", i));
+	if (write_interval > 0.0) {
+		binarywrite();
+		for (auto p : positions) {
+			PyObject* x = PyList_New(0);
+			PyObject* y = PyList_New(0);
+			for (auto i : p[0]) {
+				PyList_Append(x, Py_BuildValue("d", i));
+			}
+			for (auto j : p[1]) {
+				PyList_Append(y, Py_BuildValue("d", j));
+			}
+			PyObject_CallFunction(pltPlot, "(OO)", x, y);
+			PyObject_CallFunction(pltScatter, "([d],[d])", p[0][0], p[1][0]);
 		}
-		for (auto j : p[1]) {
-			PyList_Append(y, Py_BuildValue("d", j));
-		}
-		PyObject_CallFunction(pltPlot, "(OO)", x, y);
-		PyObject_CallFunction(pltScatter, "([d],[d])", p[0][0], p[1][0]);
+		PyObject_CallMethod(PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gca")), "()"), "set_aspect", "s", (char*)("equal"));
+		PyObject_CallFunction(pltSavefig, "(s)", (char*)("out.png"));
 	}
-	PyObject_CallMethod(PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gca")), "()"), "set_aspect", "s", (char*)("equal"));
-	PyObject_CallFunction(pltSavefig, "(s)", (char*)("out.png"));
 	Py_Finalize();
 }
 

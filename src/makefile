@@ -3,6 +3,7 @@ TEST     = test
 TIMING   = timing
 TWOBODY  = twobodytest
 THREEBODY= threebodytest
+FOURBODY = fourbodytest
 
 ABS		= .
 BIN		= .
@@ -83,6 +84,11 @@ threebodytest: $(OBJS) $(BUILD)/$(OPT)$(THREEBODY).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(THREEBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(THREEBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(THREEBODY) $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(THREEBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+
+fourbodytest: $(OBJS) $(BUILD)/$(OPT)$(FOURBODY).o
+	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(FOURBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(FOURBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(FOURBODY) $(LIBS)
+	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(FOURBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 timing: $(OBJS) $(BUILD)/$(OPT)$(TIMING).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"

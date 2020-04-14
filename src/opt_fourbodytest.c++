@@ -38,16 +38,19 @@ int main(int argn, char** argv) {
 	tsim->Type(simType::bulirschStoer);
 	int day = int(h);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
-	CBody* earth = new CBody(5.97237e24, 6.371e6, 3.978e4, 0.0, 1.521e11, 0.0, day);
+	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e4, 0.0, 1.521e11, 0.0, day);
 	CBody* jupiter = new CBody(1.8982e27, 6.991e7, 1.307e4, 0.0, 8.1662e11, 0.0, day);
+	CBody* saturn = new CBody(5.683e26, 5.8232e7, 9.68e3, 0.0, 1.5155e12, 0.0, day);
 
 	sun->Name("Sun"); 
 	earth->Name("Earth");
 	jupiter->Name("Jupiter");
+	saturn->Name("Saturn");
 
 	tsim->addPlanet(sun);
 	tsim->addPlanet(earth);
 	tsim->addPlanet(jupiter);
+	tsim->addPlanet(saturn);
 	tsim->outputInterval(h);
 
 	std::cout << green << " Initialization complete. " << res << std::endl;

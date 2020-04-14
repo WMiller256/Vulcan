@@ -126,7 +126,7 @@ protected:
 
 	std::string binaryofile = "out.vln";
 	std::fstream binaryout;
-	double write_interval = 8.64e4;
+	double write_interval = -1.0;
 	double write_fix = 0.0;
 	std::vector<std::valarray<std::pair<Pos, Vel> > > output;
 
