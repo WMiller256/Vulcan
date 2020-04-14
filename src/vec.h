@@ -13,6 +13,7 @@
 #define VEC_H
 
 #include <string>
+#include <algorithm>
 
 #include "colors.h"
 #include "simio.h"
@@ -33,6 +34,7 @@ public:
 	double squared() const;
 	double to(int n) const;
 	double norm() const;
+	double max() const;
 	vec unit();
 
 	bool operator != (vec r) const;

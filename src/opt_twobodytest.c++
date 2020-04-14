@@ -24,7 +24,7 @@ int main(int argn, char** argv) {
 		nthreads = atoi(argv[3]);
 	}
 	else {
-		nthreads = 1;
+		nthreads = 0;
 	}
 	if (argn > 4) {
 		extension = std::string(argv[4]);
@@ -45,7 +45,7 @@ int main(int argn, char** argv) {
 
 	tsim->addPlanet(sun);
 	tsim->addPlanet(earth);
-	tsim->outputInterval(h*1000);
+	tsim->outputInterval(h);
 
 	std::cout << green << " Initialization complete. " << res << std::endl;
 

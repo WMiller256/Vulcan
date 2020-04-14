@@ -268,6 +268,7 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 void CSim::sim() {
 	auto start = std::chrono::high_resolution_clock::now();
 	binaryout = std::fstream(binaryofile, std::ios::out | std::ios::binary);
+	binaryout.close();
 
 	integrator = new Integrator();
 	integrator->set(nadded, nghosts);

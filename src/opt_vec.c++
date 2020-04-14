@@ -43,20 +43,22 @@ void vec::zero() {
 double vec::squared() const { return this->to(2); }
 double vec::to(int n) const { return (pow(x, n) + pow(y, n) + pow(z, n)); }
 double vec::norm() const    { return sqrt(this->to(2)); }
-vec vec::unit()        		{ return *this / norm(); }
+double vec::max() const     { return std::max({abs(x), abs(y), abs(z)}); }
+vec vec::unit()             { return *this / norm(); }
 
-bool vec::operator != (vec r) const   { return (r == *this); }
-bool vec::operator == (vec r) const   { return (x == r.x && y == r.y && z == r.z); }
+bool vec::operator != (vec r) const     { return (r == *this); }
+bool vec::operator == (vec r) const     { return (x == r.x && y == r.y && z == r.z); }
 vec operator / (double s, vec const &v) { return vec(v.x / s, v.y / s, v.z / s); }
 vec operator * (double s, vec const &v) { return vec(v.x * s, v.y * s, v.z * s); }
 vec operator * (long s, vec const &v)   { return vec(v.x * s, v.y * s, v.z * s); }
 vec operator / (vec const &v, double s) { return vec(v.x / s, v.y / s, v.z / s); }
 vec operator * (vec const &v, double s) { return vec(v.x * s, v.y * s, v.z * s); }
 vec operator * (vec const &v, long s)   { return vec(v.x * s, v.y * s, v.z * s); }
-double vec::operator * (vec const &r) { return x * r.x + y * r.y + z * r.z; }
-vec vec::operator + (vec const &r)    { return vec(x + r.x, y + r.y, z + r.z); }
-vec vec::operator - (vec const &r)    { return vec(x - r.x, y - r.y, z - r.z); }
-vec& vec::operator += (vec const &r)   { 
+double vec::operator * (vec const &r)   { return x * r.x + y * r.y + z * r.z; }
+vec vec::operator + (vec const &r)      { return vec(x + r.x, y + r.y, z + r.z); }
+vec vec::operator - (vec const &r)      { return vec(x - r.x, y - r.y, z - r.z); }
+
+vec& vec::operator += (vec const &r) { 
 	x += r.x;
 	y += r.y; 
 	z += r.z; 

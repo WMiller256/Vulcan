@@ -25,6 +25,7 @@ void warning(const std::string& s) {
 
 std::string scientific(double d, int precision) {
 	std::stringstream ret;
+	if (d < 0) precision -= 1;
 	ret << std::scientific << std::setprecision(precision) << d;
 	return ret.str();
 }

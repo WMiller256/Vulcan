@@ -19,10 +19,8 @@ class BulirschStoer : public Integrator {
 
 public:
 	BulirschStoer();
-	int step();
-	void main(CBody*, CBody*) override;	// Main integration function
-	std::vector<Force> gravity();		// Calculates gravitational forces without updating
-	vec acceleration(Pos r, int idx);	// Get the acceleration if body {read[idx]} were at position {r}
+	void main(CBody*, CBody*) override;			// Main integration function
+	vec acceleration(Pos &r, int &idx) const;	// Get the gravitational acceleration if body {read[idx]} were at position {r}
 
 	int NSteps();
 
