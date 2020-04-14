@@ -13,21 +13,18 @@ Miller::Miller() {
 }
 
 void Miller::main(CBody* body, CBody* wbody) {
-	vec v;
-	vec a;
 	double dt;
 	dt = simTime - body->fix;
 	if (dt >= body->h) {
-		wbody->net.zero();
+		wbody->a.zero();
 		for (int jj = 0; jj < nreal; jj ++) {
 			if (read[jj] != body) {
-				wbody->net += body->r.direction(read[jj]->r) * (G * read[jj]->m) / read[jj]->squareDistance(body->r);
+				wbody->a += body->r.direction(read[jj]->r) * (G * read[jj]->m) / read[jj]->squareDistance(body->r);
 
 			}
 		}
-	    a = wbody->net * dt;
-	    v = wbody->accelerate(a);
-	    wbody->r = body->r + (v + a * 0.5) * dt;
+		wbody->v = body->v + wbody->a * dt;
+	    wbody->r = body->r + (body->v + 0.5 * wbody->a * dt) * dt;
 	    wbody->fix = simTime;
 	    wbody->ncalcs++;
 	}

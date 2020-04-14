@@ -64,7 +64,7 @@ vec BulirschStoer::acceleration(Pos r, int idx) {
 	for (int ii = 0; ii < nbodies; ii ++) {
 		if (ii != idx) {
 			// G M / r^2 r-hat
-			a += (r - read[ii]->r).unit() * (G * read[ii]->m) / (read[ii]->r - r).squared();
+			a += r.direction(read[ii]->r) * (G * read[ii]->m) / read[ii]->squareDistance(r);
 		}
 	}
 	return a;
@@ -78,6 +78,9 @@ void BulirschStoer::main(CBody* b, CBody* w) {
 	// For each value in {steps}, perform modified midpoint integration with {steps[n]} substeps
 mmid:
 	vec a = acceleration(b->r, ii);
+	w->r = b->r + (b->v + a * b->h) * b->h;
+	w->v = b->v + w->a * h;
+	return;
 	for (int n = 1; n < nsteps; n++) {
 		hc[ii] = b->h / (2.0 * float(n));
 		hs(ii, n) = 0.25 / (n*n);

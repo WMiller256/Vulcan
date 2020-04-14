@@ -69,7 +69,7 @@ vec BulirschStoer::acceleration(Pos r, int idx) {
 	for (int ii = 0; ii < nbodies; ii ++) {
 		if (ii != idx) {
 			// G M / r^2 r-hat
-			a += (r - read[ii]->r).unit() * (G * read[ii]->m) / (read[ii]->r - r).squared();
+			a += r.direction(read[ii]->r) * (G * read[ii]->m) / read[ii]->squareDistance(r);
 		}
 	}
 	return a;
@@ -137,6 +137,9 @@ mmid:
 					w->h *= grow;
 					b->h = w->h;
 				}
+				std::cout << w->r.info() << std::endl;
+				std::cout << w->v.info() << std::endl;
+				std::cout << std::endl;
 				return;
 			}
 		}

@@ -128,6 +128,7 @@ protected:
 	std::fstream binaryout;
 	double write_interval = 8.64e4;
 	double write_fix = 0.0;
+	std::vector<std::valarray<std::pair<Pos, Vel> > > output;
 
 	simType type;		// The simulation type
 
@@ -145,7 +146,7 @@ protected:
 	PyObject* pltScatter;
 	PyObject* pltPlot;
 	PyObject* pltShow;
-	PyObject* pltSavfig;
+	PyObject* pltSavefig;
 	std::valarray<std::array<std::vector<double>, 2>> positions;
 
 	void init();

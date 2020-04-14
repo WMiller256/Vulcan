@@ -142,15 +142,15 @@ void CSim::ofile(const std::string& filename)     { binaryofile = filename; }
 void CSim::outputInterval(const double& interval) { write_interval = interval; }
 void CSim::binarywrite() {
 	binaryout.open(binaryofile, std::ios::binary | std::ios::app);
-	binaryout.write((char*)&nbodies, 8);
-	for (int jj = 0; jj < integrator->write.size(); jj ++) {
-		positions[jj][0].push_back(integrator->write[jj]->r[0]);
-		positions[jj][1].push_back(integrator->write[jj]->r[1]);
-		for (int ii = 0; ii < 3; ii ++) {
-			binaryout.write((char*)&(integrator->write[jj]->r[ii]), 8);
-		}
-		for (int ii = 0; ii < 3; ii ++) {
-			binaryout.write((char*)&(integrator->write[jj]->v[ii]), 8);
+	for (auto l : output) {
+		binaryout.write((char*)&nbodies, 8);
+		for (int ii = 0; ii < nbodies; ii ++) {
+			for (int jj = 0; jj < 3; jj ++) {
+				binaryout.write((char*)&(l[ii].first[jj]), 8);
+			}
+			for (int jj = 0; jj < 3; jj ++) {
+				binaryout.write((char*)&(l[ii].second[jj]), 8);
+			}
 		}
 	}
 	binaryout.close();
@@ -338,7 +338,14 @@ void CSim::sim() {
 		}
 		while (simTime < maxTime) {
 			if (simTime - write_fix >= write_interval) {
-				binarywrite();
+				std::valarray<std::pair<Pos, Vel>> line(nbodies);
+				for (int jj = 0; jj < nbodies; jj ++) {
+					line[jj] = std::make_pair(integrator->write[jj]->r, integrator->write[jj]->v);
+					positions[jj][0].push_back(integrator->write[jj]->r[0]);
+					positions[jj][1].push_back(integrator->write[jj]->r[1]);
+				}
+				output.push_back(line);
+				write_fix = simTime;
 			}
 			tocalc = nthreads;
 #if SIMTIME_TYPE == 1
@@ -382,6 +389,7 @@ void CSim::sim() {
 	for (int ii = 0; ii < nthreads; ii ++) {
 		threads[ii].join();
 	}
+	binarywrite();
 	for (auto p : positions) {
 		PyObject* x = PyList_New(0);
 		PyObject* y = PyList_New(0);
@@ -394,7 +402,8 @@ void CSim::sim() {
 		PyObject_CallFunction(pltPlot, "(OO)", x, y);
 		PyObject_CallFunction(pltScatter, "([d],[d])", p[0][0], p[1][0]);
 	}
-	PyObject_CallFunction(pltSavfig, "(s)", (char*)("out.png")); 
+	PyObject_CallMethod(PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gca")), "()"), "set_aspect", "s", (char*)("equal"));
+	PyObject_CallFunction(pltSavefig, "(s)", (char*)("out.png"));
 	Py_Finalize();
 }
 
