@@ -10,12 +10,12 @@ double Pos::originDist() { return norm(); }
 vec Pos::direction(Pos* target) {
 	vec v(target->x - x, target->y - y, target->z - z);
 	v = v / v.norm();
-	printrln(in("Pos","direction")+"            {"+green+"target"+res+"} - "+target->info(2)+" to {"+green+"this"+res+"} - "+info(2), v.info(2), 5);
+	printrln(in("Pos","direction")+"            {"+green+"target"+res+"} - "+target->info(2)+" to {"+green+"this"+res+"} - "+info(2), v.info(2), 6);
 	return v;
 }
 vec Pos::direction(Pos target) {
 	vec v(target.x - x, target.y - y, target.z - z);
 	v = v / v.norm();
-	printrln(in("Pos","direction")+"            {"+green+"target"+res+"} - "+target.info(2)+" to {"+green+"this"+res+"} - "+info(2), v.info(2), 5);
+	printrln(in("Pos","direction")+"            {"+green+"target"+res+"} - "+target.info(2)+" to {"+green+"this"+res+"} - "+info(2), v.info(2), 6);
 	return v;
 }

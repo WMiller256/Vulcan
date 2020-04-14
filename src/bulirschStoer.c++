@@ -75,6 +75,9 @@ vec BulirschStoer::acceleration(Pos r, int idx) {
 	return a;
 }
 void BulirschStoer::main(CBody* b, CBody* w) {
+	// TODO Testing - Advanced compensation for difference between elapsed time and 
+	// fix age - i.e. need to confirm hc[ii] = (simTime - b->fix) / (2.0 * float(n))
+	// is robust.
 	if (simTime - b->fix < b->h) return;
 	w->totSteps++;
 	int ii = b->idx;
@@ -82,11 +85,11 @@ void BulirschStoer::main(CBody* b, CBody* w) {
 	vscale[ii] = b->v.norm() > 1e3 ? 1.0 / b->v.norm() : 0.0;
 	// For each value in {steps}, perform modified midpoint integration with {steps[n]} substeps
 mmid:
-	vec a = acceleration(b->r, ii);
-	for (int n = 1; n < nsteps; n++) {
-		hc[ii] = b->h / (2.0 * float(n));
-		println(in("BulirschStoer", "main")+"                            MMID on {"+cyan+b->Name()+res+"}, stepsize "+magenta+std::to_string(hc[ii]), 5);
-		hs(ii, n) = 0.25 / (n*n);
+	for (int n = 1; n <= nsteps; n++) {
+		vec a = acceleration(b->r, ii);
+		hc[ii] = (simTime - b->fix) / (2.0 * float(n));
+		println(in("BulirschStoer", "main")+"                            MMID on {"+cyan+b->Name()+res+"}, stepsize "+magenta+std::to_string(hc[ii])+res, 5);
+		hs(ii, n-1) = 0.25 / (n*n);
 		h2[ii] = hc[ii] * 2.0;
 
 		// Perform modified midpoint integration with {steps[n]} steps.
@@ -106,15 +109,13 @@ mmid:
 		a = acceleration(rn[ii], ii);
 
 		// Update the delta matricies (used for polynomial extrapolation)
-		dr(ii, n) = 0.5 * (rn[ii] + r[ii] + hc[ii]*vn[ii]);
-		dv(ii, n) = 0.5 * (vn[ii] + v[ii] + hc[ii]*a);
-
+		dr(ii, n-1) = 0.5 * (rn[ii] + r[ii] + hc[ii]*vn[ii]);
+		dv(ii, n-1) = 0.5 * (vn[ii] + v[ii] + hc[ii]*a);
 		// Perform polynomial extrapolation
 		for (int jj = n - 2; jj >= 0; jj --) {
-			dr(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n))) * hs(ii, jj+1) * dr(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dr(ii, jj);
-			dv(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n))) * hs(ii, jj+1) * dv(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dv(ii, jj);
+			dr(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) * dr(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dr(ii, jj);
+			dv(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) * dv(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dv(ii, jj);
 		}
-		
 		// After several integrations, check the relative error for
 		// satisfaction of completion condition
 		if (n > 3) {
@@ -122,9 +123,7 @@ mmid:
 			println(in("BulirschStoer", "main")+"                            Error is "+scientific(error[ii], 5), 5);
 			// If error is sufficiently small, update the body position
 			if (error[ii] <= tolerance) {
-				w->r = dr(ii, 0);
-				w->v = dv(ii, 0);
-				for (int jj = 0; jj < n; jj ++) {
+				for (int jj = 0; jj < n - 1; jj ++) {
 					w->r += dr(ii, jj);
 					w->v += dv(ii, jj);
 				}
@@ -137,9 +136,6 @@ mmid:
 					w->h *= grow;
 					b->h = w->h;
 				}
-				std::cout << w->r.info() << std::endl;
-				std::cout << w->v.info() << std::endl;
-				std::cout << std::endl;
 				return;
 			}
 		}

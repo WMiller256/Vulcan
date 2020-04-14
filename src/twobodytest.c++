@@ -34,7 +34,7 @@ int main(int argn, char** argv) {
 	}
 
 	CSim* tsim = new CSim(2, t, h);
-	tsim->setDebug(5);
+	tsim->setDebug(0);
 	tsim->Type(simType::bulirschStoer);
 	int day = int(h);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
@@ -45,7 +45,7 @@ int main(int argn, char** argv) {
 
 	tsim->addPlanet(sun);
 	tsim->addPlanet(earth);
-	tsim->outputInterval(h);
+	tsim->outputInterval(h*1000);
 
 	std::cout << green << " Initialization complete. " << res << std::endl;
 

@@ -77,13 +77,10 @@ void BulirschStoer::main(CBody* b, CBody* w) {
 	vscale[ii] = b->v.norm() > 1e3 ? 1.0 / b->v.norm() : 0.0;
 	// For each value in {steps}, perform modified midpoint integration with {steps[n]} substeps
 mmid:
-	vec a = acceleration(b->r, ii);
-	w->r = b->r + (b->v + a * b->h) * b->h;
-	w->v = b->v + w->a * h;
-	return;
-	for (int n = 1; n < nsteps; n++) {
+	for (int n = 1; n <= nsteps; n++) {
+		vec a = acceleration(b->r, ii);
 		hc[ii] = b->h / (2.0 * float(n));
-		hs(ii, n) = 0.25 / (n*n);
+		hs(ii, n-1) = 0.25 / (n*n);
 		h2[ii] = hc[ii] * 2.0;
 
 		// Perform modified midpoint integration with {steps[n]} steps.
@@ -103,24 +100,24 @@ mmid:
 		a = acceleration(rn[ii], ii);
 
 		// Update the delta matricies (used for polynomial extrapolation)
-		dr(ii, n) = 0.5 * (rn[ii] + r[ii] + hc[ii]*vn[ii]);
-		dv(ii, n) = 0.5 * (vn[ii] + v[ii] + hc[ii]*a);
-
+		dr(ii, n-1) = 0.5 * (rn[ii] + r[ii] + hc[ii]*vn[ii]);
+		dv(ii, n-1) = 0.5 * (vn[ii] + v[ii] + hc[ii]*a);
 		// Perform polynomial extrapolation
+		// BUG identified in following loop
 		for (int jj = n - 2; jj >= 0; jj --) {
-			dr(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n))) * hs(ii, jj+1) * dr(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dr(ii, jj);
-			dv(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n))) * hs(ii, jj+1) * dv(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dv(ii, jj);
+			dr(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) * dr(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dr(ii, jj);
+			dv(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) * dv(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dv(ii, jj);
 		}
-		
 		// After several integrations, check the relative error for
 		// satisfaction of completion condition
 		if (n > 3) {
 			error[ii] = std::max(dr(ii, 0)*rscale[ii], dv(ii, 0)*vscale[ii], vecComp).norm();
 			// If error is sufficiently small, update the body position
 			if (error[ii] <= tolerance) {
-				w->r = dr(ii, 0);
-				w->v = dv(ii, 0);
-				for (int jj = 0; jj < n; jj ++) {
+//				w->r = dr(ii, 0);
+//				w->v = dv(ii, 0);
+//				std::cout << "dr: " << dr(ii, 0).info(2) << " w->r " << w->r.info(2) << std::endl;
+				for (int jj = 0; jj < n - 1; jj ++) {
 					w->r += dr(ii, jj);
 					w->v += dv(ii, jj);
 				}

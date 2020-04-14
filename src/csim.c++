@@ -268,7 +268,6 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 void CSim::sim() {
 	auto start = std::chrono::high_resolution_clock::now();
 	binaryout = std::fstream(binaryofile, std::ios::out | std::ios::binary);
-	positions.resize(nadded);
 
 	integrator = new Integrator();
 	integrator->set(nadded, nghosts);
@@ -308,6 +307,11 @@ void CSim::sim() {
 	}
 	sort();
 	nbodies = nadded;
+	positions.resize(nadded);
+	for (int jj = 0; jj < nbodies; jj ++) {
+		positions[jj][0].push_back(integrator->write[jj]->r[0]);
+		positions[jj][1].push_back(integrator->write[jj]->r[1]);
+	}
 
 	int block = nbodies / nthreads;
 //			cpu_set_t set;

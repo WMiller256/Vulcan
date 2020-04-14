@@ -7,7 +7,7 @@ THREEBODY= threebodytest
 ABS		= .
 BIN		= .
 BUILD	= $(ABS)/../build-wsl
-OPT		= 
+OPT		= opt_
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
