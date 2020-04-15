@@ -12,7 +12,6 @@
 
 const int BulirschStoer::nsteps = 12;
 const int BulirschStoer::steps[] = { 2,4,6,8,12,16,24,32,48,64,96,128 };
-const double BulirschStoer::threshold = 100000;
 const double BulirschStoer::grow = 1.3;
 const double BulirschStoer::shrink = 0.55;
 

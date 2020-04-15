@@ -25,8 +25,6 @@ public:
 	int NSteps();
 
 private:
-	static double const threshold;
-	static int const attempts;
 	static int const nsteps;
 	static int const steps[];
 
