@@ -47,6 +47,7 @@ OBJS	= $(BUILD)/$(OPT)csim.o			\
 		  $(BUILD)/$(OPT)simio.o		\
 		  $(BUILD)/$(OPT)global.o		\
 		  $(BUILD)/$(OPT)integrator.o	\
+		  $(BUILD)/$(OPT)mercury.o      \
 		  $(BUILD)/$(OPT)miller.o		\
 		  $(BUILD)/$(OPT)bulirschStoer.o
 		  

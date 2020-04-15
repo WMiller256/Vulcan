@@ -259,6 +259,7 @@ void CSim::sim() {
 	integrator->set(nadded, nghosts);
 	bulirschStoer = new BulirschStoer();
 	miller = new Miller();
+	mercury = new Mercury(integrator->h);
 
 	if (do_main) {
 		if (type == simType::basic) {
@@ -270,6 +271,9 @@ void CSim::sim() {
 		else if (type == simType::bulirschStoer) {
 			calcs.push_back(std::bind(&Integrator::main, this->bulirschStoer, std::placeholders::_1, std::placeholders::_2));
 		}
+	}
+	if (false) {
+		calcs.push_back(std::bind(&Mercury::bulirschStoer, this->mercury, std::placeholders::_1, std::placeholders::_2));
 	}
 	ncalcs = calcs.size();
 	sort();

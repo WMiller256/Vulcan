@@ -12,7 +12,6 @@
 
 const int BulirschStoer::nsteps = 12;
 const int BulirschStoer::steps[] = { 2,4,6,8,12,16,24,32,48,64,96,128 };
-const double BulirschStoer::threshold = 100000;
 const double BulirschStoer::grow = 1.3;
 const double BulirschStoer::shrink = 0.55;
 
@@ -21,7 +20,7 @@ BulirschStoer::BulirschStoer() {
 }
 
 void BulirschStoer::init() {
-	tolerance = 1e-9;
+	tolerance = 1e-10;
 	error = std::valarray<double>(0.0, nreal);
 	rscale = std::valarray<double>(0.0, nreal);
 	vscale = std::valarray<double>(0.0, nreal);
@@ -87,14 +86,6 @@ mmid:
 			// if so should calculate a lookup table at beginning of simulation instead of recalculating every iteration. 
 			dr(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) * dr(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dr(ii, jj);
 			dv(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) * dv(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dv(ii, jj);
-/*			if (ii == read.size() - 1) {
-				for (int kk = n - 1; kk >= 0; kk --) {
-					std::cout << kk << " dr(ii, kk)   " << dr(ii, kk).info(3) << std::endl;
-//						std::cout << jj << " dr(ii, +1) " << dr(ii, jj+1).info(3) << std::endl;
-				}
-			}
-			if (ii == read.size() - 1) std::cout << std::endl;
-			if (ii == read.size() - 1 && n == 5) exit(0); */
 		}
 		
 		// After several integrations, check the relative error for

@@ -51,9 +51,12 @@
 #include "vec.h"
 
 // Include order matters for Integrator and derived class headers
+std::vector<std::function<void(CBody*, CBody*)>> calcs;
+class Mercury;
 #include "integrator.h"
 #include "bulirschStoer.h"
 #include "miller.h"
+#include "mercury.h"
 
 
 #if SIMTIME_TYPE == INT
@@ -73,10 +76,7 @@ class BulirschStoer;
 // TODO Issue - Reusing {CSim} instance causes segmentation fault because cleanup and 
 // re-instantiation of the integrators is not properly managed
 
-// TODO Refactor - Need to add support for plotting multiple python lists - the positions 
-// of every body instead of only one - should use a std::vector<std::array<PyObject*, 2>>
-// object to store positions (where each PyObject* is a list). Adding positions to the 
-// plotting lists should not be done in [CSim::binarywrite], and should be optional.
+// TODO Make plotting optional
 
 enum simType {
 	basic,
@@ -123,6 +123,7 @@ protected:
 	Integrator* integrator;
 	Miller* miller;
 	BulirschStoer* bulirschStoer;
+	Mercury* mercury;
 
 	std::string binaryofile = "out.vln";
 	std::fstream binaryout;
@@ -138,8 +139,6 @@ protected:
 	int nghosts;
 
 	bool do_main;
-
-	std::vector<std::function<void(CBody*, CBody*)>> calcs;
 	int ncalcs;
 
 	PyObject* plt;
