@@ -250,6 +250,27 @@ CSim* CSim::readConfiguration(const std::string& filename) {
 	return sim;
 }
 
+double CSim::get_energy() {
+// Low optimization method to retrieve total energy of a system
+	double energy = 0.0;
+	Pos R(0.0, 0.0, 0.0);
+	double M = 0.0;
+	for (int ii = 0; ii < nbodies; ii ++) {
+		M += integrator->write[ii]->m;
+	}
+	for (int ii = 0; ii < nbodies; ii ++) {
+		R += integrator->write[ii]->m * integrator->write[ii]->r;
+	}
+	R = R / M;
+	for (int ii = 0; ii < nbodies; ii ++) {
+		for (int jj = ii; jj < nbodies; jj ++) {
+			if (ii != jj) energy += G * (integrator->write[jj]->m + integrator->write[ii]->m) / (integrator->write[jj]->r - integrator->write[ii]->r).norm();
+		}
+		energy += 0.5 * integrator->write[ii]->m * integrator->write[ii]->v.squared();
+	}
+	return energy;
+}
+
 void CSim::sim() {
 	auto start = std::chrono::high_resolution_clock::now();
 	binaryout = std::fstream(binaryofile, std::ios::out | std::ios::binary);
@@ -338,6 +359,8 @@ void CSim::sim() {
 					positions[jj][0].push_back(integrator->write[jj]->r[0] - integrator->write[0]->r[0]);
 					positions[jj][1].push_back(integrator->write[jj]->r[1] - integrator->write[0]->r[1]);
 				}
+				outtimes.push_back(simTime);
+				energies.push_back(get_energy());
 				output.push_back(line);
 				write_fix = simTime;
 			}
@@ -395,8 +418,18 @@ void CSim::sim() {
 			PyObject_CallFunction(pltPlot, "(OO)", x, y);
 			PyObject_CallFunction(pltScatter, "([d],[d])", p[0][0], p[1][0]);
 		}
+		PyObject* fig = PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gcf")), "()");
 		PyObject_CallMethod(PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gca")), "()"), "set_aspect", "s", (char*)("equal"));
 		PyObject_CallFunction(pltSavefig, "(s)", (char*)("out.png"));
+		PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
+		PyObject* t = PyList_New(0);
+		PyObject* e = PyList_New(0);
+		for (int ii = 0; ii < outtimes.size(); ii ++) {
+			PyList_Append(t, Py_BuildValue("d", outtimes[ii]));
+			PyList_Append(e, Py_BuildValue("d", energies[ii]));
+		}
+		PyObject_CallFunction(pltPlot, "(OO)", t, e);
+		PyObject_CallFunction(pltShow, "()");		
 	}
 	Py_Finalize();
 }

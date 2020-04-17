@@ -51,8 +51,10 @@ void BulirschStoer::main(CBody* b, CBody* w) {
 	if (simTime - b->fix < b->h) return;
 	w->totSteps++;
 	int ii = b->idx;
-	rscale[ii] = b->r.squared() > 1e3 ? 1.0 / b->r.squared() : 0.0;
-	vscale[ii] = b->v.squared() > 1e3 ? 1.0 / b->v.squared() : 0.0;
+	// TODO Treatement of central body may not be robust - might be causing energy drift.
+	// Compare against Mercury.
+	rscale[ii] = b->r.squared() > 0.0 ? 1.0 / b->r.squared() : 0.0;
+	vscale[ii] = b->v.squared() > 0.0 ? 1.0 / b->v.squared() : 0.0;
 	// For each value in {steps}, perform modified midpoint integration with {steps[n]} substeps
 mmid:
 	for (int n = 1; n <= nsteps; n++) {
@@ -106,7 +108,7 @@ mmid:
 				if (n == nsteps) {
 					w->h = b->h * shrink;
 				}
-				if (n < nsteps && b->h < 1e6) {
+				if (n < nsteps) {
 					w->h = b->h * grow;
 				}
 				return;
@@ -116,10 +118,11 @@ mmid:
 	b->h *= 0.5; 		// If completion condition was not met, cut h-value in half
 	if (b->h < 1e-5) { 	// Check that h-value is still sufficiently large to continue
 		mtx.lock();
-		warning("Error at simulation time "+red+std::to_string(simTime)+res, __LINE__, __FILE__);	// Exclude
-		warning("Step size scaled below minimum value for body {"+cyan+b->Name()+res+"}"); // Exclude
-		warning("h-value is             "+magenta+scientific(b->h, 3)+res+" at position "+b->r.info(3)+" with velocity "+b->v.info(3)); // Exclude
-		warning("extrapolation error is "+magenta+scientific(error[ii], 5)+res); // Exclude
+		warning("Error at simulation time "+red+std::to_string(simTime)+res, __LINE__, __FILE__);  // Exclude
+		warning("Step size scaled below minimum value for body {"+cyan+b->Name()+res+"}");         // Exclude
+		warning("h-value is             "+magenta+scientific(b->h, 3)+res+                         // Exclude
+		        " at position "+b->r.info(3)+" with velocity "+b->v.info(3));                      // Exclude
+		warning("extrapolation error is "+magenta+scientific(error[ii], 5)+res);                   // Exclude
 		exit(0);
 	}
 	goto mmid;		// and then try again

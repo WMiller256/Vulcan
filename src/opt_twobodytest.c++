@@ -35,7 +35,7 @@ int main(int argn, char** argv) {
 
 	CSim* tsim = new CSim(2, t, h);
 	tsim->setDebug(0);
-	tsim->Type(simType::basic);
+	tsim->Type(simType::bulirschStoer);
 	int day = int(h);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
 	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e4, 0.0, 1.521e11, 0.0, day);

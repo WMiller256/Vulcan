@@ -50,8 +50,8 @@
 #include "vel.h"
 #include "vec.h"
 
+
 // Include order matters for Integrator and derived class headers
-std::vector<std::function<void(CBody*, CBody*)>> calcs;
 class Mercury;
 #include "integrator.h"
 #include "bulirschStoer.h"
@@ -116,6 +116,7 @@ public:
 	int writeConfiguration(const std::string& filename, bool overwrite = false);
 	CSim* readConfiguration(const std::string& filename);
 
+	double get_energy();
 	void sim();
 	void integrate(int min, int max);
 
@@ -130,6 +131,7 @@ protected:
 	double write_interval = -1.0;
 	double write_fix = 0.0;
 	std::vector<std::valarray<std::pair<Pos, Vel> > > output;
+	std::vector<std::function<void(CBody*, CBody*)>> calcs;
 
 	simType type;		// The simulation type
 
@@ -147,6 +149,8 @@ protected:
 	PyObject* pltShow;
 	PyObject* pltSavefig;
 	std::valarray<std::array<std::vector<double>, 2>> positions;
+	std::vector<double> outtimes;
+	std::vector<double> energies;
 
 	void init();
 };
