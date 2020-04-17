@@ -73,27 +73,27 @@ $(BUILD)/%.o: %.c++
 
 test: $(OBJS) $(BUILD)/$(OPT)$(TEST).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TEST).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TEST) $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TEST).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TEST).out $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 twobodytest: $(OBJS) $(BUILD)/$(OPT)$(TWOBODY).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TWOBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TWOBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TWOBODY) $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TWOBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TWOBODY).out $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TWOBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 threebodytest: $(OBJS) $(BUILD)/$(OPT)$(THREEBODY).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(THREEBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(THREEBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(THREEBODY) $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(THREEBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(THREEBODY).out $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(THREEBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 fourbodytest: $(OBJS) $(BUILD)/$(OPT)$(FOURBODY).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(FOURBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(FOURBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(FOURBODY) $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(FOURBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(FOURBODY).out $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(FOURBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 timing: $(OBJS) $(BUILD)/$(OPT)$(TIMING).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TIMING).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TIMING) $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TIMING).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TIMING).out $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 clean:

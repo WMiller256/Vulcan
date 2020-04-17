@@ -10,7 +10,7 @@ CBody::CBody(double Mass, double Radius, double Speed) {
 	v.x = Speed;
 	print(info(), 2);
 }
-CBody::CBody(double Mass, double Radius, double Speed, double X, double Y, double Z, int H) {
+CBody::CBody(double Mass, double Radius, double Speed, double X, double Y, double Z, double H) {
 	init();
 	h = H;
 	r = Pos(X, Y, Z);

@@ -363,6 +363,7 @@ void CSim::sim() {
 		else {
 			percent = integrator->h;
 		}
+		initial_energy = get_energy();
 		while (simTime < maxTime) {
 			if (write_interval > 0.0 && simTime - write_fix >= write_interval) {
 				std::valarray<std::pair<Pos, Vel>> line(nbodies);
@@ -372,7 +373,7 @@ void CSim::sim() {
 					positions[jj][1].push_back(integrator->write[jj]->r[1] - integrator->write[0]->r[1]);
 				}
 				outtimes.push_back(simTime);
-				energies.push_back(get_energy());
+				energies.push_back(initial_energy - get_energy());
 				output.push_back(line);
 				write_fix = simTime;
 			}
@@ -442,7 +443,19 @@ void CSim::sim() {
 			PyList_Append(t, Py_BuildValue("d", outtimes[ii]));
 			PyList_Append(e, Py_BuildValue("d", energies[ii]));
 		}
-		PyObject_CallFunction(pltPlot, "(OO)", t, e);
+		PyObject* av = PyList_New(0);
+		PyObject* tv = PyList_New(0);
+		int block = energies.size() / 100;
+		block = block > 0.0 ? block : 1.0;
+		for (int ii = 0; ii < energies.size() / block; ii ++) {
+			double sum = 0.0;
+			for (int jj = 0; jj < block; jj ++) {
+				sum += energies[ii*block + jj];
+			}
+			PyList_Append(av, Py_BuildValue("d", sum / float(block)));
+			PyList_Append(tv, Py_BuildValue("d", outtimes[ii*block]));
+		}
+		PyObject_CallFunction(pltPlot, "(OO)", tv, av);
 		PyObject_CallFunction(pltShow, "()");		
 	}
 	Py_Finalize();
@@ -474,10 +487,10 @@ void CSim::integrate(int min, int max) {
 				for (int jj = 0; jj < ncalcs; jj ++) {
 					calcs[jj](integrator->read[ii], integrator->write[ii]);
 				}
-				print(in("CSim", "integrate")+"       Old Velocity of {"+cyan+integrator->read[ii]->Name()+res+"} is "+integrator->read[ii]->v.info(3)+"\n", 1);
-				print(in("CSim", "integrate")+"       New Velocity of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->v.info(3)+"\n", 1);
-				print(in("CSim", "integrate")+"       Old posiiton of {"+cyan+integrator->read[ii]->Name()+res+"} is "+integrator->read[ii]->r.info(3)+"\n", 1);
-				print(in("CSim", "integrate")+"       New posiiton of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->r.info(3)+"\n", 1);
+//				print(in("CSim", "integrate")+"       Old Velocity of {"+cyan+integrator->read[ii]->Name()+res+"} is "+integrator->read[ii]->v.info(3)+"\n", 1);
+//				print(in("CSim", "integrate")+"       New Velocity of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->v.info(3)+"\n", 1);
+//				print(in("CSim", "integrate")+"       Old posiiton of {"+cyan+integrator->read[ii]->Name()+res+"} is "+integrator->read[ii]->r.info(3)+"\n", 1);
+//				print(in("CSim", "integrate")+"       New posiiton of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->r.info(3)+"\n", 1);
 			}
 			tocalc--;
 #ifdef profiling

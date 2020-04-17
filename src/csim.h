@@ -151,6 +151,7 @@ protected:
 	std::valarray<std::array<std::vector<double>, 2>> positions;
 	std::vector<double> outtimes;
 	std::vector<double> energies;
+	double initial_energy;
 
 	void init();
 };

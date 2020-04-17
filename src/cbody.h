@@ -19,7 +19,7 @@ class CBody {
 public:
 	CBody();
 	CBody(double Mass, double Radius, double Velocity);
-	CBody(double Mass, double Radius, double Velocity, double X, double Y, double Z, int H=1);
+	CBody(double Mass, double Radius, double Velocity, double X, double Y, double Z, double H=1.0);
 	CBody(double Mass, double Radius, double Velocity, Pos pos);
 	~CBody();
 
