@@ -45,7 +45,7 @@ int main(int argn, char** argv) {
 
 	tsim->addPlanet(sun);
 	tsim->addPlanet(earth);
-	tsim->outputInterval(day);
+//	tsim->outputInterval(day);
 
 	std::cout << green << " Initialization complete. " << res << std::endl;
 

@@ -13,26 +13,24 @@
 Miller::Miller() {}
 
 void Miller::main(CBody* body, CBody* wbody) {
-	double dt = simTime - body->fix;
-	if (dt >= body->h) {
+	double dt = simTime - wbody->fix;
+	// TODO Need to extrapolate stale positions along previous orbits to 
+	// current time for use in acceleration calculation
+	if (dt >= wbody->h) {
 		wbody->a.zero();
 		for (int jj = 0; jj < nreal; jj ++) {
-			if (read[jj] != body) {
-				wbody->a += body->r.direction(read[jj]->r) * (G * read[jj]->m) / read[jj]->squareDistance(body->r);
+			if (write[jj] != wbody) {
+				wbody->a += wbody->r.direction(write[jj]->r) * (G * write[jj]->m) / write[jj]->squareDistance(wbody->r);
 
 			}
 		}
 		// Apply acceleration to velocity
-		wbody->v = body->v + wbody->a * dt;
-		body->v = wbody->v;
+		wbody->v = wbody->v + wbody->a * dt;
     	// Apply acceleration to position, extra factor of two comes from applying acceleration to endpoint as well 
 	    // as initial position. This significantly mitigates temporal degeneracy of the integration accuracy
-	    wbody->r = body->r + (body->v + wbody->a * dt) * dt;
-	    body->r = wbody->r;
+	    wbody->r = wbody->r + (wbody->v + wbody->a * dt) * dt;
 	    // Update the fix time of the body
 	    wbody->fix = simTime;
-	    body->fix = wbody->fix;
-	    wbody->totSteps++;
-	    body->totSteps = wbody->totSteps;
+	    body->totSteps++;
 	}
 }

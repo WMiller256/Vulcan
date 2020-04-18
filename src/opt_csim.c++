@@ -137,6 +137,7 @@ int CSim::NReal() {
 	}
 	return ret;
 }
+void CSim::toggle(bool t) { _toggle = t; }
 
 void CSim::ofile(const std::string& filename)     { binaryofile = filename; }
 void CSim::outputInterval(const double& interval) { write_interval = interval; }
@@ -282,6 +283,8 @@ void CSim::sim() {
 	miller = new Miller();
 	mercury = new Mercury(integrator->h);
 
+	if (type == simType::miller) toggle(false);
+
 	if (do_main) {
 		if (type == simType::basic) {
 			calcs.push_back(std::bind(&Integrator::main, this->integrator, std::placeholders::_1, std::placeholders::_2));
@@ -383,13 +386,15 @@ void CSim::sim() {
             fetch_add(&simTime, integrator->h);
 #endif
 			while (tocalc > 0) {}					
-			if (integrator->read == integrator->one) {
-				integrator->read = integrator->two;
-				integrator->write = integrator->one;
-			}
-			else {
-				integrator->read = integrator->one;
-				integrator->write = integrator->two;
+			if (_toggle) {
+				if (integrator->read == integrator->one) {
+					integrator->read = integrator->two;
+					integrator->write = integrator->one;
+				}
+				else {
+					integrator->read = integrator->one;
+					integrator->write = integrator->two;
+				}
 			}
 		}
 	}

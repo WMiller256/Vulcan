@@ -109,8 +109,10 @@ void CSim::sort() {
 		bodies[1][ii] = defs[1][ii];
 	}
 	for (int ii = 0; ii < bodies[0].size(); ii ++) {
-		bodies[0][ii]->idx = ii;
-		bodies[1][ii]->idx = ii;
+		if (ii < nreal + nghosts) {
+			bodies[0][ii]->idx = ii;
+			bodies[1][ii]->idx = ii;
+		}
 		integrator->one[ii] = bodies[0][ii];
 		integrator->two[ii] = bodies[1][ii];
 	}
@@ -137,6 +139,7 @@ int CSim::NReal() {
 	}
 	return ret;
 }
+void CSim::toggle(bool t) { _toggle = t; }
 
 void CSim::ofile(const std::string& filename)     { binaryofile = filename; }
 void CSim::outputInterval(const double& interval) { write_interval = interval; }
@@ -297,6 +300,8 @@ void CSim::sim() {
 	miller = new Miller();
 	mercury = new Mercury(integrator->h);
 
+	if (type == simType::miller) toggle(false);
+
 	if (do_main) {
 		if (type == simType::basic) {
 			calcs.push_back(std::bind(&Integrator::main, this->integrator, std::placeholders::_1, std::placeholders::_2));
@@ -332,6 +337,7 @@ void CSim::sim() {
 	nbodies = nadded;
 	positions.resize(nadded);
 	for (int jj = 0; jj < nbodies; jj ++) {
+		std::cout << jj << std::endl;
 		positions[jj][0].push_back(integrator->write[jj]->r[0]);
 		positions[jj][1].push_back(integrator->write[jj]->r[1]);
 	}
@@ -399,13 +405,15 @@ void CSim::sim() {
 #endif
 			println(in("CSim","sim")+"         Sim time - "+std::to_string(simTime),1);
 			while (tocalc > 0) {}					
-			if (integrator->read == integrator->one) {
-				integrator->read = integrator->two;
-				integrator->write = integrator->one;
-			}
-			else {
-				integrator->read = integrator->one;
-				integrator->write = integrator->two;
+			if (_toggle) {
+				if (integrator->read == integrator->one) {
+					integrator->read = integrator->two;
+					integrator->write = integrator->one;
+				}
+				else {
+					integrator->read = integrator->one;
+					integrator->write = integrator->two;
+				}
 			}
 		}
 	}

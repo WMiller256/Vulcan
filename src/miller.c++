@@ -13,33 +13,29 @@
 Miller::Miller() {}
 
 void Miller::main(CBody* body, CBody* wbody) {
-	double dt = simTime - body->fix;
+	double dt = simTime - wbody->fix;
 	// TODO Need to extrapolate stale positions along previous orbits to 
 	// current time for use in acceleration calculation
-	if (dt >= body->h) {
-		println(in("Miller", "main")+"          Calculating gravitational acceleration on "+bright+red+body->Name()+res, 4);
+	if (dt >= wbody->h) {
+		println(in("Miller", "main")+"          Calculating gravitational acceleration on "+bright+red+wbody->Name()+res, 4);
 		wbody->a.zero();
 		for (int jj = 0; jj < nreal; jj ++) {
-			if (read[jj] != body) {
-				wbody->a += body->r.direction(read[jj]->r) * (G * read[jj]->m) / read[jj]->squareDistance(body->r);
+			if (write[jj] != wbody) {
+				wbody->a += wbody->r.direction(write[jj]->r) * (G * write[jj]->m) / write[jj]->squareDistance(wbody->r);
 
-				printrln(in("Miller", "main")+"              Magnitude of force between "+body->Name()+" and "+
-					read[jj]->Name()+" is ", scientific(G * body->m * read[jj]->m / read[jj]->squareDistance(body->r)), 5);
+				printrln(in("Miller", "main")+"              Magnitude of force between "+wbody->Name()+" and "+
+					write[jj]->Name()+" is ", scientific(G * wbody->m * write[jj]->m / write[jj]->squareDistance(wbody->r)), 5);
 			}
 		}
 		// Apply acceleration to velocity
-		wbody->v = body->v + wbody->a * dt;
-		body->v = wbody->v;
+		wbody->v = wbody->v + wbody->a * dt;
     	// Apply acceleration to position, extra factor of two comes from applying acceleration to endpoint as well 
 	    // as initial position. This significantly mitigates temporal degeneracy of the integration accuracy
-	    wbody->r = body->r + (body->v + wbody->a * dt) * dt;
-	    body->r = wbody->r;
+	    wbody->r = wbody->r + (wbody->v + wbody->a * dt) * dt;
 	    // Update the fix time of the body
 	    wbody->fix = simTime;
-	    body->fix = wbody->fix;
-	    wbody->totSteps++;
-	    body->totSteps = wbody->totSteps;
-		printrln(in("Miller", "main")+"          Acceleration vector on "+bright+red+body->Name()+res+" is ", wbody->a.info(), 4);
+	    body->totSteps++;
+		printrln(in("Miller", "main")+"          Acceleration vector on "+bright+red+wbody->Name()+res+" is ", wbody->a.info(), 4);
 		println(in("Miller", "main")+green+"          Done"+res, 4);
 	}
 }

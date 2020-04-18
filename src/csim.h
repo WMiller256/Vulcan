@@ -73,10 +73,13 @@ class BulirschStoer;
 
 // TODO Refactor - enumerations should be all-caps 
 
-// TODO Issue - Reusing {CSim} instance causes segmentation fault because cleanup and 
-// re-instantiation of the integrators is not properly managed
+// ISSUE - Padding {integrator->read} and {integrator->write} with virtual bodies
+// to acheive optimum block width is broken, the virtual bodies are NULL for
+// unknown reason.
 
 // TODO Make plotting optional
+
+// TODO Make pointer toggling between integrator->one and integrator->two optional
 
 enum simType {
 	basic,
@@ -108,6 +111,8 @@ public:
 	void sort();
 	int NVirtual();
 	int NReal();
+
+	void toggle(bool t);
 
 	void printForces();
 	void ofile(const std::string& filename);
@@ -141,6 +146,7 @@ protected:
 	int nghosts;
 
 	bool do_main;
+	bool _toggle = true;	// Enable or disable pointer toggling between read and write vector
 	int ncalcs;
 
 	PyObject* plt;

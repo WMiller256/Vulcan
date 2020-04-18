@@ -6,6 +6,10 @@
  * Implementation for Bulirsch Stoer integrator, 
  * inherited from Integrator base class
  *
+ * NOTE - h-values are scaled independently for every body, but 
+ *        necessary extrapolation is not performed for stale 
+ *        positions of bodies in acceleration calculation. This
+ *        may be causing significant energy drift.
  */
 
 #include "bulirschStoer.h"

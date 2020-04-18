@@ -35,12 +35,12 @@ int main(int argn, char** argv) {
 
 	double day = h * 0.01;
 	CSim* tsim = new CSim(3, t, day);
-	tsim->setDebug(5);
+	tsim->setDebug(0);
 	tsim->Type(simType::miller);
-	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day*10);
-	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e4, 0.0, 1.521e11, 0.0, day*10);
-	CBody* jupiter = new CBody(1.8982e27, 6.991e7, 1.307e4, 0.0, 8.1662e11, 0.0, day*10);
-	CBody* saturn = new CBody(5.683e26, 5.8232e7, 9.68e3, 0.0, 1.5155e12, 0.0, day*10);
+	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day*88);
+	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e4, 0.0, 1.521e11, 0.0, day*365);
+	CBody* jupiter = new CBody(1.8982e27, 6.991e7, 1.307e4, 0.0, 8.1662e11, 0.0, day*12*365);
+	CBody* saturn = new CBody(5.683e26, 5.8232e7, 9.68e3, 0.0, 1.5155e12, 0.0, day*29*365);
 
 	sun->Name("Sun"); 
 	earth->Name("Earth");
