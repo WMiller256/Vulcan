@@ -1,4 +1,4 @@
-#include "csim.h"
+#include "csim.h" 
 #include "simio.h"
 
 bool warnings = true;
@@ -71,7 +71,7 @@ void CSim::addGhost(CGhost* ghost) {
 CBody* CSim::at(int ii) { return integrator->read[ii]; }
 CBody CSim::copy(int ii) { return *integrator->read[ii]; }
 double CSim::H() { return integrator->h; }
-int CSim::count() { return nadded; }
+int CSim::count() { return nreal; }
 void CSim::sort() {
 	std::array<std::vector<CBody*>, 2> planets;
 	std::array<std::vector<CBody*>, 2> ghosts;
@@ -101,16 +101,18 @@ void CSim::sort() {
 		bodies[1][ii] = planets[1][ii];
 	}
 	for (int ii = nreal; ii < nghosts + nreal; ii ++) {
-		bodies[0][ii] = ghosts[0][ii];
-		bodies[1][ii] = ghosts[1][ii];
+		bodies[0][ii] = ghosts[0][ii - nreal];
+		bodies[1][ii] = ghosts[1][ii - nreal];
 	}
 	for (int ii = nreal + nghosts; ii < nghosts + nreal + ndefs; ii ++) {
-		bodies[0][ii] = defs[0][ii];
-		bodies[1][ii] = defs[1][ii];
+		bodies[0][ii] = defs[0][ii - nreal - nghosts];
+		bodies[1][ii] = defs[1][ii - nreal - nghosts];
 	}
 	for (int ii = 0; ii < bodies[0].size(); ii ++) {
-		bodies[0][ii]->idx = ii;
-		bodies[1][ii]->idx = ii;
+		if (ii < nreal + nghosts) {
+			bodies[0][ii]->idx = ii;
+			bodies[1][ii]->idx = ii;
+		}
 		integrator->one[ii] = bodies[0][ii];
 		integrator->two[ii] = bodies[1][ii];
 	}
@@ -131,7 +133,7 @@ int CSim::NReal() {
 	const int size = integrator->read.size();
 	int ret = 0;
 	for (int ii = 0; ii < size; ii ++) {
-		if (integrator->read[ii]->Type() != bodyType::def) {
+		if (integrator->read[ii] != NULL && integrator->read[ii]->Type() != bodyType::def) {
 			ret++;
 		}
 	}
@@ -256,15 +258,15 @@ double CSim::get_energy() {
 	double energy = 0.0;
 	Pos R(0.0, 0.0, 0.0);
 	double M = 0.0;
-	for (int ii = 0; ii < nbodies; ii ++) {
+	for (int ii = 0; ii < nreal; ii ++) {
 		M += integrator->write[ii]->m;
 	}
-	for (int ii = 0; ii < nbodies; ii ++) {
+	for (int ii = 0; ii < nreal; ii ++) {
 		R += integrator->write[ii]->m * integrator->write[ii]->r;
 	}
 	R = R / M;
-	for (int ii = 0; ii < nbodies; ii ++) {
-		for (int jj = ii; jj < nbodies; jj ++) {
+	for (int ii = 0; ii < nreal; ii ++) {
+		for (int jj = ii; jj < nreal; jj ++) {
 			if (ii != jj) energy += G * (integrator->write[jj]->m + integrator->write[ii]->m) / (integrator->write[jj]->r - integrator->write[ii]->r).norm();
 		}
 		energy += 0.5 * integrator->write[ii]->m * integrator->write[ii]->v.squared();
@@ -318,8 +320,9 @@ void CSim::sim() {
 	}
 	sort();
 	nbodies = nadded;
-	positions.resize(nadded);
-	for (int jj = 0; jj < nbodies; jj ++) {
+	nreal = NReal();
+	positions.resize(nreal);
+	for (int jj = 0; jj < nreal; jj ++) {
 		positions[jj][0].push_back(integrator->write[jj]->r[0]);
 		positions[jj][1].push_back(integrator->write[jj]->r[1]);
 	}
@@ -354,8 +357,8 @@ void CSim::sim() {
 		initial_energy = get_energy();
 		while (simTime < maxTime) {
 			if (write_interval > 0.0 && simTime - write_fix >= write_interval) {
-				std::valarray<std::pair<Pos, Vel>> line(nbodies);
-				for (int jj = 0; jj < nbodies; jj ++) {
+				std::valarray<std::pair<Pos, Vel>> line(nreal);
+				for (int jj = 0; jj < nreal; jj ++) {
 					line[jj] = std::make_pair(integrator->write[jj]->r, integrator->write[jj]->v);
 					positions[jj][0].push_back(integrator->write[jj]->r[0] - integrator->write[0]->r[0]);
 					positions[jj][1].push_back(integrator->write[jj]->r[1] - integrator->write[0]->r[1]);

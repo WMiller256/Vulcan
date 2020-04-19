@@ -2,7 +2,9 @@
 #include "simio.h"
 #include "global.h"
 
-CBody::CBody() {}
+CBody::CBody() {
+	init();
+}
 CBody::CBody(double Mass, double Radius, double Speed) {
 	init();
 	m = Mass;
