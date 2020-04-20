@@ -37,6 +37,7 @@ void BulirschStoer::init() {
 	vn = std::valarray<Vel>(nreal);
 	dr = Matrix<Pos>(nreal, nsteps);
 	dv = Matrix<Vel>(nreal, nsteps);
+	h = 1.0e4;
 }
 
 vec BulirschStoer::acceleration(Pos &r, int &idx) const {

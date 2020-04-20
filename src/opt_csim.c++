@@ -374,10 +374,10 @@ void CSim::sim() {
                 if (!debug) std::cout << '\r' << " Progress: " << std::setw(3) << (simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)(integrator->h)) << std::flush;
                 past = simTime / percent;
             }
-            if (simTime >= maxTime - h) {
+            if (simTime >= maxTime - integrator->h) {
                 if (!debug) std::cout << "\r Progress: 100\n";
             }
-            simTime += h;
+            simTime += integrator->h;
 #elif SIMTIME_TYPE == 2
             if ((unsigned long long)simTime / percent != past) {
                 if (!debug) std::cout << '\r' << " Progress: " << std::setw(3) << ((unsigned long long)simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)(integrator->h)) << std::flush;
