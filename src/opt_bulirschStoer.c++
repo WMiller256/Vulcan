@@ -37,7 +37,7 @@ void BulirschStoer::init() {
 	vn = std::valarray<Vel>(nreal);
 	dr = Matrix<Pos>(nreal, nsteps);
 	dv = Matrix<Vel>(nreal, nsteps);
-	h = 1.0e4;
+//	h = 1.0;
 }
 
 vec BulirschStoer::acceleration(Pos &r, int &idx) const {
@@ -114,12 +114,16 @@ mmid:
 				if (n < nsteps) {
 					w->h = b->h * grow;
 				}
+//				b->h = w->h;
+//				b->fix = simTime;
+//				w->fix = simTime;
 				return;
 			}
 		}
 	}
 	b->h *= 0.5; 		// If completion condition was not met, cut h-value in half
-	if (b->h < 1e-5) { 	// Check that h-value is still sufficiently large to continue
+//	w->h *= 0.5;
+	if (b->h < 1e-12) { 	// Check that h-value is still sufficiently large to continue
 		mtx.lock();
 		warning("Error at simulation time "+red+std::to_string(simTime)+res, __LINE__, __FILE__);  // Exclude
 		warning("Step size scaled below minimum value for body {"+cyan+b->Name()+res+"}");         // Exclude

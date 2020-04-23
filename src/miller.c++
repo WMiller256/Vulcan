@@ -34,7 +34,7 @@ void Miller::main(CBody* body, CBody* wbody) {
 	    wbody->r = wbody->r + (wbody->v + wbody->a * dt) * dt;
 	    // Update the fix time of the body
 	    wbody->fix = simTime;
-	    body->totSteps++;
+	    wbody->totSteps++;
 		printrln(in("Miller", "main")+"          Acceleration vector on "+bright+red+wbody->Name()+res+" is ", wbody->a.info(), 4);
 		println(in("Miller", "main")+green+"          Done"+res, 4);
 	}

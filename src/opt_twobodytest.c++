@@ -33,19 +33,19 @@ int main(int argn, char** argv) {
 		extension = "";
 	}
 
-	double day = h*0.01;
+	double day = h;
 	CSim* tsim = new CSim(2, t, day);
 	tsim->setDebug(0);
-	tsim->Type(simType::bulirschStoer);
-	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day*88);
-	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e4, 0.0, 1.521e11, 0.0, day*365);
+	tsim->Type(simType::miller);
+	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
+	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e4, 0.0, 1.521e11, 0.0, day);
 
 	sun->Name("Sun"); 
 	earth->Name("Earth");
 
 	tsim->addPlanet(sun);
 	tsim->addPlanet(earth);
-//	tsim->outputInterval(day);
+	tsim->outputInterval(h);
 
 	std::cout << green << " Initialization complete. " << res << std::endl;
 
