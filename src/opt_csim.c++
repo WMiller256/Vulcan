@@ -68,8 +68,8 @@ void CSim::addGhost(CGhost* ghost) {
 	integrator->two.push_back(wghost);
 	nadded++;
 }
-CBody* CSim::at(int ii) { return integrator->read[ii]; }
-CBody CSim::copy(int ii) { return *integrator->read[ii]; }
+CBody* CSim::at(int ii) { return integrator->write[ii]; }
+CBody CSim::copy(int ii) { return *integrator->write[ii]; }
 double CSim::H() { return integrator->h; }
 int CSim::count() { return nreal; }
 void CSim::sort() {
@@ -390,6 +390,7 @@ void CSim::sim() {
 #endif
 			while (tocalc > 0) {}					
 			if (_toggle) {
+				std::cout << "Toggled" << std::endl;
 				if (integrator->read == integrator->one) {
 					integrator->read = integrator->two;
 					integrator->write = integrator->one;

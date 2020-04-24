@@ -68,8 +68,8 @@ void CSim::addGhost(CGhost* ghost) {
 	integrator->two.push_back(wghost);
 	nadded++;
 }
-CBody* CSim::at(int ii) { return integrator->read[ii]; }
-CBody CSim::copy(int ii) { return *integrator->read[ii]; }
+CBody* CSim::at(int ii) { return integrator->write[ii]; }
+CBody CSim::copy(int ii) { return *integrator->write[ii]; }
 double CSim::H() { return integrator->h; }
 int CSim::count() { return nreal; }
 void CSim::sort() {
