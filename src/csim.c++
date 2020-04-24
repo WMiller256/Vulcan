@@ -406,6 +406,7 @@ void CSim::sim() {
 			println(in("CSim","sim")+"         Sim time - "+std::to_string(simTime),1);
 			while (tocalc > 0) {}					
 			if (_toggle) {
+				std::cout << "Toggled" << std::endl;
 				if (integrator->read == integrator->one) {
 					integrator->read = integrator->two;
 					integrator->write = integrator->one;

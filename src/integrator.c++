@@ -36,7 +36,7 @@ void Integrator::main(CBody* body, CBody* wbody) {
     wbody->v = body->v + wbody->a * h;
     // Apply acceleration to position, extra factor of two comes from applying acceleration to endpoint as well 
     // as initial position. This significantly mitigates temporal degeneracy of the integration accuracy
-    wbody->r = body->r + (body->v + wbody->a * h) * h;
+    wbody->r = body->r + wbody->v * h;
     // Update the fix time of the body
     wbody->fix = simTime;
     wbody->ncalcs++;

@@ -28,9 +28,9 @@ void Miller::main(CBody* body, CBody* wbody) {
 		wbody->v = wbody->v + wbody->a * dt;
     	// Apply acceleration to position, extra factor of two comes from applying acceleration to endpoint as well 
 	    // as initial position. This significantly mitigates temporal degeneracy of the integration accuracy
-	    wbody->r = wbody->r + (wbody->v + wbody->a * dt) * dt;
+	    wbody->r = wbody->r + wbody->v * dt;
 	    // Update the fix time of the body
 	    wbody->fix = simTime;
-	    body->totSteps++;
+	    wbody->totSteps++;
 	}
 }
