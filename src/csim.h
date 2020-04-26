@@ -149,6 +149,7 @@ protected:
 	bool _toggle = true;	// Enable or disable pointer toggling between read and write vector
 	int ncalcs;
 
+	bool _pyinit = false;   // If python C-api has been initialized
 	PyObject* plt;
 	PyObject* pltScatter;
 	PyObject* pltPlot;
@@ -159,6 +160,7 @@ protected:
 	std::vector<double> energies;
 	double initial_energy;
 
+	void pyinit();
 	void init();
 };
 

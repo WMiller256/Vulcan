@@ -39,7 +39,9 @@ CSim::CSim(int n, double max, double step) {
 	integrator->read = integrator->one;
 	integrator->write = integrator->two;
 }
-CSim::~CSim() {}
+CSim::~CSim() {
+	if (_pyinit) Py_Finalize();
+}
 
 void CSim::setDebug(int Debug) { debug = Debug;} 
 void CSim::Type(simType t) { type = t; }
@@ -390,7 +392,6 @@ void CSim::sim() {
 #endif
 			while (tocalc > 0) {}					
 			if (_toggle) {
-				std::cout << "Toggled" << std::endl;
 				if (integrator->read == integrator->one) {
 					integrator->read = integrator->two;
 					integrator->write = integrator->one;
@@ -413,44 +414,45 @@ void CSim::sim() {
 	}
 	if (write_interval > 0.0) {
 		binarywrite();
-		for (auto p : positions) {
-			PyObject* x = PyList_New(0);
-			PyObject* y = PyList_New(0);
-			for (auto i : p[0]) {
-				PyList_Append(x, Py_BuildValue("d", i));
+		if (_pyinit) {
+			for (auto p : positions) {
+				PyObject* x = PyList_New(0);
+				PyObject* y = PyList_New(0);
+				for (auto i : p[0]) {
+					PyList_Append(x, Py_BuildValue("d", i));
+				}
+				for (auto j : p[1]) {
+					PyList_Append(y, Py_BuildValue("d", j));
+				}
+				PyObject_CallFunction(pltPlot, "(OO)", x, y);
+				PyObject_CallFunction(pltScatter, "([d],[d])", p[0][0], p[1][0]);
 			}
-			for (auto j : p[1]) {
-				PyList_Append(y, Py_BuildValue("d", j));
+			PyObject* fig = PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gcf")), "()");
+			PyObject_CallMethod(PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gca")), "()"), "set_aspect", "s", (char*)("equal"));
+			PyObject_CallFunction(pltSavefig, "(s)", (char*)("out.png"));
+			PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
+			PyObject* t = PyList_New(0);
+			PyObject* e = PyList_New(0);
+			for (int ii = 0; ii < outtimes.size(); ii ++) {
+				PyList_Append(t, Py_BuildValue("d", outtimes[ii]));
+				PyList_Append(e, Py_BuildValue("d", energies[ii]));
 			}
-			PyObject_CallFunction(pltPlot, "(OO)", x, y);
-			PyObject_CallFunction(pltScatter, "([d],[d])", p[0][0], p[1][0]);
-		}
-		PyObject* fig = PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gcf")), "()");
-		PyObject_CallMethod(PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gca")), "()"), "set_aspect", "s", (char*)("equal"));
-		PyObject_CallFunction(pltSavefig, "(s)", (char*)("out.png"));
-		PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
-		PyObject* t = PyList_New(0);
-		PyObject* e = PyList_New(0);
-		for (int ii = 0; ii < outtimes.size(); ii ++) {
-			PyList_Append(t, Py_BuildValue("d", outtimes[ii]));
-			PyList_Append(e, Py_BuildValue("d", energies[ii]));
-		}
-		PyObject* av = PyList_New(0);
-		PyObject* tv = PyList_New(0);
-		int block = energies.size() / 100;
-		block = block > 0.0 ? block : 1.0;
-		for (int ii = 0; ii < energies.size() / block; ii ++) {
-			double sum = 0.0;
-			for (int jj = 0; jj < block; jj ++) {
-				sum += energies[ii*block + jj];
+			PyObject* av = PyList_New(0);
+			PyObject* tv = PyList_New(0);
+			int block = energies.size() / 100;
+			block = block > 0.0 ? block : 1.0;
+			for (int ii = 0; ii < energies.size() / block; ii ++) {
+				double sum = 0.0;
+				for (int jj = 0; jj < block; jj ++) {
+					sum += energies[ii*block + jj];
+				}
+				PyList_Append(av, Py_BuildValue("d", sum / float(block)));
+				PyList_Append(tv, Py_BuildValue("d", outtimes[ii*block]));
 			}
-			PyList_Append(av, Py_BuildValue("d", sum / float(block)));
-			PyList_Append(tv, Py_BuildValue("d", outtimes[ii*block]));
+			PyObject_CallFunction(pltPlot, "(OO)", tv, av);
+			PyObject_CallFunction(pltShow, "()");		
 		}
-		PyObject_CallFunction(pltPlot, "(OO)", tv, av);
-		PyObject_CallFunction(pltShow, "()");		
 	}
-	Py_Finalize();
 }
 
 void CSim::integrate(int min, int max) {
@@ -489,8 +491,7 @@ void CSim::integrate(int min, int max) {
 	joinable++;
 }
 
-void CSim::init() {
-
+void CSim::pyinit() {
 	Py_Initialize();
 	plt = PyImport_ImportModule("matplotlib.pyplot");
 	pltScatter = PyObject_GetAttrString(plt, (char*)("scatter"));
@@ -498,6 +499,11 @@ void CSim::init() {
 	pltSavefig = PyObject_GetAttrString(plt, (char*)("savefig"));
 	pltShow = PyObject_GetAttrString(plt, (char*)("show"));
 	
+	_pyinit = true;
+}
+
+void CSim::init() {
+
 	type = simType::basic;
 	do_main = true;
 	ncalcs = 0;
