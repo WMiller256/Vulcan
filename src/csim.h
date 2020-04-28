@@ -137,6 +137,7 @@ protected:
 	double write_fix = 0.0;
 	std::vector<std::valarray<std::pair<Pos, Vel> > > output;
 	std::vector<std::function<void(CBody*, CBody*)>> calcs;
+	std::vector<std::function<void()>> mainCalcs;
 
 	simType type;		// The simulation type
 

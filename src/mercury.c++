@@ -12,7 +12,6 @@
 
 #include "mercury.h"
 
-const int Mercury::nsteps = 12;
 const int Mercury::steps[] = {2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128};
 const double Mercury::grow = 1.3;
 const double Mercury::shrink = 0.55;
@@ -22,7 +21,7 @@ Mercury::Mercury(double &h) : Integrator() {
 	init();
 }
 
-void Mercury::init() const {
+void Mercury::init() {
 	tolerance = 1e-10;
 	error = std::valarray<double>(0.0, nreal);
 	s = std::valarray<int>(0, nreal);
@@ -38,7 +37,7 @@ void Mercury::init() const {
 	dv = Matrix<Vel>(nreal, nsteps);
 }
 
-vec Mercury::accleration(Pos &r, int &idx) const {
+vec Mercury::acceleration(Pos &r, int &idx) const {
 	vec a(0, 0, 0);
 	for (int ii = 0; ii < nbodies; ii ++) {
 		if (ii != idx) {
@@ -82,12 +81,12 @@ void Mercury::bulirschStoer(CBody* b, CBody* w) {
 				a = acceleration(rn[ii], ii);
 
 				// Update the delta matrices (used for polynomial extrapolation)
-				dr(ii, n-1) = 0.5 * (rn[ii] * r[ii] + hc[ii] * vn[ii]);
+				dr(ii, n-1) = 0.5 * (rn[ii] + r[ii] + hc[ii] * vn[ii]);
 				dv(ii, n-1) = 0.5 * (vn[ii] + v[ii] + hc[ii] * a);
 				// Perform polynomial extrapolation
 				for (int jj = n - 2; jj >= 0; jj --) {
-					dr(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dr(ii, jj);
-					dv(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dv(ii, jj);
+					dr(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) * dr(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dr(ii, jj);
+					dv(ii, jj) = (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, jj+1) * dv(ii, jj+1) - (1.0 / (hs(ii, jj) - hs(ii, n-1))) * hs(ii, n-1) * dv(ii, jj);
 				}
 
 				// After several integrations, check the relative error for 

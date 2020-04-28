@@ -121,7 +121,7 @@ mmid:
 			}
 		}
 	}
-	b->h *= 0.5; 		// If completion condition was not met, cut h-value in half
+	b->h *= 0.5; 			// If completion condition was not met, cut h-value in half
 //	w->h *= 0.5;
 	if (b->h < 1e-12) { 	// Check that h-value is still sufficiently large to continue
 		mtx.lock();

@@ -390,7 +390,10 @@ void CSim::sim() {
             }
             fetch_add(&simTime, integrator->h);
 #endif
-			while (tocalc > 0) {}					
+			while (tocalc > 0) {}
+			for (auto calc : mainCalcs) {
+				calc();
+			}
 			if (_toggle) {
 				if (integrator->read == integrator->one) {
 					integrator->read = integrator->two;
@@ -478,8 +481,8 @@ void CSim::integrate(int min, int max) {
 			}
 			prev = simTime;
 			for (int ii = min; ii < max; ii ++) {
-				for (int jj = 0; jj < ncalcs; jj ++) {
-					calcs[jj](integrator->read[ii], integrator->write[ii]);
+				for (auto calc : calcs) {
+					calc(integrator->read[ii], integrator->write[ii]);
 				}
 			}
 			tocalc--;

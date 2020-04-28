@@ -20,23 +20,27 @@ class Mercury : public Integrator {
 public:
 	Mercury(double &h);
 
-	void init() const;
+	void init();
 	vec acceleration(Pos &r, int &idx) const;
 	void bulirschStoer(CBody*, CBody*);
 
 private:
 	int const nsteps = 12;
+	static int const steps[];
 	double h;
 
 	double tolerance;
 	static double const grow;
 	static double const shrink;
 	std::valarray<double> error;   // Error value for each body, used to check that the completion condition is met
+	std::valarray<int> s;		   // The actually number of steps which were used each time
 
 	std::valarray<double> rscale;  // Scale factors for calculating position errors
 	std::valarray<double> vscale;  // Scale factors for calculating velocity errors
 
 	std::valarray<double> hc;      // Intermediate h-values for current step
+	Matrix<double> hs;      	   // Squared h-values to reduce floating point operations needed
+	std::valarray<double> h2;      // Double h-values to reduce floating point operations needed
 
 	std::valarray<Pos> r;    // Array to store positions in modified midterm integration scheme
 	std::valarray<Pos> rn;   // Second array to store positions for integration

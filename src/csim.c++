@@ -406,7 +406,10 @@ void CSim::sim() {
             fetch_add(&simTime, integrator->h);
 #endif
 			println(in("CSim","sim")+"         Sim time - "+std::to_string(simTime),1);
-			while (tocalc > 0) {}					
+			while (tocalc > 0) {}
+			for (auto calc : mainCalcs) {
+				calc();
+			}
 			if (_toggle) {
 				if (integrator->read == integrator->one) {
 					integrator->read = integrator->two;
@@ -495,13 +498,13 @@ void CSim::integrate(int min, int max) {
 			}
 			prev = simTime;
 			for (int ii = min; ii < max; ii ++) {
-				for (int jj = 0; jj < ncalcs; jj ++) {
-					calcs[jj](integrator->read[ii], integrator->write[ii]);
+				for (auto calc : calcs) {
+					calc(integrator->read[ii], integrator->write[ii]);
 				}
-//				print(in("CSim", "integrate")+"       Old Velocity of {"+cyan+integrator->read[ii]->Name()+res+"} is "+integrator->read[ii]->v.info(3)+"\n", 1);
-//				print(in("CSim", "integrate")+"       New Velocity of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->v.info(3)+"\n", 1);
-//				print(in("CSim", "integrate")+"       Old posiiton of {"+cyan+integrator->read[ii]->Name()+res+"} is "+integrator->read[ii]->r.info(3)+"\n", 1);
-//				print(in("CSim", "integrate")+"       New posiiton of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->r.info(3)+"\n", 1);
+				print(in("CSim", "integrate")+"       Old Velocity of {"+cyan+integrator->read[ii]->Name()+res+"} is "+integrator->read[ii]->v.info(3)+"\n", 6);
+				print(in("CSim", "integrate")+"       New Velocity of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->v.info(3)+"\n", 6);
+				print(in("CSim", "integrate")+"       Old posiiton of {"+cyan+integrator->read[ii]->Name()+res+"} is "+integrator->read[ii]->r.info(3)+"\n", 6);
+				print(in("CSim", "integrate")+"       New posiiton of {"+cyan+integrator->write[ii]->Name()+res+"} is "+integrator->write[ii]->r.info(3)+"\n", 6);
 			}
 			tocalc--;
 #ifdef profiling
