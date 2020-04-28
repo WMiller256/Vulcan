@@ -50,3 +50,4 @@ void Integrator::set(int b, int g) {
 	nghosts = g;
 	nreal = b + g;
 }
+

@@ -20,6 +20,8 @@ class Mercury : public Integrator {
 public:
 	Mercury(double &h);
 
+	void init() const;
+	vec acceleration(Pos &r, int &idx) const;
 	void bulirschStoer(CBody*, CBody*);
 
 private:
