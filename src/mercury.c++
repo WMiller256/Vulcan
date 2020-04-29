@@ -12,6 +12,7 @@
 
 #include "mercury.h"
 
+const int Mercury::nsteps = 12;
 const int Mercury::steps[] = {2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128};
 const double Mercury::grow = 1.3;
 const double Mercury::shrink = 0.55;
@@ -24,10 +25,11 @@ Mercury::Mercury(double &h) : Integrator() {
 void Mercury::init() {
 	tolerance = 1e-10;
 	error = std::valarray<double>(0.0, nreal);
-	s = std::valarray<int>(0, nreal);
+	s = std::vector<int>(nreal, 0);
 	rscale = std::valarray<double>(0.0, nreal);
 	vscale = std::valarray<double>(0.0, nreal);
 	hc = std::valarray<double>(nreal);
+	h2 = std::valarray<double>(nreal);
 	hs = Matrix<double>(nreal, nsteps);
 	r = std::valarray<Pos>(nreal);
 	v = std::valarray<Vel>(nreal);
@@ -48,19 +50,25 @@ vec Mercury::acceleration(Pos &r, int &idx) const {
 	return a;
 }
 
+void Mercury::resizeH() {
+	if (std::any_of(s.begin(), s.end(), [](int i) { return i == nsteps; })) h *= shrink;
+	else if (h < 1e4) h *= grow;
+	std::cout << '\r' << h << std::flush;
+}
+
 void Mercury::bulirschStoer(CBody* b, CBody* w) {
 	w->ncalcs++;
+	b->ncalcs++;
 	int ii = b->idx;
 	int fmax = 1;
 	rscale[ii] = b->r.squared() > 0.0 ? 1.0 / b->r.squared() : 0.0;
 	vscale[ii] = b->v.squared() > 0.0 ? 1.0 / b->v.squared() : 0.0;
 	vec a(0, 0, 0);
-	while (true) {
-		for (int f = 1; f < fmax; f++) {
-			for (int e = 0; e < nsteps; e ++) {
-				int n = steps[e];
-				vec a = acceleration(b->r, ii);
-				hc[ii] = h / (2.0 * float(n * fmax));
+//	do {
+//		for (int f = 1; f < fmax; f++) {
+			for (int n = 1; n <= nsteps; n ++) {
+				a = acceleration(b->r, ii);
+				hc[ii] = h / (2.0 * float(n));
 				hs(ii, n-1) = pow(hc[ii], 2);
 				h2[ii] = hc[ii] * 2.0;
 
@@ -92,21 +100,25 @@ void Mercury::bulirschStoer(CBody* b, CBody* w) {
 				// After several integrations, check the relative error for 
 				// satisfaction of completion condition
 				if (n > 3) {
-					w->r = dr(ii, 0);
-					w->v = dv(ii, 0);
-					for (int jj = 1; jj < n; jj ++) {
-						w->r += dr(ii, jj);
-						w->v += dv(ii, jj);
+					error[ii] = std::max(dr(ii, 0)*rscale[ii], dv(ii, 0)*vscale[ii], vecComp).max();
+					if (error[ii] <= tolerance) {
+						w->r = dr(ii, 0);
+						w->v = dv(ii, 0);
+						for (int jj = 1; jj < n; jj ++) {
+							w->r += dr(ii, jj);
+							w->v += dv(ii, jj);
+						}
+						// Store the number of substeps which was actually used
+						s[ii] = n;
+						return;
+//						if (f == fmax - 1) return;
+//						else break;
 					}
-					// Store the number of substeps which was actually used
-					s[ii] = n;
-					if (f == fmax - 1) return;
-					else break;
 				}
 			}
-			std::swap(b, w);
-		}
-		fmax *= 2;
-	}
+//			std::swap(b, w);
+//		}
+//		fmax++;
+//	} while (hc[ii] > 1e-6);
 }
 

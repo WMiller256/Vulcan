@@ -85,6 +85,7 @@ enum simType {
 	basic,
 	bulirschStoer,
 	miller,
+	mercury,
 	symplectic
 };
 
@@ -125,6 +126,8 @@ public:
 	void sim();
 	void integrate(int min, int max);
 
+	void pyinit();
+
 protected:
 	Integrator* integrator;
 	Miller* miller;
@@ -161,7 +164,6 @@ protected:
 	std::vector<double> energies;
 	double initial_energy;
 
-	void pyinit();
 	void init();
 };
 

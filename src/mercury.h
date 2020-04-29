@@ -22,10 +22,11 @@ public:
 
 	void init();
 	vec acceleration(Pos &r, int &idx) const;
+	void resizeH();
 	void bulirschStoer(CBody*, CBody*);
 
 private:
-	int const nsteps = 12;
+	static int const nsteps;
 	static int const steps[];
 	double h;
 
@@ -33,7 +34,7 @@ private:
 	static double const grow;
 	static double const shrink;
 	std::valarray<double> error;   // Error value for each body, used to check that the completion condition is met
-	std::valarray<int> s;		   // The actually number of steps which were used each time
+	std::vector<int> s;		   	   // The actually number of steps which were used each time
 
 	std::valarray<double> rscale;  // Scale factors for calculating position errors
 	std::valarray<double> vscale;  // Scale factors for calculating velocity errors
