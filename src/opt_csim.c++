@@ -301,7 +301,7 @@ void CSim::sim() {
 		}
 		else if (type == simType::mercury) {
 			calcs.push_back(std::bind(&Mercury::bulirschStoer, this->mercury, std::placeholders::_1, std::placeholders::_2));
-			mainCalcs.push_back(std::bind(&Mercury::resizeH, this->mercury));
+//			mainCalcs.push_back(std::bind(&Mercury::resizeH, this->mercury));
 		}
 	}
 	ncalcs = calcs.size();

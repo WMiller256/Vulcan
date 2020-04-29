@@ -53,7 +53,6 @@ vec Mercury::acceleration(Pos &r, int &idx) const {
 void Mercury::resizeH() {
 	if (std::any_of(s.begin(), s.end(), [](int i) { return i == nsteps; })) h *= shrink;
 	else if (h < 1e4) h *= grow;
-	std::cout << '\r' << h << std::flush;
 }
 
 void Mercury::bulirschStoer(CBody* b, CBody* w) {
@@ -65,10 +64,10 @@ void Mercury::bulirschStoer(CBody* b, CBody* w) {
 	vscale[ii] = b->v.squared() > 0.0 ? 1.0 / b->v.squared() : 0.0;
 	vec a(0, 0, 0);
 //	do {
-//		for (int f = 1; f < fmax; f++) {
+		for (int f = 1; f <= fmax; f++) {
 			for (int n = 1; n <= nsteps; n ++) {
 				a = acceleration(b->r, ii);
-				hc[ii] = h / (2.0 * float(n));
+				hc[ii] = h / (2.0 * float(n * fmax));
 				hs(ii, n-1) = pow(hc[ii], 2);
 				h2[ii] = hc[ii] * 2.0;
 
@@ -110,14 +109,14 @@ void Mercury::bulirschStoer(CBody* b, CBody* w) {
 						}
 						// Store the number of substeps which was actually used
 						s[ii] = n;
-						return;
-//						if (f == fmax - 1) return;
-//						else break;
+//						return;
+						if (f == fmax) return;
+						else break;
 					}
 				}
 			}
-//			std::swap(b, w);
-//		}
+			std::swap(b, w);
+		}
 //		fmax++;
 //	} while (hc[ii] > 1e-6);
 }
