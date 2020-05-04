@@ -207,8 +207,9 @@ void CSim::sim() {
 			calcs.push_back(std::bind(&Integrator::main, this->bulirschStoer, std::placeholders::_1, std::placeholders::_2));
 		}
 		else if (type == simType::mercury) {
+			integrator = mercury;
 			calcs.push_back(std::bind(&Mercury::bulirschStoer, this->mercury, std::placeholders::_1, std::placeholders::_2));
-//			mainCalcs.push_back(std::bind(&Mercury::resizeH, this->mercury));
+			mainCalcs.push_back(std::bind(&Mercury::resizeH, this->mercury));
 		}
 	}
 	ncalcs = calcs.size();

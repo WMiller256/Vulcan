@@ -55,8 +55,10 @@ void Mercury::resizeH() {
 	if (std::any_of(s.begin(), s.end(), [](int i) { return i == nsteps; })) {
 		// Go back to the beginning of the current time step and try again 
 		// with smaller {h}
-		fetch_add(&simTime, -h);
+//		fetch_add(&simTime, -h);
 		h *= shrink;
+		if (read == one) write = one;
+		else write = two;
 	}
 	else {
 		h *= grow;
@@ -105,9 +107,9 @@ void Mercury::bulirschStoer(CBody* b, CBody* w) {
 
 		// After several integrations, check the relative error for 
 		// satisfaction of completion condition
-		if (n > 3) {
+		if (n > 3 || n == nsteps) {
 			error[ii] = std::max(dr(ii, 0)*rscale[ii], dv(ii, 0)*vscale[ii], vecComp).max();
-			if (error[ii] <= tolerance) {
+			if (error[ii] <= tolerance || n == nsteps) {
 				w->r = dr(ii, 0);
 				w->v = dv(ii, 0);
 				for (int jj = 1; jj < n; jj ++) {

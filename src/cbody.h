@@ -60,7 +60,7 @@ public:
 	double fix;					// The fix time for this body's position in simulation time
 	unsigned long long ncalcs;	// Tracks the number of calculations performed, to ensure synchronization was maintained
 	unsigned long long totSteps;
-	double time;				// To track the integration time for debugging purposes
+	double time = 0.0;			// To track the integration time for debugging purposes
 	long idx;					// The index of this body in [read] and [write]
 
 	bool operator != (CBody r) const;

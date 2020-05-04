@@ -72,4 +72,5 @@ int main(int argn, char** argv) {
 	for (int ii = 0; ii < tsim->count(); ii ++) {
 		std::cout << tsim->at(ii)->Name() << " - " << tsim->at(ii)->ncalcs << " " << tsim->at(ii)->time << std::endl; 
 	}
+	std::cout << simTime << " " << tsim->H() << std::endl;
 }
