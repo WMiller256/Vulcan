@@ -294,10 +294,10 @@ void CSim::sim() {
 			calcs.push_back(std::bind(&Integrator::main, this->integrator, std::placeholders::_1, std::placeholders::_2));
 		}
 		else if (type == simType::miller) {
-			calcs.push_back(std::bind(&Integrator::main, this->miller, std::placeholders::_1, std::placeholders::_2));
+			calcs.push_back(std::bind(&Miller::basic, this->miller, std::placeholders::_1, std::placeholders::_2));
 		}
 		else if (type == simType::bulirschStoer) {
-			calcs.push_back(std::bind(&Integrator::main, this->bulirschStoer, std::placeholders::_1, std::placeholders::_2));
+			calcs.push_back(std::bind(&BulirschStoer::bulirschStoer, this->bulirschStoer, std::placeholders::_1, std::placeholders::_2));
 		}
 		else if (type == simType::mercury) {
 			calcs.push_back(std::bind(&Mercury::bulirschStoer, this->mercury, std::placeholders::_1, std::placeholders::_2));

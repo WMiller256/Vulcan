@@ -50,7 +50,7 @@ vec BulirschStoer::acceleration(Pos &r, int &idx) const {
 	}
 	return a;
 }
-void BulirschStoer::main(CBody* b, CBody* w) {
+void BulirschStoer::bulirschStoer(CBody* b, CBody* w) {
 	// TODO Refactor - Advanced compensation for difference between elapsed time and 
 	// fix age - i.e. hc[ii] = (simTime - b->fix) / (2.0 * float(n))
 	if (simTime - b->fix < b->h) return;

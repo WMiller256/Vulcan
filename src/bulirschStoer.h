@@ -19,7 +19,7 @@ class BulirschStoer : public Integrator {
 
 public:
 	BulirschStoer();
-	void main(CBody*, CBody*) override;			// Main integration function
+	void bulirschStoer(CBody*, CBody*);			// Main integration function
 	vec acceleration(Pos &r, int &idx) const;	// Get the gravitational acceleration if body {read[idx]} were at position {r}
 
 	int NSteps();
