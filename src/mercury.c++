@@ -70,6 +70,7 @@ void Mercury::bulirschStoer(CBody* b, CBody* w) {
 	int fmax = 1;
 	rscale[ii] = b->r.squared() > 0.0 ? 1.0 / b->r.squared() : 0.0;
 	vscale[ii] = b->v.squared() > 0.0 ? 1.0 / b->v.squared() : 0.0;
+	s[ii] = 0;
 	vec a(0, 0, 0);
 	for (int n = 1; n <= nsteps; n ++) {
 		a = acceleration(b->r, ii);
@@ -113,6 +114,9 @@ void Mercury::bulirschStoer(CBody* b, CBody* w) {
 					w->r += dr(ii, jj);
 					w->v += dv(ii, jj);
 				}
+				// Track the integrated time for the body for debugging
+				w->time += h;
+				b->time += h;
 				// Store the number of substeps which was actually used
 				s[ii] = n;
 						return;

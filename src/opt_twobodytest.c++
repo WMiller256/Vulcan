@@ -46,7 +46,7 @@ int main(int argn, char** argv) {
 
 	tsim->addPlanet(sun);
 	tsim->addPlanet(earth);
-	tsim->outputInterval(h*100);
+	tsim->outputInterval(h);
 
 	std::cout << green << " Initialization complete. " << res << std::endl;
 
@@ -70,6 +70,6 @@ int main(int argn, char** argv) {
 	avg = float(sum) / float(nsamples);
 	std::cout << "\nAverage time:                    " << bright+magenta << avg << res << std::endl;
 	for (int ii = 0; ii < tsim->count(); ii ++) {
-		std::cout << tsim->at(ii)->Name() << " - " << tsim->at(ii)->ncalcs << std::endl; 
+		std::cout << tsim->at(ii)->Name() << " - " << tsim->at(ii)->ncalcs << " " << tsim->at(ii)->time << std::endl; 
 	}
 }
