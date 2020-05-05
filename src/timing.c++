@@ -55,7 +55,7 @@ int main(int argn, char** argv) {
 	int n = 9 + nghosts;
 
 	if (n > 12) n = 12;
-		for (int jj = n; jj > 0; jj --) {
+	for (int jj = n; jj > 0; jj --) {
 
 		CSim* tsim = new CSim(8, t, h);
 		tsim -> setDebug(0);
