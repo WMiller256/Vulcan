@@ -35,9 +35,10 @@ int main(int argn, char** argv) {
 	std::cout << t << " " << h << " " << nthreads << std::endl;
 
 	CSim* tsim = new CSim(8, t, h);
-	tsim -> setDebug(0);
-	tsim->Type(simType::miller);
-	tsim->outputInterval(h*10000);
+	tsim->setDebug(0);
+	tsim->pyinit();
+	tsim->Type(simType::mercury);
+	tsim->outputInterval(h);
 	int day = int(h);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
 	CBody* mercury = new CBody(3.3011e23, 2.439e6, 4.7362e4, 0.0, 6.98169e10, 0.0, day);
@@ -98,6 +99,6 @@ int main(int argn, char** argv) {
 	avg = float(sum) / float(nsamples);
 	std::cout << "\nAverage time:                    " << bright+magenta << avg << res << std::endl;
 	for (int ii = 0; ii < tsim->count(); ii ++) {
-		std::cout << tsim->at(ii)->Name() << " - " << tsim->at(ii)->totSteps << std::endl; 
+		std::cout << tsim->at(ii)->Name() << " - " << tsim->at(ii)->ncalcs << std::endl; 
 	}
 }

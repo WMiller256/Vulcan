@@ -23,7 +23,7 @@ Mercury::Mercury(double &h) : Integrator() {
 }
 
 void Mercury::init() {
-	tolerance = 1e-10;
+	tolerance = 1e-8;
 	error = std::valarray<double>(0.0, nreal);
 	s = std::vector<int>(nreal, 0);
 	rscale = std::valarray<double>(0.0, nreal);
@@ -56,12 +56,12 @@ void Mercury::resizeH() {
 		// Go back to the beginning of the current time step and try again 
 		// with smaller {h}
 //		fetch_add(&simTime, -h);
-		h *= shrink;
+		this->h *= shrink;
 		if (read == one) write = one;
 		else write = two;
 	}
 	else {
-		h *= grow;
+		this->h *= grow;
 	}
 }
 

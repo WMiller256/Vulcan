@@ -28,7 +28,6 @@ public:
 private:
 	static int const nsteps;
 	static int const steps[];
-	double h;
 
 	double tolerance;
 	static double const grow;
