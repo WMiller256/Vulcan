@@ -119,8 +119,6 @@ public:
 	void ofile(const std::string& filename);
 	void outputInterval(const double& interval);
 	void binarywrite();
-	int writeConfiguration(const std::string& filename, bool overwrite = false);
-	CSim* readConfiguration(const std::string& filename);
 
 	double get_energy();
 	void sim();

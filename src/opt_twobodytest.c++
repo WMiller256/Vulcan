@@ -36,7 +36,7 @@ int main(int argn, char** argv) {
 	double day = h;
 	CSim* tsim = new CSim(2, t, day);
 	tsim->pyinit();
-	tsim->setDebug(1);
+	tsim->setDebug(0);
 	tsim->Type(simType::mercury);
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
 	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e4, 0.0, 1.521e11, 0.0, day);
@@ -46,7 +46,7 @@ int main(int argn, char** argv) {
 
 	tsim->addPlanet(sun);
 	tsim->addPlanet(earth);
-	tsim->outputInterval(h*100);
+	tsim->outputInterval(h);
 
 	std::cout << green << " Initialization complete. " << res << std::endl;
 
@@ -70,6 +70,7 @@ int main(int argn, char** argv) {
 	avg = float(sum) / float(nsamples);
 	std::cout << "\nAverage time:                    " << bright+magenta << avg << res << std::endl;
 	for (int ii = 0; ii < tsim->count(); ii ++) {
-		std::cout << tsim->at(ii)->Name() << " - " << tsim->at(ii)->ncalcs << std::endl; 
+		std::cout << tsim->at(ii)->Name() << " - " << tsim->at(ii)->ncalcs << " " << tsim->at(ii)->time << std::endl; 
 	}
+	std::cout << simTime << " " << tsim->H() << std::endl;
 }
