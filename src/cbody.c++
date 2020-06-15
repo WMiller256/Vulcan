@@ -58,9 +58,9 @@ Pos CBody::COM(CBody* target) {
 	if (this == target) {
 		error("{target} and {this} are the same, center of mass will be {this->r}.", __LINE__, __FILE__);
 	}
-	double m1 = Mass();
-	double m2 = target->Mass();
-	double M = m1 + m2;
+	static double m1 = Mass();
+	static double m2 = target->Mass();
+	static double M = m1 + m2;
 	if (M > 0.0) {
 		return Pos((target->r * m1 + r * m2) / M);		// Surprisingly, returning a (Pos) object instead of a pointer is
 	}													// 1000x faster in this case, due to the cost of pointer construction
@@ -77,9 +77,9 @@ Pos CBody::COM(CBody target) {
 	if (*this == target) {
 		error("{target} and {this} are the same, center of mass will be {this->r}.", __LINE__, __FILE__);
 	}
-	double m1 = Mass();
-	double m2 = target.Mass();
-	double M = m1 + m2;
+	static double m1 = Mass();
+	static double m2 = target.Mass();
+	static double M = m1 + m2;
 	if (M > 0.0) {
 		return Pos((target.r * m1 + r * m2) / M);		// Surprisingly, returning a (Pos) object instead of a pointer is
 	}													// 1000x faster in this case, due to the cost of pointer construction
