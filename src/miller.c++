@@ -13,7 +13,7 @@
 Miller::Miller() {}
 
 void Miller::basic(CBody* body, CBody* wbody) {
-	static double dt = simTime - wbody->fix;
+	thread_local double dt = simTime - wbody->fix;
 	// TODO Need to extrapolate stale positions along previous orbits to 
 	// current time for use in acceleration calculation
 	if (dt >= wbody->h) {
