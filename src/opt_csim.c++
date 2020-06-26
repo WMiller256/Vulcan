@@ -257,18 +257,17 @@ void CSim::sim() {
 #ifdef profiling
 	start = std::chrono::high_resolution_clock::now();
 #endif
-	if (int(integrator->h) > 0) {
+
+	// Only attempt to integrate if step size is positive
+	if (integrator->h > 0.0) {
 		vec a;
 		vec v;
-		unsigned long long percent;
-		int past = 0;
-		if (maxTime > 100 * integrator->h) {
-			percent = (maxTime - integrator->h) / 100;
-		}
-		else {
-			percent = integrator->h;
-		}
+		double previous = simTime;
+		
+		// Calculate energy for initial configuration
 		initial_energy = get_energy();
+		
+		// Main integration loop
 		while (simTime < maxTime) {
 			if (write_interval > 0.0 && simTime - write_fix >= write_interval) {
 				std::valarray<std::pair<Pos, Vel>> line(nreal);
@@ -283,30 +282,19 @@ void CSim::sim() {
 				write_fix = simTime;
 			}
 			tocalc = nthreads;
-#if SIMTIME_TYPE == 1
-            if (simTime / percent != past && simTime < maxTime) {
-                if (!debug) std::cout << '\r' << " Progress: " << std::setw(3) << (simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)(integrator->h)) << std::flush;
-                past = simTime / percent;
-            }
-            if (simTime >= maxTime - integrator->h) {
-                if (!debug) std::cout << "\r Progress: 100\n";
-            }
-            simTime += integrator->h;
-#elif SIMTIME_TYPE == 2
-            if ((unsigned long long)simTime / percent != past) {
-                if (!debug) std::cout << '\r' << " Progress: " << std::setw(3) << ((unsigned long long)simTime * 100) / ((unsigned long long)maxTime - (unsigned long long)(integrator->h)) << std::flush;
-                past = (unsigned long long)simTime / percent;
-            }
-            if ((unsigned long long)maxTime - (unsigned long long)simTime <= integrator->h) {
-                if (!debug) std::cout << "\r Progress: 100\n";
-            }
+
+			// Atomic += operation (would be equivalent to simTime += integrator->h, but std::atomic<double> does not presently support)
             fetch_add(&simTime, integrator->h);
-#endif
-			while (tocalc > 0) {}
-			for (auto calc : mainCalcs) {
-				calc();
+			if (!debug && simTime != previous) {
+				print_percent(simTime, maxTime);
+				previous = simTime;
 			}
+
+			while (tocalc > 0) {}
+			for (auto calc : mainCalcs) calc();
+
 			if (_toggle) {
+				// Toggling between read and write array is more efficient, but not every integration scheme supports it
 				if (integrator->read == integrator->one) {
 					integrator->read = integrator->two;
 					integrator->write = integrator->one;
@@ -330,6 +318,7 @@ void CSim::sim() {
 	if (write_interval > 0.0) {
 		binarywrite();
 		if (_pyinit) {
+			// Plot positions
 			for (auto p : positions) {
 				PyObject* x = PyList_New(0);
 				PyObject* y = PyList_New(0);
@@ -344,8 +333,10 @@ void CSim::sim() {
 			}
 			PyObject* fig = PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gcf")), "()");
 			PyObject_CallMethod(PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gca")), "()"), "set_aspect", "s", (char*)("equal"));
-			PyObject_CallFunction(pltSavefig, "(s)", (char*)("out.png"));
+			PyObject_CallFunction(pltSavefig, "(s)", (char*)("positions.png"));
 			PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
+
+			// Plot system energy over time
 			PyObject* t = PyList_New(0);
 			PyObject* e = PyList_New(0);
 			for (int ii = 0; ii < outtimes.size(); ii ++) {
@@ -364,8 +355,11 @@ void CSim::sim() {
 				PyList_Append(av, Py_BuildValue("d", sum / float(block)));
 				PyList_Append(tv, Py_BuildValue("d", outtimes[ii*block]));
 			}
+			fig = PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gcf")), "()");
 			PyObject_CallFunction(pltPlot, "(OO)", tv, av);
-			PyObject_CallFunction(pltShow, "()");		
+			PyObject_CallFunction(pltSavefig, "(s)", (char*)("energies.png"));
+			PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
+			PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
 		}
 	}
 }

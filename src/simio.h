@@ -15,6 +15,8 @@
 #include "externs.h"
 #include "format.h"
 
+void print_percent(const double &current, const double &total);
+
 std::string in(std::string prefix, std::string function);
 
 void error(const std::string& s, const int line, const char* file);

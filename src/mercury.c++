@@ -23,7 +23,7 @@ Mercury::Mercury(double &h) : Integrator() {
 }
 
 void Mercury::init() {
-	tolerance = 1e-8;
+	tolerance = 1e-10;
 	error = std::valarray<double>(0.0, nreal);
 	s = std::vector<int>(nreal, 0);
 	rscale = std::valarray<double>(0.0, nreal);
@@ -40,7 +40,8 @@ void Mercury::init() {
 }
 
 vec Mercury::acceleration(Pos &r, int &idx) const {
-	vec a(0, 0, 0);
+	thread_local vec a;
+	a.zero();
 	for (int ii = 0; ii < nbodies; ii ++) {
 		if (ii != idx) {
 			// G M / r^2 r-hat
@@ -52,10 +53,9 @@ vec Mercury::acceleration(Pos &r, int &idx) const {
 
 void Mercury::resizeH() {
 	// If any of the bodies needed maximum number of steps
-	if (std::any_of(s.begin(), s.end(), [](int i) { return i == nsteps; })) {
-		// Go back to the beginning of the current time step and try again 
-		// with smaller {h}
-//		fetch_add(&simTime, -h);
+	if (std::any_of(s.begin() + 1, s.end(), [](int i) { return i == nsteps; }) && h < hmax) {
+		// Go back to the beginning of the current time step and try again with smaller step size {h}
+		// fetch_add(&simTime, -h);
 		this->h *= shrink;
 		if (read == one) write = one;
 		else write = two;
@@ -121,7 +121,7 @@ void Mercury::bulirschStoer(CBody* b, CBody* w) {
 				b->time += h;
 				// Store the number of substeps which was actually used
 				s[ii] = n;
-						return;
+				return;
 			}
 		}
 	}

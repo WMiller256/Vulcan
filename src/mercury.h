@@ -26,6 +26,7 @@ public:
 	void bulirschStoer(CBody*, CBody*);
 
 private:
+	double const hmax = 1e8;
 	static int const nsteps;
 	static int const steps[];
 
