@@ -24,7 +24,7 @@ int main(int argn, char** argv) {
 		nthreads = atoi(argv[3]);
 	}
 	else {
-		nthreads = 0;
+		nthreads = 1;
 	}
 	if (argn > 4) {
 		extension = std::string(argv[4]);
@@ -33,22 +33,25 @@ int main(int argn, char** argv) {
 		extension = "";
 	}
 
-	double day = h;
-	CSim* tsim = new CSim(2, t, day);
-	tsim->pyinit();
+	double day = h*0.1;
+	CSim* tsim = new CSim(3, t, day);
 	tsim->setDebug(0);
-	tsim->Type(simType::bulirschStoer);
+	tsim->Type(simType::miller);
+	tsim->pyinit();
 	CBody* sun = new CBody(1.989e30, 6.95508e8, 0.0, 0.0, 0.0, 0.0, day);
-	CBody* earth = new CBody(5.97237e24, 6.371e6, 2.978e4, 0.0, 1.521e11, 0.0, day);
+	CBody* hotjupiter = new CBody(9.1e26, 6.991e7, 1.1e5, 0.0, 8.9e9, 0.0, day*9.);
+	CBody* jupiter = new CBody(1.8982e27, 6.991e7, 8.e3, 0.0, 7.4052e11, 0.0, day*9.);
 
 	sun->Name("Sun"); 
-	earth->Name("Earth");
+	hotjupiter->Name("Hot Jupiter");
+	jupiter->Name("Jupiter");
 
 	tsim->addPlanet(sun);
-	tsim->addPlanet(earth);
-	tsim->outputInterval(h);
+	tsim->addPlanet(hotjupiter);
+	tsim->addPlanet(jupiter);
+	tsim->outputInterval(day);
 
-	std::cout << green << " Initialization complete. " << res << std::endl;
+	std::cout << green << "Initialization complete. " << res << std::endl;
 
 	double avg = 0;
 	unsigned long long sum = 0;
@@ -70,7 +73,6 @@ int main(int argn, char** argv) {
 	avg = float(sum) / float(nsamples);
 	std::cout << "\nAverage time:                    " << bright+magenta << avg << res << std::endl;
 	for (int ii = 0; ii < tsim->count(); ii ++) {
-		std::cout << tsim->at(ii)->Name() << " - " << tsim->at(ii)->ncalcs << " " << tsim->at(ii)->time << std::endl; 
+		std::cout << tsim->at(ii)->Name() << " - " << tsim->at(ii)->totSteps << std::endl; 
 	}
-	std::cout << simTime << " " << tsim->H() << std::endl;
 }

@@ -24,7 +24,7 @@ BulirschStoer::BulirschStoer() {
 }
 
 void BulirschStoer::init() {
-	tolerance = 1e-10;
+	tolerance = 1e-12;
 	error = std::valarray<double>(0.0, nreal);
 	rscale = std::valarray<double>(0.0, nreal);
 	vscale = std::valarray<double>(0.0, nreal);
