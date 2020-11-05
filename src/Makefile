@@ -62,7 +62,7 @@ $(BUILD)/%.o: %.c++
 
 $(MAIN): $(OBJS) $(BUILD)/$(OPT)$(MAIN).o
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(MAIN).o $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN) $(LIBS)
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(MAIN).o $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN).out $(LIBS)
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 clean:
