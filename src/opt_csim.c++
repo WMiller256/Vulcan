@@ -162,22 +162,19 @@ void CSim::binarywrite() {
 	write_fix = simTime;
 }
 
-double CSim::get_energy() {
+double CSim::calculate_energy() {
 // Low optimization method to retrieve total energy of a system
 	double energy = 0.0;
-	Pos R(0.0, 0.0, 0.0);
-	double M = 0.0;
-	for (int ii = 0; ii < nreal; ii ++) {
-		M += integrator->write[ii]->m;
-	}
-	for (int ii = 0; ii < nreal; ii ++) {
-		R += integrator->write[ii]->m * integrator->write[ii]->r;
-	}
-	R = R / M;
 	for (int ii = 0; ii < nreal; ii ++) {
 		for (int jj = ii; jj < nreal; jj ++) {
-			if (ii != jj) energy += G * (integrator->write[jj]->m + integrator->write[ii]->m) / (integrator->write[jj]->r - integrator->write[ii]->r).norm();
+		    if (ii != jj) {
+		        std::cout << G << " * (" << integrator->write[jj]->m << " * " << integrator->write[ii]->m << ") / (" << integrator->write[jj]->r;
+		        std::cout << " - " << integrator->write[ii]->r << ").norm() = ";
+		        std::cout << G * (integrator->write[jj]->m * integrator->write[ii]->m) / (integrator->write[jj]->r - integrator->write[ii]->r).norm() << std::endl;
+            }
+			if (ii != jj) energy += G * (integrator->write[jj]->m * integrator->write[ii]->m) / (integrator->write[jj]->r - integrator->write[ii]->r).norm();
 		}
+		std::cout << "0.5 * " << integrator->write[ii]->m << " * " << integrator->write[ii]->v << ".squared() = " << 0.5 * integrator->write[ii]->m * integrator->write[ii]->v.squared() << std::endl;
 		energy += 0.5 * integrator->write[ii]->m * integrator->write[ii]->v.squared();
 	}
 	return energy;
@@ -265,7 +262,7 @@ void CSim::sim() {
 		double previous = simTime;
 		
 		// Calculate energy for initial configuration
-		initial_energy = get_energy();
+		initial_energy = calculate_energy();
 		
 		// Main integration loop
 		while (simTime < maxTime) {
@@ -277,7 +274,7 @@ void CSim::sim() {
 					positions[jj][1].push_back(integrator->write[jj]->r[1] - integrator->write[0]->r[1]);
 				}
 				outtimes.push_back(simTime);
-				energies.push_back(initial_energy - get_energy());
+				energies.push_back(initial_energy - calculate_energy());
 				output.push_back(line);
 				write_fix = simTime;
 			}
@@ -286,7 +283,7 @@ void CSim::sim() {
 			// Atomic += operation (would be equivalent to simTime += integrator->h, but std::atomic<double> does not presently support)
             fetch_add(&simTime, integrator->h);
 			if (!debug && simTime != previous) {
-				print_percent(simTime, maxTime);
+//				print_percent(simTime, maxTime);
 				previous = simTime;
 			}
 
@@ -307,6 +304,7 @@ void CSim::sim() {
 		}
 	}
 	else {
+		exit(0);
 	}
 #ifdef profiling
 	simulationtime += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start).count();

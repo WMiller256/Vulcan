@@ -1,10 +1,8 @@
 #Names of programs
-TEST     = test
-TIMING   = timing
-TWOBODY  = twobodytest
-THREEBODY= threebodytest
-FOURBODY = fourbodytest
-HOTJUP   = hotjupitertest
+MAIN    = $(firstword $(MAKECMDGOALS))
+ifeq ($(MAIN),clean)
+    MAIN =
+endif
 
 ABS		= .
 BIN		= .
@@ -55,52 +53,17 @@ OBJS	= $(BUILD)/$(OPT)csim.o			\
 
 #Builds
 all:
-	@printf "[      $(YELLOW)Building $(OPT)$(TEST)$(WHITE)       ]\n"
-	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(TEST)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make -f makefile test
-	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(TEST)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
-	
-	@printf "[      $(YELLOW)Building $(OPT)$(TIMING)$(WHITE)       ]\n"
-	@printf "[$(BLUE)Building$(WHITE)] $(BRIGHT)$(OPT)$(TIMING)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	make -f makefile timing
-	@printf "[$(GREEN) Built  $(WHITE)] $(BRIGHT)$(OPT)$(TIMING)$(WHITE) - $(MAGENTA)Program$(WHITE)\n"
-	@printf "[        $(GREEN)Build Complete$(WHITE)        ]\n"
+	@printf "Specify build target\n"
 
 $(BUILD)/%.o: %.c++
 	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$<$(WHITE) - $(MAGENTA)Object$(WHITE)\n"
 	cd $(ABS); $(CC) -c -o $@ $<
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$<$(WHITE) - $(MAGENTA)Object$(WHITE)\n"
 
-test: $(OBJS) $(BUILD)/$(OPT)$(TEST).o
-	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TEST).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TEST).out $(LIBS)
-	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TEST).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-
-twobodytest: $(OBJS) $(BUILD)/$(OPT)$(TWOBODY).o
-	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TWOBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TWOBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TWOBODY).out $(LIBS)
-	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TWOBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-
-threebodytest: $(OBJS) $(BUILD)/$(OPT)$(THREEBODY).o
-	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(THREEBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(THREEBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(THREEBODY).out $(LIBS)
-	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(THREEBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-
-fourbodytest: $(OBJS) $(BUILD)/$(OPT)$(FOURBODY).o
-	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(FOURBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(FOURBODY).o $(LIBDIRS) -o $(BIN)/$(OPT)$(FOURBODY).out $(LIBS)
-	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(FOURBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-
-hotjupitertest: $(OBJS) $(BUILD)/$(OPT)$(HOTJUP).o
-	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(FOURBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(HOTJUP).o $(LIBDIRS) -o $(BIN)/$(OPT)$(HOTJUP).out $(LIBS)
-	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(FOURBODY).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-
-timing: $(OBJS) $(BUILD)/$(OPT)$(TIMING).o
-	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(TIMING).o $(LIBDIRS) -o $(BIN)/$(OPT)$(TIMING).out $(LIBS)
-	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(TIMING).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+$(MAIN): $(OBJS) $(BUILD)/$(OPT)$(MAIN).o
+	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(MAIN).o $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN) $(LIBS)
+	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 clean:
 	$(RM) *.core $(BUILD)/*.o *.d *.stackdump

@@ -120,7 +120,7 @@ public:
 	void outputInterval(const double& interval);
 	void binarywrite();
 
-	double get_energy();
+	double calculate_energy();
 	void sim();
 	void integrate(int min, int max);
 

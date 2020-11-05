@@ -9,11 +9,11 @@
  *
  */
 
-#ifndef VEC_H
-#define VEC_H
+#pragma once
 
-#include <string>
 #include <algorithm>
+#include <iostream>
+#include <string>
 
 #include "colors.h"
 #include "simio.h"
@@ -46,6 +46,9 @@ public:
 	void operator = (vec const &r);
 	double& operator [] (const int idx);
 
+    // Output overload
+    friend std::ostream& operator<<(std::ostream &os, const vec &v);
+
 private:
 	
 	void init();
@@ -59,4 +62,3 @@ vec operator / (vec const &v, double s);
 vec operator * (vec const &v, double s);
 vec operator * (vec const &v, long s);
 
-#endif // VEC_H

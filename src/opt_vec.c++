@@ -58,6 +58,11 @@ double vec::operator * (vec const &r)   { return x * r.x + y * r.y + z * r.z; }
 vec vec::operator + (vec const &r)      { return vec(x + r.x, y + r.y, z + r.z); }
 vec vec::operator - (vec const &r)      { return vec(x - r.x, y - r.y, z - r.z); }
 
+std::ostream& operator<<(std::ostream &os, const vec &v) {
+    os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+    return os;
+}
+
 vec& vec::operator += (vec const &r) { 
 	x += r.x;
 	y += r.y; 
