@@ -5,9 +5,8 @@ ifeq ($(MAIN),clean)
 endif
 
 ABS		= .
-BIN		= .
+BIN		= ~/bin
 BUILD	= $(ABS)/../build-wsl
-OPT		= opt_
 RM      = /bin/rm -f
 MV		= /bin/mv -f
 
@@ -29,26 +28,26 @@ MAGENTA = \033[35m
 YELLOW  = \033[33m
 
 #Source files
-SRCS	= $(ABS)/$(OPT)csim.c++			\
-		  $(ABS)/$(OPT)cbody.c++		\
-		  $(ABS)/$(OPT)simio.c++		\
-		  $(ABS)/$(OPT)global.c++		\
-		  $(ABS)/$(OPT)vel.c++			\
-		  $(ABS)/$(OPT)vec.c++			\
-		  $(ABS)/$(OPT)force.c++		\
-		  $(ABS)/$(OPT)pos.c++
-OBJS	= $(BUILD)/$(OPT)csim.o			\
-		  $(BUILD)/$(OPT)cbody.o		\
-		  $(BUILD)/$(OPT)pos.o			\
-		  $(BUILD)/$(OPT)vel.o			\
-		  $(BUILD)/$(OPT)vec.o			\
-		  $(BUILD)/$(OPT)force.o		\
-		  $(BUILD)/$(OPT)simio.o		\
-		  $(BUILD)/$(OPT)global.o		\
-		  $(BUILD)/$(OPT)integrator.o	\
-		  $(BUILD)/$(OPT)mercury.o      \
-		  $(BUILD)/$(OPT)miller.o		\
-		  $(BUILD)/$(OPT)bulirschStoer.o
+SRCS	= $(ABS)/csim.c++			\
+		  $(ABS)/cbody.c++		\
+		  $(ABS)/simio.c++		\
+		  $(ABS)/global.c++		\
+		  $(ABS)/vel.c++			\
+		  $(ABS)/vec.c++			\
+		  $(ABS)/force.c++		\
+		  $(ABS)/pos.c++
+OBJS	= $(BUILD)/csim.o			\
+		  $(BUILD)/cbody.o		\
+		  $(BUILD)/pos.o			\
+		  $(BUILD)/vel.o			\
+		  $(BUILD)/vec.o			\
+		  $(BUILD)/force.o		\
+		  $(BUILD)/simio.o		\
+		  $(BUILD)/global.o		\
+		  $(BUILD)/integrator.o	\
+		  $(BUILD)/mercury.o      \
+		  $(BUILD)/miller.o		\
+		  $(BUILD)/bulirschStoer.o
 		  
 
 #Builds
@@ -60,10 +59,10 @@ $(BUILD)/%.o: %.c++
 	cd $(ABS); $(CC) -c -o $@ $<
 	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$<$(WHITE) - $(MAGENTA)Object$(WHITE)\n"
 
-$(MAIN): $(OBJS) $(BUILD)/$(OPT)$(MAIN).o
-	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
-	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(OPT)$(MAIN).o $(LIBDIRS) -o $(BIN)/$(OPT)$(MAIN).out $(LIBS)
-	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(OPT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+$(MAIN): $(OBJS) $(BUILD)/$(MAIN).o
+	@printf "[$(CYAN)Building$(WHITE)]   $(BRIGHT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
+	cd $(ABS); $(CC) $(OBJS) $(BUILD)/$(MAIN).o $(LIBDIRS) -o $(BIN)/$(MAIN) $(LIBS)
+	@printf "[$(GREEN) Built  $(WHITE)]   $(BRIGHT)$(MAIN).c++$(WHITE) - $(MAGENTA)Binary$(WHITE)\n"
 
 clean:
 	$(RM) *.core $(BUILD)/*.o *.d *.stackdump

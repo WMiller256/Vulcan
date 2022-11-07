@@ -99,6 +99,7 @@ int main(int argn, char** argv) {
 		}
 
 		nthreads = jj;
+		std::cout << jj << std::endl;
 		sum = 0;
 		avg = 0;
 		for (int ii = 0; ii < nsamples; ii ++) {

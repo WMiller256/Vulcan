@@ -8,7 +8,7 @@ int main(int argn, char** argv) {
 	CSim* tsim = new CSim(2, t, h);
 	tsim->pyinit();
 	tsim->setDebug(0);
-	tsim->Type(simType::bulirschStoer);
+	tsim->Type(simType::bulirschstoer);
 	tsim->outputInterval(h);
 
 	CBody* earth1 = new CBody(5.97237e24, 6.371e6, -2.978e4, 0.0, -1.521e11, 0.0, h);

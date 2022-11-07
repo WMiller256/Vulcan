@@ -161,6 +161,14 @@ void CSim::binarywrite() {
 	binaryout.close();
 	write_fix = simTime;
 }
+void CSim::csvwrite() {
+    std::ofstream fp;
+    fp.open("out.csv");
+    for (int ii = 0; ii < energies.size(); ii ++) {
+        fp << outtimes[ii] << "," << energies[ii] << "\n";
+    }
+    fp.close();
+}
 
 double CSim::calculate_energy() {
 // Low optimization method to retrieve total energy of a system
@@ -256,7 +264,7 @@ void CSim::sim() {
 		double previous = simTime;
 		
 		// Calculate energy for initial configuration
-		initial_energy = calculate_energy();
+		energies.push_back(calculate_energy());
 		
 		// Main integration loop
 		while (simTime < maxTime) {
@@ -268,7 +276,8 @@ void CSim::sim() {
 					positions[jj][1].push_back(integrator->write[jj]->r[1] - integrator->write[0]->r[1]);
 				}
 				outtimes.push_back(simTime);
-				energies.push_back(initial_energy - calculate_energy());
+//				energies.push_back(energies.back() - calculate_energy());
+                energies.push_back(calculate_energy());
 				output.push_back(line);
 				write_fix = simTime;
 			}
@@ -311,6 +320,7 @@ void CSim::sim() {
 	}
 	if (write_interval > 0.0) {
 		binarywrite();
+		csvwrite();
 		if (_pyinit) {
 			// Plot positions
 			for (auto p : positions) {
@@ -335,7 +345,7 @@ void CSim::sim() {
 			PyObject* e = PyList_New(0);
 			for (int ii = 0; ii < outtimes.size(); ii ++) {
 				PyList_Append(t, Py_BuildValue("d", outtimes[ii]));
-				PyList_Append(e, Py_BuildValue("d", energies[ii]));
+				PyList_Append(e, Py_BuildValue("d", (energies[ii] - energies[0]) / energies[0]));
 			}
 			PyObject* av = PyList_New(0);
 			PyObject* tv = PyList_New(0);
@@ -350,7 +360,7 @@ void CSim::sim() {
 				PyList_Append(tv, Py_BuildValue("d", outtimes[ii*block]));
 			}
 			fig = PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gcf")), "()");
-			PyObject_CallFunction(pltPlot, "(OO)", tv, av);
+			PyObject_CallFunction(pltScatter, "(OO)", tv, av);
 			PyObject_CallFunction(pltSavefig, "(s)", (char*)("energies.png"));
 			PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
 			PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
@@ -401,11 +411,16 @@ void CSim::integrate(int min, int max) {
 void CSim::pyinit() {
 	Py_Initialize();
 	plt = PyImport_ImportModule("matplotlib.pyplot");
-	pltScatter = PyObject_GetAttrString(plt, (char*)("scatter"));
-	pltPlot = PyObject_GetAttrString(plt, (char*)("plot"));
-	pltSavefig = PyObject_GetAttrString(plt, (char*)("savefig"));
-	pltShow = PyObject_GetAttrString(plt, (char*)("show"));
-	
+	if (plt == NULL) {
+	    std::cout << "Could not load matplotlib.pyplot, check matplotlib installation or run with graphing disabled." << std::endl;
+	    exit(1);
+	}
+	else {
+    	pltScatter = PyObject_GetAttrString(plt, (char*)("scatter"));
+    	pltPlot = PyObject_GetAttrString(plt, (char*)("plot"));
+    	pltSavefig = PyObject_GetAttrString(plt, (char*)("savefig"));
+    	pltShow = PyObject_GetAttrString(plt, (char*)("show"));
+    }
 	_pyinit = true;
 }
 

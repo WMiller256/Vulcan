@@ -119,7 +119,8 @@ public:
 	void ofile(const std::string& filename);
 	void outputInterval(const double& interval);
 	void binarywrite();
-
+    void csvwrite();
+    
 	double calculate_energy();
 	void sim();
 	void integrate(int min, int max);
