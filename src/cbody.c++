@@ -22,6 +22,7 @@ CBody::CBody(double Mass, double Radius, double Speed, double X, double Y, doubl
 	print(info(), 2);
 }
 CBody::CBody(double m, Vel v, Pos p, double h) {
+    init();
     this->r = p;
     this->v = v;
     this->m = m;
