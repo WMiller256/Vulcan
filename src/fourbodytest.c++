@@ -33,7 +33,7 @@ int main(int argn, char** argv) {
 		extension = "";
 	}
 
-	double day = h * 0.01;
+	double day = h;
 	CSim* tsim = new CSim(3, t, day);
 	tsim->setDebug(0);
 	tsim->Type(simType::bulirschStoer);

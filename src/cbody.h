@@ -20,6 +20,7 @@ public:
 	CBody();
 	CBody(double Mass, double Radius, double Velocity);
 	CBody(double Mass, double Radius, double Velocity, double X, double Y, double Z, double H=1.0);
+	CBody(double m, Vel v, Pos p, double h);
 	CBody(double Mass, double Radius, double Velocity, Pos pos);
 	~CBody();
 
