@@ -145,6 +145,7 @@ void CSim::toggle(bool t) { _toggle = t; }
 
 void CSim::ofile(const std::string& filename)     { binaryofile = filename; }
 void CSim::outputInterval(const double& interval) { write_interval = interval; }
+// TODO Implement concurrent write to csv/json/database instead of binary write
 void CSim::binarywrite() {
 	binaryout.open(binaryofile, std::ios::binary | std::ios::app);
 	for (auto l : output) {
@@ -323,7 +324,8 @@ void CSim::sim() {
 		csvwrite();
 		if (_pyinit) {
 			// Plot positions
-			for (auto p : positions) {
+			for (int ii = 0; ii < nreal; ii ++) {
+			    auto p = positions[ii];
 				PyObject* x = PyList_New(0);
 				PyObject* y = PyList_New(0);
 				for (auto i : p[0]) {
@@ -332,38 +334,35 @@ void CSim::sim() {
 				for (auto j : p[1]) {
 					PyList_Append(y, Py_BuildValue("d", j));
 				}
-				PyObject_CallFunction(pltPlot, "(OO)", x, y);
-				PyObject_CallFunction(pltScatter, "([d],[d])", p[0][0], p[1][0]);
+				PyObject_CallFunction(plot_positions, "(OOO)", x, y, PyUnicode_FromString(integrator->write[ii]->Name().c_str()));
 			}
-			PyObject* fig = PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gcf")), "()");
-			PyObject_CallMethod(PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gca")), "()"), "set_aspect", "s", (char*)("equal"));
-			PyObject_CallFunction(pltSavefig, "(s)", (char*)("positions.png"));
-			PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
+			PyObject_CallFunction(finalize, "(s)", (char*)("positions"));
+			return;
 
 			// Plot system energy over time
-			PyObject* t = PyList_New(0);
-			PyObject* e = PyList_New(0);
-			for (int ii = 0; ii < outtimes.size(); ii ++) {
-				PyList_Append(t, Py_BuildValue("d", outtimes[ii]));
-				PyList_Append(e, Py_BuildValue("d", (energies[ii] - energies[0]) / energies[0]));
-			}
-			PyObject* av = PyList_New(0);
-			PyObject* tv = PyList_New(0);
-			int block = energies.size() / 100;
-			block = block > 0.0 ? block : 1.0;
-			for (int ii = 0; ii < energies.size() / block; ii ++) {
-				double sum = 0.0;
-				for (int jj = 0; jj < block; jj ++) {
-					sum += energies[ii*block + jj];
-				}
-				PyList_Append(av, Py_BuildValue("d", sum / float(block)));
-				PyList_Append(tv, Py_BuildValue("d", outtimes[ii*block]));
-			}
-			fig = PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gcf")), "()");
-			PyObject_CallFunction(pltScatter, "(OO)", tv, av);
-			PyObject_CallFunction(pltSavefig, "(s)", (char*)("energies.png"));
-			PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
-			PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
+//			PyObject* t = PyList_New(0);
+//			PyObject* e = PyList_New(0);
+//			for (int ii = 0; ii < outtimes.size(); ii ++) {
+//				PyList_Append(t, Py_BuildValue("d", outtimes[ii]));
+//				PyList_Append(e, Py_BuildValue("d", (energies[ii] - energies[0]) / energies[0]));
+//			}
+//			PyObject* av = PyList_New(0);
+//			PyObject* tv = PyList_New(0);
+//			int block = energies.size() / 100;
+//			block = block > 0.0 ? block : 1.0;
+//			for (int ii = 0; ii < energies.size() / block; ii ++) {
+//				double sum = 0.0;
+//				for (int jj = 0; jj < block; jj ++) {
+//					sum += energies[ii*block + jj];
+//				}
+//				PyList_Append(av, Py_BuildValue("d", sum / float(block)));
+//				PyList_Append(tv, Py_BuildValue("d", outtimes[ii*block]));
+//			}
+//			fig = PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("gcf")), "()");
+//			PyObject_CallFunction(pltScatter, "(OO)", tv, av);
+//			PyObject_CallFunction(pltSavefig, "(s)", (char*)("energies.png"));
+//			PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
+//			PyObject_CallFunction(PyObject_GetAttrString(plt, (char*)("close")), "(O)", fig);
 		}
 	}
 }
@@ -410,16 +409,20 @@ void CSim::integrate(int min, int max) {
 
 void CSim::pyinit() {
 	Py_Initialize();
-	plt = PyImport_ImportModule("matplotlib.pyplot");
-	if (plt == NULL) {
-	    std::cout << "Could not load matplotlib.pyplot, check matplotlib installation or run with graphing disabled." << std::endl;
+	PyObject* sys = PyImport_ImportModule("sys");
+	PyObject* path = PyObject_GetAttrString(sys, "path");
+	PyList_Append(path, PyUnicode_FromString("."));
+	
+	vln = PyImport_ImportModule("vulcan");
+	
+	if (vln == NULL) {
+	    std::cout << "Could not load Vulcan python module, check installation or run with graphing disabled." << std::endl;
 	    exit(1);
 	}
 	else {
-    	pltScatter = PyObject_GetAttrString(plt, (char*)("scatter"));
-    	pltPlot = PyObject_GetAttrString(plt, (char*)("plot"));
-    	pltSavefig = PyObject_GetAttrString(plt, (char*)("savefig"));
-    	pltShow = PyObject_GetAttrString(plt, (char*)("show"));
+    	plot_positions = PyObject_GetAttrString(vln, (char*)("plot_positions"));
+    	plot_energy    = PyObject_GetAttrString(vln, (char*)("plot_energy"));
+    	finalize       = PyObject_GetAttrString(vln, (char*)("finalize"));
     }
 	_pyinit = true;
 }

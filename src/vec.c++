@@ -84,8 +84,6 @@ double& vec::operator [] (int idx) {
 		case 1:	return y;
 		case 2:	return z;
 	}
-
-	return 0;
 }
 
 void vec::init() {

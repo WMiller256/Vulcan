@@ -153,11 +153,11 @@ protected:
 	int ncalcs;
 
 	bool _pyinit = false;   // If python C-api has been initialized
-	PyObject* plt;
-	PyObject* pltScatter;
-	PyObject* pltPlot;
-	PyObject* pltShow;
-	PyObject* pltSavefig;
+	PyObject* vln;
+	PyObject* plot_positions;
+	PyObject* plot_energy;
+	PyObject* finalize;
+
 	std::valarray<std::array<std::vector<double>, 2>> positions;
 	std::vector<double> outtimes;
 	std::vector<double> energies;

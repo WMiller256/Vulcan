@@ -1,0 +1,25 @@
+# Tableau 20 color palette
+axes.prop_cycle : cycler('color', ['1f77b4', 'aec7e8', 'ff7f0e', 'ffbb78', '2ca02c', '98df8a', 'd62728', 'ff9896', '9467bd', 'c5b0d5', '8c564b', 'c49c94', 'e377c2', 'f7b6d2', '7f7f7f', 'c7c7c7', 'bcbd22', 'dbdb8d', '17becf', '9edae5'])
+figure.figsize : 14, 9
+font.family : DejaVu Sans
+font.size : 16
+figure.dpi : 100
+savefig.dpi : 300
+figure.titlesize : 28
+legend.fontsize : 16
+ytick.labelsize : 14
+xtick.labelsize : 14
+axes.labelsize : 20
+lines.dash_capstyle : round
+lines.dotted_pattern : 1, 4
+lines.linewidth : 1
+axes.titlepad : 10.0
+xtick.direction : in
+ytick.direction : in
+xtick.major.size : 5
+ytick.major.size : 5
+xtick.minor.visible : True
+ytick.minor.visible : True
+text.usetex : True
+pgf.rcfonts : False
+pgf.preamble : \usepackage{bm}

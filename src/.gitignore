@@ -3,3 +3,5 @@ optimize.c++
 *.pdf
 *.png
 *.csv
+*.vln
+__pycache__
