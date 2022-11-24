@@ -1,5 +1,5 @@
 #define TEST
-#include "csim.h"
+#include "vulcan.h"
 #include <chrono>
 #include <fstream>
 #include <sstream>

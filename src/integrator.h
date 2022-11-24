@@ -39,6 +39,6 @@ protected:
 	static std::vector<CBody*> write;
 };
 
-#include "csim.h"
+#include "vulcan.h"
 
 #endif // INTEGRATOR_H

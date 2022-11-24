@@ -52,7 +52,6 @@ bin/*.stackdump
 *.stackdump
 
 #Ignore python files
-*.py
 src/plotting/.ipynb_checkpoints/*
 src/plotting/*.ipynb
 

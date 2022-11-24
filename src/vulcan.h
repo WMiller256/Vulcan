@@ -1,5 +1,5 @@
 /*
- * csim.h
+ * vulcan.h
  *
  * William Miller
  * Nov 3, 2018

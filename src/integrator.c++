@@ -7,7 +7,7 @@
  *
  */
 
-#include "csim.h"
+#include "vulcan.h"
 
 std::vector<CBody*> Integrator::one;
 std::vector<CBody*> Integrator::two;
